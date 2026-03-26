@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Source_Sans_3, Fraunces } from 'next/font/google';
 import Navigation from '@/components/layout/Navigation';
+import Footer from '@/components/layout/Footer';
 import '../globals.css';
 
 const sourceSans = Source_Sans_3({
@@ -48,6 +49,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Navigation />
           <main className="flex-1">{children}</main>
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
@@ -13,15 +13,7 @@ export default function Navigation() {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [hasScrolled, setHasScrolled] = useState(false);
-
   const otherLocale = locale === 'ua' ? 'en' : 'ua';
-
-  useEffect(() => {
-    const onScroll = () => setHasScrolled(window.scrollY > 8);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   function handleLocaleSwitch() {
     startTransition(() => {
@@ -30,16 +22,12 @@ export default function Navigation() {
   }
 
   return (
-    <nav
-      className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${
-        hasScrolled ? 'shadow-[0_1px_12px_rgba(7,108,179,0.08)]' : ''
-      }`}
-    >
+    <nav className="bg-white border-b border-gray-100">
       {/* Gradient accent line */}
       <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <button
             onClick={() => router.push('/')}
@@ -47,11 +35,11 @@ export default function Navigation() {
             aria-label="Home"
           >
             <Image
-              src="/images/logo.svg"
+              src={locale === 'ua' ? '/images/logo-ua.svg' : '/images/logo-en.svg'}
               alt="Way to Health"
               width={140}
               height={42}
-              className="h-7 sm:h-8 w-auto transition-opacity group-hover:opacity-80"
+              className="h-10 sm:h-12 w-auto transition-opacity group-hover:opacity-80"
               priority
             />
           </button>
@@ -62,7 +50,7 @@ export default function Navigation() {
             <button
               onClick={handleLocaleSwitch}
               disabled={isPending}
-              className="relative px-2.5 py-1 text-[13px] tracking-wide font-medium
+              className="relative px-2.5 py-1 text-[15px] tracking-wide font-medium
                          text-ukraine-blue-600 hover:text-ukraine-blue-800
                          transition-colors disabled:opacity-40 cursor-pointer"
             >
