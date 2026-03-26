@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-ukraine-blue-50: #e6f2fa;
+  --color-ukraine-blue-100: #b3d9f0;
+  --color-ukraine-blue-200: #80bfe6;
+  --color-ukraine-blue-300: #4da6dc;
+  --color-ukraine-blue-400: #1a8cd2;
+  --color-ukraine-blue-500: #076CB3;
+  --color-ukraine-blue-600: #065a96;
+  --color-ukraine-blue-700: #054879;
+  --color-ukraine-blue-800: #04365c;
+  --color-ukraine-blue-900: #03243f;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ukraine-gold-50: #fef8e6;
+  --color-ukraine-gold-100: #fceab3;
+  --color-ukraine-gold-200: #fadc80;
+  --color-ukraine-gold-300: #f8ce4d;
+  --color-ukraine-gold-400: #f6c01a;
+  --color-ukraine-gold-500: #F5B800;
+  --color-ukraine-gold-600: #cc9a00;
+  --color-ukraine-gold-700: #a37b00;
+  --color-ukraine-gold-800: #7a5c00;
+  --color-ukraine-gold-900: #523d00;
+
+  --color-life-500: #10B981;
+  --color-warm-500: #E76F51;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Source Sans 3', sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background: #ffffff;
+  color: #1a1a1a;
 }
