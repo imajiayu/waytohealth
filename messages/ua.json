@@ -7,6 +7,22 @@
     "donate": "Підтримати",
     "menu": "Меню"
   },
+  "partners": {
+    "title": "Наші партнери",
+    "allPartners": "Всі партнери",
+"visitWebsite": "Перейти на сайт",
+    "list": {
+      "amalna-foundation": { "name": "Amalna Foundation" },
+      "comfy": { "name": "Comfy" },
+      "serce-ukrainskoi-nacii": { "name": "Серце Української Нації" },
+      "dcc": { "name": "DCC" },
+      "medux": { "name": "Medux" },
+      "pizza-day": { "name": "Pizza Day" },
+      "rehau": { "name": "REHAU" },
+      "work-ua": { "name": "Work.ua" },
+      "golfstream": { "name": "Golfstream" }
+    }
+  },
   "footer": {
     "about": "Про центр",
     "team": "Наша команда",
@@ -23,7 +39,7 @@
     "hotline": "Гаряча лінія",
     "donate": "Підтримати",
     "foundationPage": "Сторінка фонду",
-    "legalEntity": "БО «Благодійний фонд «Шлях до здоров'я»» (код ЄДРПОУ 44556677)",
+    "legalEntity": "БО «Благодійний фонд «Шлях до здоров'я»» (код ЄДРПОУ 44947699)",
     "copyright": "© {year} Way to Health Charity Foundation. Всі права захищені.",
     "language": "Українською"
   }

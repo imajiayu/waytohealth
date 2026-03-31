@@ -7,6 +7,22 @@
     "donate": "Donate",
     "menu": "Menu"
   },
+  "partners": {
+    "title": "Our Partners",
+    "allPartners": "All Partners",
+"visitWebsite": "Visit website",
+    "list": {
+      "amalna-foundation": { "name": "Amalna Foundation" },
+      "comfy": { "name": "Comfy" },
+      "serce-ukrainskoi-nacii": { "name": "Heart of Ukrainian Nation" },
+      "dcc": { "name": "DCC" },
+      "medux": { "name": "Medux" },
+      "pizza-day": { "name": "Pizza Day" },
+      "rehau": { "name": "REHAU" },
+      "work-ua": { "name": "Work.ua" },
+      "golfstream": { "name": "Golfstream" }
+    }
+  },
   "footer": {
     "about": "About Center",
     "team": "Our Team",
@@ -23,7 +39,7 @@
     "hotline": "Hotline",
     "donate": "Donate",
     "foundationPage": "Foundation page",
-    "legalEntity": "CO \"Way to Health Charity Foundation\" (EDRPOU Code 44556677)",
+    "legalEntity": "CO \"Way to Health Charity Foundation\" (EDRPOU Code 44947699)",
     "copyright": "© {year} Way to Health Charity Foundation. All rights reserved.",
     "language": "English"
   }

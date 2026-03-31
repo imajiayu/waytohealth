@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useRef, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
@@ -13,7 +13,26 @@ export default function Navigation() {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = useRef(0);
+  const isMobileMenuOpenRef = useRef(false);
+  isMobileMenuOpenRef.current = isMobileMenuOpen;
   const otherLocale = locale === 'ua' ? 'en' : 'ua';
+
+  useEffect(() => {
+    function handleScroll() {
+      const currentY = window.scrollY;
+      // 向下滚动超过 60px 时隐藏，向上滚动时显示；菜单打开时不隐藏
+      if (currentY > lastScrollY.current && currentY > 60 && !isMobileMenuOpenRef.current) {
+        setIsHidden(true);
+      } else {
+        setIsHidden(false);
+      }
+      lastScrollY.current = currentY;
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   function handleLocaleSwitch() {
     startTransition(() => {
@@ -22,12 +41,14 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-100">
+    <nav className={`sticky top-0 z-50 bg-white border-b border-gray-100
+                     transition-transform duration-300 ease-out
+                     ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
       {/* Gradient accent line */}
       <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <button
             onClick={() => router.push('/')}
@@ -35,11 +56,11 @@ export default function Navigation() {
             aria-label="Home"
           >
             <Image
-              src={locale === 'ua' ? '/images/logo-ua.svg' : '/images/logo-en.svg'}
+              src="/images/logo.png"
               alt="Way to Health"
-              width={140}
-              height={42}
-              className="h-10 sm:h-12 w-auto transition-opacity group-hover:opacity-80"
+              width={1678}
+              height={323}
+              className="h-7 sm:h-9 w-auto transition-opacity group-hover:opacity-80"
               priority
             />
           </button>
@@ -57,21 +78,6 @@ export default function Navigation() {
               <span className="opacity-40">{locale === 'ua' ? 'UA' : 'EN'}</span>
               <span className="mx-1 opacity-20">/</span>
               <span>{locale === 'ua' ? 'EN' : 'UA'}</span>
-            </button>
-
-            <div className="w-px h-4 bg-gray-200 mx-1" />
-
-            {/* Donate button */}
-            <button
-              onClick={() => router.push('/donate')}
-              className="text-center px-4 py-1.5 text-[13px] font-semibold tracking-wide text-white
-                         bg-ukraine-gold-500 rounded-full
-                         hover:bg-ukraine-gold-600 active:scale-[0.97]
-                         transition-all duration-150 cursor-pointer"
-            >
-              {/* Invisible longest text to lock width */}
-              <span className="block h-0 overflow-hidden invisible" aria-hidden="true">Підтримати</span>
-              {t('donate')}
             </button>
 
             <div className="w-px h-4 bg-gray-200 mx-1" />

@@ -2,9 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, Link } from '@/i18n/navigation';
-import { type Locale } from '@/i18n/config';
-import Image from 'next/image';
-import { Globe, Phone, ArrowUpRight } from 'lucide-react';
+import { Phone, ArrowUpRight } from 'lucide-react';
 
 /* ── Brand SVG Icons (not available in Lucide) ──────────────── */
 
@@ -24,21 +22,14 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-function TelegramIcon({ className }: { className?: string }) {
+function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
     </svg>
   );
 }
 
-function YoutubeIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-    </svg>
-  );
-}
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (
@@ -51,11 +42,10 @@ function LinkedinIcon({ className }: { className?: string }) {
 /* ── Constants ───────────────────────────────────────────────── */
 
 const SOCIAL_LINKS = [
-  { name: 'Facebook', href: 'https://facebook.com/waytohealth.ua', icon: FacebookIcon },
-  { name: 'Instagram', href: 'https://instagram.com/waytohealth.ua', icon: InstagramIcon },
-  { name: 'Telegram', href: 'https://t.me/waytohealth_ua', icon: TelegramIcon },
-  { name: 'YouTube', href: 'https://youtube.com/@waytohealthua', icon: YoutubeIcon },
-  { name: 'LinkedIn', href: 'https://linkedin.com/company/waytohealth-ua', icon: LinkedinIcon },
+  { name: 'Facebook', href: 'https://www.facebook.com/Waytohealthfoundation', icon: FacebookIcon },
+  { name: 'Instagram', href: 'https://www.instagram.com/way__to_health/', icon: InstagramIcon },
+  { name: 'TikTok', href: 'https://www.tiktok.com/@way_to_health', icon: TikTokIcon },
+  { name: 'LinkedIn', href: 'https://www.linkedin.com/company/way-to-health-ua/', icon: LinkedinIcon },
 ];
 
 const NAV_COL_1 = ['about', 'team', 'partners', 'faq'] as const;
@@ -65,49 +55,37 @@ const NAV_COL_2 = ['programs', 'news', 'reports', 'media'] as const;
 
 export default function Footer() {
   const t = useTranslations('footer');
-  const locale = useLocale() as Locale;
+  const locale = useLocale();
   const router = useRouter();
 
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-[#0d1b2e] text-gray-300">
-      {/* Gradient accent line */}
+      {/* 渐变分隔线 */}
       <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
 
-      {/* Main footer content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
-        {/* Top row: Logo + Language + Social */}
-        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-8 mb-12">
-          {/* Logo */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/')}
-              className="flex-shrink-0 cursor-pointer group"
-              aria-label="Home"
-            >
-              <Image
-                src={locale === 'ua' ? '/images/logo-ua.svg' : '/images/logo-en.svg'}
-                alt="Way to Health"
-                width={160}
-                height={48}
-                className="h-12 w-auto brightness-0 invert opacity-90 transition-opacity group-hover:opacity-100"
-              />
-            </button>
-          </div>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-14 sm:pt-16 pb-10">
+        {/* ── 顶部：Logo + 社交 ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-14">
+          <button
+            onClick={() => router.push('/')}
+            className="flex-shrink-0 cursor-pointer group"
+            aria-label="Home"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/images/logo-${locale === 'ua' ? 'ua' : 'en'}.svg`}
+              alt="Way to Health"
+              className="h-20 w-auto opacity-90 transition-opacity group-hover:opacity-100"
+            />
+          </button>
 
-          {/* Language indicator */}
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <Globe className="w-4 h-4" />
-            <span>{t('language')}</span>
-          </div>
-
-          {/* Social icons + Foundation page */}
-          <div className="flex items-center gap-6">
-            <span className="hidden lg:block text-sm text-gray-400 whitespace-nowrap">
+          <div className="flex items-center gap-5">
+            <span className="hidden lg:block text-base text-gray-400 whitespace-nowrap">
               {t('foundationPage')}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {SOCIAL_LINKS.map(({ name, href, icon: Icon }) => (
                 <a
                   key={name}
@@ -115,130 +93,130 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={name}
-                  className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center
+                  className="w-11 h-11 rounded-full bg-white/8 flex items-center justify-center
                              text-gray-400 hover:bg-white/15 hover:text-white
                              transition-all duration-200"
                 >
-                  <Icon className="w-[18px] h-[18px]" />
+                  <Icon className="w-5 h-5" />
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Middle row: Nav + Contact + CTA */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 mb-12">
-          {/* Nav Column 1 */}
-          <nav className="space-y-3">
+        {/* ── 主体：导航 + 联系方式 + CTA ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-10">
+          {/* 导航栏 1 */}
+          <nav className="space-y-4">
             {NAV_COL_1.map((key) => (
               <Link
                 key={key}
                 href={`/${key}`}
-                className="block text-[15px] text-gray-300 hover:text-white transition-colors duration-150"
+                className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
               >
                 {t(key)}
               </Link>
             ))}
           </nav>
 
-          {/* Nav Column 2 */}
-          <nav className="space-y-3">
+          {/* 导航栏 2 */}
+          <nav className="space-y-4">
             {NAV_COL_2.map((key) => (
               <Link
                 key={key}
                 href={`/${key}`}
-                className="block text-[15px] text-gray-300 hover:text-white transition-colors duration-150"
+                className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
               >
                 {t(key)}
               </Link>
             ))}
           </nav>
 
-          {/* Contact info */}
-          <div className="space-y-5">
+          {/* 联系方式 */}
+          <div className="space-y-6">
             <div>
-              <p className="text-sm text-gray-500 mb-1">{t('generalQuestions')}</p>
+              <p className="text-sm text-gray-500 mb-1.5">{t('generalQuestions')}</p>
               <a
                 href="mailto:info@waytohealth.org.ua"
-                className="text-[15px] text-gray-300 hover:text-white transition-colors
-                           inline-flex items-center gap-1 group"
+                className="text-base text-gray-200 hover:text-white transition-colors
+                           inline-flex items-center gap-1.5 group"
               >
                 info@waytohealth.org.ua
-                <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-y-0.5 translate-x-0.5
+                <ArrowUpRight className="w-4 h-4 opacity-0 -translate-y-0.5 translate-x-0.5
                                          group-hover:opacity-70 group-hover:translate-y-0 group-hover:translate-x-0
                                          transition-all duration-200" />
               </a>
             </div>
             <div>
-              <p className="text-sm text-gray-500 mb-1">{t('collaboration')}</p>
+              <p className="text-sm text-gray-500 mb-1.5">{t('collaboration')}</p>
               <a
                 href="mailto:partners@waytohealth.org.ua"
-                className="text-[15px] text-gray-300 hover:text-white transition-colors
-                           inline-flex items-center gap-1 group"
+                className="text-base text-gray-200 hover:text-white transition-colors
+                           inline-flex items-center gap-1.5 group"
               >
                 partners@waytohealth.org.ua
-                <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-y-0.5 translate-x-0.5
+                <ArrowUpRight className="w-4 h-4 opacity-0 -translate-y-0.5 translate-x-0.5
                                          group-hover:opacity-70 group-hover:translate-y-0 group-hover:translate-x-0
                                          transition-all duration-200" />
               </a>
             </div>
             <div>
-              <p className="text-sm text-gray-500 mb-1">{t('volunteers')}</p>
+              <p className="text-sm text-gray-500 mb-1.5">{t('volunteers')}</p>
               <Link
                 href="/volunteer"
-                className="text-[15px] text-gray-300 hover:text-white transition-colors
-                           inline-flex items-center gap-1 group"
+                className="text-base text-gray-200 hover:text-white transition-colors
+                           inline-flex items-center gap-1.5 group"
               >
                 {t('volunteerForm')}
-                <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-y-0.5 translate-x-0.5
+                <ArrowUpRight className="w-4 h-4 opacity-0 -translate-y-0.5 translate-x-0.5
                                          group-hover:opacity-70 group-hover:translate-y-0 group-hover:translate-x-0
                                          transition-all duration-200" />
               </Link>
             </div>
           </div>
 
-          {/* Hotline + Donate */}
+          {/* 热线 + 捐赠 */}
           <div className="space-y-4">
-            {/* Hotline card */}
+            {/* 热线卡片 */}
             <a
               href="tel:+380441234567"
-              className="flex items-center justify-between gap-3
-                         bg-white/6 rounded-xl px-5 py-3.5
+              className="flex items-center justify-between gap-4
+                         bg-white/6 rounded-xl px-5 py-4
                          hover:bg-white/10 transition-colors duration-200 group"
             >
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">{t('hotline')}</p>
-                <p className="text-[15px] text-white font-medium tracking-wide font-[family-name:var(--font-data)]">
+                <p className="text-sm text-gray-500 mb-1">{t('hotline')}</p>
+                <p className="text-lg text-white font-medium tracking-wide font-[family-name:var(--font-data)]">
                   +38 044 123 4567
                 </p>
               </div>
-              <Phone className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors" />
+              <Phone className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors flex-shrink-0" />
             </a>
 
-            {/* Donate CTA */}
+            {/* 捐赠按钮 */}
             <button
               onClick={() => router.push('/donate')}
               className="w-full flex items-center justify-between gap-3
-                         bg-ukraine-gold-500 text-ukraine-blue-900 rounded-xl px-5 py-3.5
+                         bg-ukraine-gold-500 text-ukraine-blue-900 rounded-xl px-5 py-4
                          hover:bg-ukraine-gold-400 active:scale-[0.98]
                          transition-all duration-200 cursor-pointer font-semibold group"
             >
-              <span className="text-[15px]">{t('donate')}</span>
+              <span className="text-base">{t('donate')}</span>
               <ArrowUpRight className="w-5 h-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </button>
 
-            {/* Legal entity info */}
-            <p className="text-xs text-gray-600 leading-relaxed mt-4">
+            {/* 法人信息 */}
+            <p className="text-sm text-gray-600 leading-relaxed mt-2">
               {t('legalEntity')}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
+      {/* ── 底部版权 ── */}
       <div className="border-t border-white/8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-gray-500">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-sm text-gray-500">
             {t('copyright', { year: currentYear })}
           </p>
         </div>

@@ -75,4 +75,6 @@ const t = useTranslations('namespace')
 
 ## 交流语言
 
-始终使用中文与用户交流
+- 始终使用中文与用户交流
+- 代码注释使用中文
+- Git commit message 使用中文

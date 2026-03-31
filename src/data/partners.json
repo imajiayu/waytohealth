@@ -1,0 +1,50 @@
+[
+  {
+    "id": "amalna-foundation",
+    "logo": "/images/partners/amalna-foundation.png",
+    "url": "https://amalna.org"
+  },
+  {
+    "id": "comfy",
+    "logo": "/images/partners/comfy.png",
+    "url": "https://comfy.ua"
+  },
+  {
+    "id": "serce-ukrainskoi-nacii",
+    "logo": "/images/partners/serce-ukrainskoi-nacii.png",
+    "url": "https://www.facebook.com/sercenacii"
+  },
+  {
+    "id": "dcc",
+    "logo": "/images/partners/dcc.png",
+    "url": "https://dc-charity.foundation",
+    "darkBg": true
+  },
+  {
+    "id": "medux",
+    "logo": "/images/partners/medux.png",
+    "url": "https://medux.nl"
+  },
+  {
+    "id": "pizza-day",
+    "logo": "/images/partners/pizza-day.png",
+    "url": "https://pizzaday.ua"
+  },
+  {
+    "id": "rehau",
+    "logo": "/images/partners/rehau.png",
+    "url": "https://rehau-ua.com"
+  },
+  {
+    "id": "work-ua",
+    "logo": "/images/partners/work-ua.svg",
+    "url": "https://www.work.ua",
+    "darkBg": true
+  },
+  {
+    "id": "golfstream",
+    "logo": "/images/partners/golfstream.png",
+    "url": "https://kievgolfclub.com",
+    "darkBg": true
+  }
+]
