@@ -61,7 +61,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#0d1b2e] text-gray-300">
+    <footer id="footer" className="bg-[#0d1b2e] text-gray-300">
       {/* 渐变分隔线 */}
       <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
 

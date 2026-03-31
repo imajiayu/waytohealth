@@ -3,9 +3,23 @@
     "title": "Way to Health",
     "description": "Rehabilitation center for war victims in Ukraine"
   },
+  "hero": {
+    "subtitle": "Restoring strength and hope to those affected by war",
+    "imageAlt": "Physical therapist guiding a patient through rehabilitation exercises"
+  },
   "navigation": {
     "donate": "Donate",
-    "menu": "Menu"
+    "menu": "Menu",
+    "close": "Close",
+    "projects": "Projects",
+    "about": "About Us",
+    "news": "News",
+    "merch": "Merch",
+    "partners": "Partners",
+    "contacts": "Contacts"
+  },
+  "pages": {
+    "comingSoon": "Coming Soon"
   },
   "partners": {
     "title": "Our Partners",

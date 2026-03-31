@@ -20,16 +20,35 @@
 
 ---
 
+## 快速开始
+
+```bash
+npm install
+npm run dev      # 启动开发服务器 (http://localhost:3000)
+npm run build    # 生产构建
+npm run lint     # ESLint 检查
+npm run start    # 启动生产服务器
+```
+
+---
+
 ## 技术栈
+
+### 已集成
+
+| 类型 | 技术 | 版本/说明 |
+|------|------|-----------|
+| 前端 | Next.js (App Router), TypeScript, Tailwind CSS | Next.js 16, React 19, Tailwind v4 |
+| 国际化 | next-intl | 支持 ua (乌克兰语) + en (英语) |
+| 部署 | Vercel | 与 NGO_web 一致 |
+
+### 计划集成（尚未安装）
 
 | 类型 | 技术 | 说明 |
 |------|------|------|
-| 前端 | Next.js 14 (App Router), TypeScript, Tailwind CSS | 与 NGO_web 一致 |
-| 国际化 | next-intl | 支持 ua (乌克兰语) + en (英语) |
 | 后端 | Supabase (PostgreSQL + Auth) | 独立实例 |
 | 支付 | Stripe | 法币支付（信用卡、Apple Pay、Google Pay） |
 | 邮件 | Resend | 捐赠通知、订阅邮件 |
-| 部署 | Vercel | 与 NGO_web 一致 |
 | 监控 | Sentry | 错误追踪 |
 | 分析 | Vercel Analytics | 流量分析 |
 
@@ -46,6 +65,42 @@
 | 数据字体 | JetBrains Mono (等宽) |
 | 图标 | Lucide React |
 | 工具 | clsx + tailwind-merge → `cn()` |
+
+---
+
+## 项目结构
+
+```
+src/
+├── app/
+│   ├── globals.css              # Tailwind v4 全局样式（@import "tailwindcss"）
+│   ├── layout.tsx               # 根 layout（html lang）
+│   └── [locale]/                # 国际化路由
+│       ├── layout.tsx           # locale layout（字体、NextIntlClientProvider）
+│       ├── page.tsx             # 首页
+│       ├── about/               # 关于我们
+│       ├── projects/            # 项目展示
+│       ├── donate/              # 捐赠页
+│       ├── merch/               # 周边商品
+│       ├── news/                # 新闻动态
+│       └── partners/            # 合作伙伴
+├── components/
+│   ├── home/                    # 首页组件（HeroSection）
+│   ├── layout/                  # 布局组件（Navigation, Footer）
+│   └── partners/                # 合作伙伴组件（PartnersShowcase）
+├── data/
+│   └── partners.json            # 合作伙伴数据
+├── i18n/
+│   ├── config.ts                # 语言配置（locales, defaultLocale）
+│   ├── request.ts               # next-intl 请求配置
+│   └── routing.ts               # next-intl 路由配置
+├── lib/
+│   └── utils.ts                 # cn() 工具函数
+└── middleware.ts                # i18n 路由中间件
+messages/
+├── ua.json                      # 乌克兰语翻译
+└── en.json                      # 英语翻译
+```
 
 ---
 
@@ -70,6 +125,16 @@ const t = useTranslations('namespace')
 **例外情况：**
 - 品牌名称可以硬编码（如 "Way to Health"）
 - Admin 后台全英文，不使用 i18n
+
+---
+
+## 注意事项 (Gotchas)
+
+- **Tailwind v4**: 使用 CSS-first 配置（`@import "tailwindcss"`），不再有 `tailwind.config.js`。自定义主题通过 `globals.css` 中的 `@theme` 定义
+- **Next.js 16 异步 API**: `cookies()`、`headers()`、`params`、`searchParams` 都需要 `await`
+- **middleware.ts 位置**: 在 `src/middleware.ts`（不是项目根目录），仅用于 next-intl 路由
+- **默认语言**: `ua`（乌克兰语）是默认语言，不是 `en`
+- **翻译键同步**: 添加新 UI 文案时，`ua.json` 和 `en.json` 必须同时更新
 
 ---
 

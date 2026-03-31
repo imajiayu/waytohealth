@@ -6,24 +6,35 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import Image from 'next/image';
 
+const menuItems = [
+  { key: 'projects', sectionId: 'projects', path: '/projects' },
+  { key: 'about', sectionId: 'about', path: '/about' },
+  { key: 'news', sectionId: 'news', path: '/news' },
+  { key: 'merch', sectionId: 'merch', path: '/merch' },
+  { key: 'partners', sectionId: 'partners', path: '/partners' },
+  { key: 'donate', sectionId: 'donate', path: '/donate' },
+  // contacts 在所有页面都直接滚动到 footer
+  { key: 'contacts', sectionId: 'footer', path: null as string | null },
+];
+
 export default function Navigation() {
   const t = useTranslations('navigation');
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
-  const isMobileMenuOpenRef = useRef(false);
-  isMobileMenuOpenRef.current = isMobileMenuOpen;
+  const isMenuOpenRef = useRef(false);
+  isMenuOpenRef.current = isMenuOpen;
   const otherLocale = locale === 'ua' ? 'en' : 'ua';
 
+  // 向下滚动超过 60px 时隐藏导航栏，向上滚动时显示；菜单打开时不隐藏
   useEffect(() => {
     function handleScroll() {
       const currentY = window.scrollY;
-      // 向下滚动超过 60px 时隐藏，向上滚动时显示；菜单打开时不隐藏
-      if (currentY > lastScrollY.current && currentY > 60 && !isMobileMenuOpenRef.current) {
+      if (currentY > lastScrollY.current && currentY > 60 && !isMenuOpenRef.current) {
         setIsHidden(true);
       } else {
         setIsHidden(false);
@@ -34,96 +45,179 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // 菜单打开时锁定页面滚动（仅 body，不动 html — 避免破坏 sticky 定位）
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.overscrollBehavior = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.overscrollBehavior = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.overscrollBehavior = '';
+    };
+  }, [isMenuOpen]);
+
   function handleLocaleSwitch() {
     startTransition(() => {
       router.replace(pathname, { locale: otherLocale });
     });
   }
 
+  function handleMenuItemClick(sectionId: string, path: string | null) {
+    setIsMenuOpen(false);
+    if (!path || pathname === '/') {
+      // 无路由（如 contacts）或在首页：直接滚动到对应元素
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 350);
+    } else {
+      // 其他页面：跳转到对应路由
+      router.push(path);
+    }
+  }
+
   return (
-    <nav className={`sticky top-0 z-50 bg-white border-b border-gray-100
-                     transition-transform duration-300 ease-out
-                     ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
-      {/* Gradient accent line */}
-      <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
+    <>
+      {/* 顶部导航栏 */}
+      <nav className={`sticky top-0 z-50 bg-white border-b border-gray-100
+                       transition-transform duration-300 ease-out
+                       ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+        {/* 渐变装饰线 */}
+        <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14">
-          {/* Logo */}
-          <button
-            onClick={() => router.push('/')}
-            className="flex-shrink-0 cursor-pointer group"
-            aria-label="Home"
-          >
-            <Image
-              src="/images/logo.png"
-              alt="Way to Health"
-              width={1678}
-              height={323}
-              className="h-7 sm:h-9 w-auto transition-opacity group-hover:opacity-80"
-              priority
-            />
-          </button>
-
-          {/* Right side controls */}
-          <div className="flex items-center gap-1">
-            {/* Language toggle */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14">
+            {/* Logo */}
             <button
-              onClick={handleLocaleSwitch}
-              disabled={isPending}
-              className="relative px-2.5 py-1 text-[15px] tracking-wide font-medium
-                         text-ukraine-blue-600 hover:text-ukraine-blue-800
-                         transition-colors disabled:opacity-40 cursor-pointer"
+              onClick={() => router.push('/')}
+              className="flex-shrink-0 cursor-pointer group"
+              aria-label="Home"
             >
-              <span className="opacity-40">{locale === 'ua' ? 'UA' : 'EN'}</span>
-              <span className="mx-1 opacity-20">/</span>
-              <span>{locale === 'ua' ? 'EN' : 'UA'}</span>
+              <Image
+                src="/images/logo.png"
+                alt="Way to Health"
+                width={1678}
+                height={323}
+                className="h-7 sm:h-9 w-auto transition-opacity group-hover:opacity-80"
+                priority
+              />
             </button>
 
-            <div className="w-px h-4 bg-gray-200 mx-1" />
+            {/* 右侧控制按钮 */}
+            <div className="flex items-center gap-1">
+              {/* 语言切换 */}
+              <button
+                onClick={handleLocaleSwitch}
+                disabled={isPending}
+                className="relative px-2.5 py-1 text-[15px] tracking-wide font-medium
+                           text-ukraine-blue-600 hover:text-ukraine-blue-800
+                           transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                <span className="opacity-40">{locale === 'ua' ? 'UA' : 'EN'}</span>
+                <span className="mx-1 opacity-20">/</span>
+                <span>{locale === 'ua' ? 'EN' : 'UA'}</span>
+              </button>
 
-            {/* Hamburger menu button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="relative w-8 h-8 flex items-center justify-center
-                         text-ukraine-blue-600 hover:text-ukraine-blue-800
-                         transition-colors cursor-pointer"
-              aria-label={t('menu')}
-              aria-expanded={isMobileMenuOpen}
-            >
-              <div className="w-[18px] h-[14px] relative">
-                <span
-                  className={`absolute left-0 w-full h-[1.5px] bg-current rounded-full
-                             transition-all duration-300 origin-center
-                             ${isMobileMenuOpen ? 'top-[6px] rotate-45' : 'top-0'}`}
-                />
-                <span
-                  className={`absolute left-0 top-[6px] w-full h-[1.5px] bg-current rounded-full
-                             transition-all duration-200
-                             ${isMobileMenuOpen ? 'opacity-0 scale-x-0' : 'opacity-100'}`}
-                />
-                <span
-                  className={`absolute left-0 w-full h-[1.5px] bg-current rounded-full
-                             transition-all duration-300 origin-center
-                             ${isMobileMenuOpen ? 'top-[6px] -rotate-45' : 'top-[12px]'}`}
-                />
-              </div>
-            </button>
+              <div className="w-px h-4 bg-gray-200 mx-1" />
+
+              {/* 汉堡菜单按钮 */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="relative w-8 h-8 flex items-center justify-center
+                           text-ukraine-blue-600 hover:text-ukraine-blue-800
+                           transition-colors cursor-pointer"
+                aria-label={t('menu')}
+                aria-expanded={isMenuOpen}
+              >
+                <div className="w-[18px] h-[14px] relative">
+                  <span
+                    className={`absolute left-0 w-full h-[1.5px] bg-current rounded-full
+                               transition-all duration-300 origin-center
+                               ${isMenuOpen ? 'top-[6px] rotate-45' : 'top-0'}`}
+                  />
+                  <span
+                    className={`absolute left-0 top-[6px] w-full h-[1.5px] bg-current rounded-full
+                               transition-all duration-200
+                               ${isMenuOpen ? 'opacity-0 scale-x-0' : 'opacity-100'}`}
+                  />
+                  <span
+                    className={`absolute left-0 w-full h-[1.5px] bg-current rounded-full
+                               transition-all duration-300 origin-center
+                               ${isMenuOpen ? 'top-[6px] -rotate-45' : 'top-[12px]'}`}
+                  />
+                </div>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Menu panel */}
+      {/* 黑色蒙版 */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-out
-                    ${isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}`}
+        className={`fixed inset-0 z-40 bg-black/60
+                   transition-opacity duration-300
+                   ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setIsMenuOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* 右侧滑出面板 */}
+      <div
+        className={`fixed top-0 right-0 z-[100] h-full w-[min(380px,85vw)]
+                   bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.08)]
+                   transition-transform duration-[400ms] ease-[cubic-bezier(0.32,0.72,0,1)]
+                   flex flex-col overflow-hidden
+                   ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('menu')}
       >
-        <div className="border-t border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-1">
-            <p className="text-sm text-gray-400 text-center py-4">Menu items coming soon</p>
-          </div>
+        {/* 渐变顶线 */}
+        <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
+
+        {/* 菜单项 */}
+        <nav className="px-8 pt-6 flex-1">
+          <ul>
+            {menuItems.map((item, i) => (
+              <li key={item.key}>
+                <button
+                  onClick={() => handleMenuItemClick(item.sectionId, item.path)}
+                  className={`w-full text-left py-[14px] text-[20px]
+                             font-[family-name:var(--font-display)] font-medium tracking-wide
+                             text-ukraine-blue-800 hover:text-ukraine-gold-500
+                             transition-[opacity,transform,color] duration-300 cursor-pointer
+                             border-b border-gray-100
+                             group
+                             ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
+                  style={{ transitionDelay: isMenuOpen ? `${80 + i * 50}ms` : '0ms' }}
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    {t(item.key)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* 底部 Logo */}
+        <div className="px-8 pb-8">
+          <div className="h-px bg-gradient-to-r from-ukraine-blue-200 via-ukraine-gold-200 to-transparent" />
+          <Image
+            src="/images/logo.png"
+            alt="Way to Health"
+            width={1678}
+            height={323}
+            className="mt-4 h-6 w-auto"
+          />
         </div>
       </div>
-    </nav>
+    </>
   );
 }
