@@ -6,6 +6,7 @@ import { routing } from '@/i18n/routing';
 import { Source_Sans_3, Fraunces } from 'next/font/google';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
+import LoadingBar from '@/components/layout/LoadingBar';
 import '../globals.css';
 
 const sourceSans = Source_Sans_3({
@@ -47,6 +48,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} className={`${sourceSans.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <LoadingBar />
           <Navigation />
           <main className="flex-1">{children}</main>
           <Footer />

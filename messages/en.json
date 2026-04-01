@@ -5,7 +5,19 @@
   },
   "hero": {
     "subtitle": "Restoring strength and hope to those affected by war",
-    "imageAlt": "Physical therapist guiding a patient through rehabilitation exercises"
+    "imageAlt": "Physical therapist guiding a patient through rehabilitation exercises",
+    "donateButton": "Donate Now",
+    "learnMoreButton": "Our Programs",
+    "stats": {
+      "patients": "500+",
+      "patientsLabel": "Rehabilitated",
+      "years": "3",
+      "yearsLabel": "Years of Service",
+      "rate": "92%",
+      "rateLabel": "Recovery Rate",
+      "partners": "9",
+      "partnersLabel": "Partners"
+    }
   },
   "navigation": {
     "donate": "Donate",

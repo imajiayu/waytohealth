@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import Image from 'next/image';
+import { triggerRouteChange } from './LoadingBar';
 
 const menuItems = [
   { key: 'projects', sectionId: 'projects', path: '/projects' },
@@ -61,6 +62,7 @@ export default function Navigation() {
   }, [isMenuOpen]);
 
   function handleLocaleSwitch() {
+    triggerRouteChange();
     startTransition(() => {
       router.replace(pathname, { locale: otherLocale });
     });
@@ -78,6 +80,7 @@ export default function Navigation() {
       }, 350);
     } else {
       // 其他页面：跳转到对应路由
+      triggerRouteChange();
       router.push(path);
     }
   }
@@ -86,16 +89,13 @@ export default function Navigation() {
     <>
       {/* 顶部导航栏 */}
       <nav className={`sticky top-0 z-50 bg-white border-b border-gray-100
-                       transition-transform duration-300 ease-out
+                       transition-transform duration-300 ease-out mt-[2px]
                        ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
-        {/* 渐变装饰线 */}
-        <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <button
-              onClick={() => router.push('/')}
+              onClick={() => { triggerRouteChange(); router.push('/'); }}
               className="flex-shrink-0 cursor-pointer group"
               aria-label="Home"
             >
@@ -112,17 +112,33 @@ export default function Navigation() {
             {/* 右侧控制按钮 */}
             <div className="flex items-center gap-1">
               {/* 语言切换 */}
-              <button
-                onClick={handleLocaleSwitch}
-                disabled={isPending}
-                className="relative px-2.5 py-1 text-[15px] tracking-wide font-medium
-                           text-ukraine-blue-600 hover:text-ukraine-blue-800
-                           transition-colors disabled:opacity-40 cursor-pointer"
-              >
-                <span className="opacity-40">{locale === 'ua' ? 'UA' : 'EN'}</span>
+              <span className="relative px-2.5 py-1 text-[15px] tracking-wide font-medium">
+                {locale === 'ua' ? (
+                  <span className="text-ukraine-blue-600/40">UA</span>
+                ) : (
+                  <button
+                    onClick={handleLocaleSwitch}
+                    disabled={isPending}
+                    className="text-ukraine-blue-600 hover:text-ukraine-blue-800
+                               transition-colors disabled:opacity-40 cursor-pointer"
+                  >
+                    UA
+                  </button>
+                )}
                 <span className="mx-1 opacity-20">/</span>
-                <span>{locale === 'ua' ? 'EN' : 'UA'}</span>
-              </button>
+                {locale === 'en' ? (
+                  <span className="text-ukraine-blue-600/40">EN</span>
+                ) : (
+                  <button
+                    onClick={handleLocaleSwitch}
+                    disabled={isPending}
+                    className="text-ukraine-blue-600 hover:text-ukraine-blue-800
+                               transition-colors disabled:opacity-40 cursor-pointer"
+                  >
+                    EN
+                  </button>
+                )}
+              </span>
 
               <div className="w-px h-4 bg-gray-200 mx-1" />
 

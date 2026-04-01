@@ -9,11 +9,11 @@
 **域名**: https://waytohealth.org.ua/
 **组织**: Way to Health 慈善基金会（乌克兰）
 **定位**: 独立全功能站 — 康复中心宣传 + 项目展示 + Stripe 收款 + 捐赠管理
-**关联项目**: [NGO_web](~/NGO_web) - Way to Future UA 综合慈善平台（waytofutureua.org.ua）
+**关联项目**: [waytofutureua](~/waytofutureua) - Way to Future UA 综合慈善平台（waytofutureua.org.ua）
 
-### 与 NGO_web 的关系
+### 与 waytofutureua 的关系
 
-- NGO_web 是 Way to Future UA 的综合慈善平台（waytofutureua.org.ua）
+- waytofutureua 是 Way to Future UA 的综合慈善平台（waytofutureua.org.ua）
 - 本站是 Way to Health 的独立网站，拥有自己的 Supabase 和 Stripe
 - 两站共享设计语言和技术模式，但后端完全独立
 - 未来可考虑两站之间的品牌联动（互相链接等）
@@ -86,7 +86,7 @@ src/
 │       └── partners/            # 合作伙伴
 ├── components/
 │   ├── home/                    # 首页组件（HeroSection）
-│   ├── layout/                  # 布局组件（Navigation, Footer）
+│   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar）
 │   └── partners/                # 合作伙伴组件（PartnersShowcase）
 ├── data/
 │   └── partners.json            # 合作伙伴数据

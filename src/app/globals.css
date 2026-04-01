@@ -82,6 +82,14 @@ body {
   animation: hero-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.7s both;
 }
 
+.animate-hero-cta {
+  animation: hero-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.0s both;
+}
+
+.animate-hero-stats {
+  animation: hero-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.2s both;
+}
+
 .animate-hero-scroll {
   animation: hero-scroll-pulse 2.4s ease-in-out 1.5s infinite;
 }

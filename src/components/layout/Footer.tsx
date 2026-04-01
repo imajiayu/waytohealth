@@ -105,32 +105,33 @@ export default function Footer() {
         </div>
 
         {/* ── 主体：导航 + 联系方式 + CTA ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-10">
-          {/* 导航栏 1 */}
-          <nav className="space-y-4">
-            {NAV_COL_1.map((key) => (
-              <Link
-                key={key}
-                href={`/${key}`}
-                className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
-              >
-                {t(key)}
-              </Link>
-            ))}
-          </nav>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-10">
+          {/* 导航栏：移动端两列并排 */}
+          <div className="grid grid-cols-2 gap-6 lg:contents">
+            <nav className="space-y-4">
+              {NAV_COL_1.map((key) => (
+                <Link
+                  key={key}
+                  href={`/${key}`}
+                  className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
+                >
+                  {t(key)}
+                </Link>
+              ))}
+            </nav>
 
-          {/* 导航栏 2 */}
-          <nav className="space-y-4">
-            {NAV_COL_2.map((key) => (
-              <Link
-                key={key}
-                href={`/${key}`}
-                className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
-              >
-                {t(key)}
-              </Link>
-            ))}
-          </nav>
+            <nav className="space-y-4">
+              {NAV_COL_2.map((key) => (
+                <Link
+                  key={key}
+                  href={`/${key}`}
+                  className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
+                >
+                  {t(key)}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
           {/* 联系方式 */}
           <div className="space-y-6">
@@ -159,19 +160,6 @@ export default function Footer() {
                                          group-hover:opacity-70 group-hover:translate-y-0 group-hover:translate-x-0
                                          transition-all duration-200" />
               </a>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1.5">{t('volunteers')}</p>
-              <Link
-                href="/volunteer"
-                className="text-base text-gray-200 hover:text-white transition-colors
-                           inline-flex items-center gap-1.5 group"
-              >
-                {t('volunteerForm')}
-                <ArrowUpRight className="w-4 h-4 opacity-0 -translate-y-0.5 translate-x-0.5
-                                         group-hover:opacity-70 group-hover:translate-y-0 group-hover:translate-x-0
-                                         transition-all duration-200" />
-              </Link>
             </div>
           </div>
 
