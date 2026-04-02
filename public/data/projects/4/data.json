@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Новий крок",
+    "en": "New Step"
+  },
+  "description": {
+    "ua": "Спрямовуємо підтримку на повний цикл відновлення людей після ампутацій — від підготовки до протезування до післяпротезної адаптації.",
+    "en": "We direct support towards the full recovery cycle for amputees — from preparation for prosthetics to post-prosthetic adaptation."
+  },
+  "goal_amount": 2000000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["prosthetics", "rehabilitation"]
+}

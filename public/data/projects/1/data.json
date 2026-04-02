@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Реабілітація героя",
+    "en": "Hero Rehabilitation"
+  },
+  "description": {
+    "ua": "Збираємо на відновлення військових та ветеранів, які отримали травми, захищаючи наш спокій.",
+    "en": "We raise funds for the recovery of soldiers and veterans who were injured while defending our peace."
+  },
+  "goal_amount": 3000000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["rehabilitation", "veterans"]
+}

@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Дитинство триває",
+    "en": "Childhood Continues"
+  },
+  "description": {
+    "ua": "Організовуємо відпочинок для дітей військових та ветеранів, щоб відновити емоційний баланс і повернути відчуття безпеки.",
+    "en": "We organize recreation for children of military and veterans to restore emotional balance and a sense of safety."
+  },
+  "goal_amount": 1000000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["children", "recreation"]
+}

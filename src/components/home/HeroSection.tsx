@@ -1,102 +1,49 @@
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import PartnersStrip from '@/components/partners/PartnersStrip';
 
 export default function HeroSection() {
   const t = useTranslations('hero');
-  const tMeta = useTranslations('metadata');
-
-  const stats = [
-    { value: t('stats.patients'), label: t('stats.patientsLabel') },
-    { value: t('stats.years'), label: t('stats.yearsLabel') },
-    { value: t('stats.rate'), label: t('stats.rateLabel') },
-    { value: t('stats.partners'), label: t('stats.partnersLabel') },
-  ];
 
   return (
-    <section className="relative h-[calc(100svh-58px)] w-full overflow-hidden">
-      {/* 背景图片 — priority 确保首屏立即加载 */}
-      <Image
-        src="/images/hero-rehabilitation.jpg"
-        alt={t('imageAlt')}
-        fill
-        priority
-        unoptimized
-        sizes="100vw"
-        className="object-cover object-[center_40%]"
-      />
-
-      {/* 底部渐变遮罩 — 从深蓝渐变，确保白色文字可读又不过度遮挡图片 */}
+    <section className="relative w-full px-4 pt-2 sm:px-6 lg:px-8">
+      {/* 圆角渐变背景块 — 填满首屏（减去导航栏 h-14 + 外边距） */}
       <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(to top, rgba(3,36,63,0.85) 0%, rgba(3,36,63,0.55) 35%, rgba(3,36,63,0.08) 60%, transparent 100%)',
-        }}
-      />
+        className="gradient-brand-full relative flex flex-col overflow-hidden rounded-3xl"
+        style={{ minHeight: 'calc(100vh - 56px - 8px - 16px)' }}
+      >
+        {/* 装饰性光晕 */}
+        <div
+          className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full opacity-30 blur-3xl"
+          style={{ background: 'radial-gradient(circle, #00A7BD, transparent)' }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full opacity-20 blur-3xl"
+          style={{ background: 'radial-gradient(circle, #006CB2, transparent)' }}
+        />
 
-      {/* 内容区 — 锚定在视口底部 */}
-      <div className="absolute inset-0 flex flex-col justify-end pb-20 sm:pb-24 lg:pb-28">
-        <div className="mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10">
-          {/* 底部左右分栏布局 */}
-          <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
-            {/* 左侧：标题 + 副标题 + CTA */}
-            <div className="max-w-2xl">
-              {/* 金色装饰线 */}
-              <div className="mb-5 h-[3px] w-14 bg-ukraine-gold-500 animate-hero-line sm:mb-6 sm:w-16" />
-
-              {/* 品牌标题 */}
-              <h1
-                className="animate-hero-title font-[family-name:var(--font-display)] text-[2.5rem] leading-[1.05] font-semibold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
-                style={{ textShadow: '0 2px 12px rgba(3,36,63,0.5), 0 1px 3px rgba(0,0,0,0.3)' }}
-              >
-                {tMeta('title')}
-              </h1>
-
-              {/* 使命副标题 */}
-              <p className="mt-4 max-w-xl animate-hero-subtitle text-base font-light text-white/80 sm:mt-5 sm:text-lg md:text-xl lg:text-[1.35rem] lg:leading-relaxed">
-                {t('subtitle')}
-              </p>
-
-              {/* CTA 按钮组 */}
-              <div className="mt-7 flex animate-hero-cta flex-wrap gap-4 sm:mt-8">
-                {/* 主按钮：捐赠 — 金黄色背景 + 深蓝文字 */}
-                <button
-                  type="button"
-                  className="rounded-lg bg-ukraine-gold-500 px-7 py-3 text-sm font-semibold tracking-wide text-ukraine-blue-900 shadow-md transition-all duration-200 hover:bg-ukraine-gold-600 hover:shadow-lg sm:px-8 sm:py-3.5 sm:text-base"
-                >
-                  {t('donateButton')}
-                </button>
-
-                {/* 次按钮：了解更多 — 白色描边 */}
-                <button
-                  type="button"
-                  className="rounded-lg border-2 border-white/60 px-7 py-3 text-sm font-semibold tracking-wide text-white shadow-sm transition-all duration-200 hover:border-white hover:bg-white/10 sm:px-8 sm:py-3.5 sm:text-base"
-                >
-                  {t('learnMoreButton')}
-                </button>
-              </div>
-            </div>
-
-            {/* 右侧：影响力数据 */}
-            <div className="animate-hero-stats grid grid-cols-4 gap-4 sm:gap-6 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-6">
-              {stats.map((stat) => (
-                <div key={stat.label} className="text-center lg:text-right">
-                  <div className="font-[family-name:var(--font-data)] text-2xl font-bold text-ukraine-gold-400 sm:text-3xl lg:text-4xl">
-                    {stat.value}
-                  </div>
-                  <div className="mt-1 text-xs font-medium tracking-wide text-white/60 uppercase sm:text-sm">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* 内容区 — flex-1 撑满剩余空间，居中显示 */}
+        <div className="relative flex flex-1 flex-col items-center justify-center px-6">
+          {/* 品牌名称 */}
+          <div className="animate-hero-title flex flex-col items-center">
+            <span className="text-sm font-semibold tracking-[0.35em] text-white/70 uppercase sm:text-base md:text-lg">
+              {t('foundationLabel')}
+            </span>
+            <h1 className="mt-3 font-[family-name:var(--font-display)] text-5xl leading-none font-bold tracking-tight text-white sm:mt-4 sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+              WAY TO HEALTH
+            </h1>
           </div>
-        </div>
-      </div>
 
-      {/* 滚动提示线 */}
-      <div className="absolute bottom-6 left-1/2 animate-hero-scroll">
-        <div className="h-7 w-px bg-white/40" />
+          {/* 副标题 */}
+          <p className="animate-hero-cta mt-6 max-w-2xl text-center text-lg font-light text-white/80 sm:mt-8 sm:text-xl md:text-2xl">
+            {t('subtitle')}
+          </p>
+        </div>
+
+        {/* Partners 滚动条 — 色块底部，mt-auto 贴底 */}
+        <div id="partners" className="relative mt-auto scroll-mt-16">
+          <div className="mx-6 border-t border-white/20" />
+          <PartnersStrip />
+        </div>
       </div>
     </section>
   );

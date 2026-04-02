@@ -65,7 +65,7 @@ export default function LoadingBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[200] h-[2px]">
       {/* 静态渐变背景 - 始终可见 */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
+      <div className="absolute inset-0 gradient-brand-line" />
 
       {/* 加载进度条 - 覆盖在上面 */}
       {loading && (
@@ -74,7 +74,7 @@ export default function LoadingBar() {
           <div className="absolute inset-0 bg-white" />
           {/* 渐变进度 */}
           <div
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]"
+            className="absolute top-0 left-0 h-full gradient-brand-line"
             style={{
               width: `${progress}%`,
               transition: finishing

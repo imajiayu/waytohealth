@@ -1,16 +1,17 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-ukraine-blue-50: #e6f2fa;
-  --color-ukraine-blue-100: #b3d9f0;
-  --color-ukraine-blue-200: #80bfe6;
-  --color-ukraine-blue-300: #4da6dc;
-  --color-ukraine-blue-400: #1a8cd2;
-  --color-ukraine-blue-500: #076CB3;
-  --color-ukraine-blue-600: #065a96;
-  --color-ukraine-blue-700: #054879;
-  --color-ukraine-blue-800: #04365c;
-  --color-ukraine-blue-900: #03243f;
+  /* Logo 渐变主色系: #006CB2 → #008DB8 → #00A7BD → #77C3CD → #DCDCDC */
+  --color-ukraine-blue-50: #e6f4f8;
+  --color-ukraine-blue-100: #b3dfe8;
+  --color-ukraine-blue-200: #77C3CD;
+  --color-ukraine-blue-300: #00A7BD;
+  --color-ukraine-blue-400: #008DB8;
+  --color-ukraine-blue-500: #006CB2;
+  --color-ukraine-blue-600: #005a94;
+  --color-ukraine-blue-700: #004876;
+  --color-ukraine-blue-800: #003658;
+  --color-ukraine-blue-900: #00243a;
 
   --color-ukraine-gold-50: #fef8e6;
   --color-ukraine-gold-100: #fceab3;
@@ -35,6 +36,61 @@ body {
   font-family: var(--font-body);
   background: #ffffff;
   color: #1a1a1a;
+}
+
+/* ── 品牌渐变工具类 ── */
+
+/* Logo 全色渐变（Hero 背景等大面积场景） */
+.gradient-brand-full {
+  background: linear-gradient(135deg, #006CB2 0%, #008DB8 24%, #00A7BD 47%, #77C3CD 75%, #DCDCDC 100%);
+}
+
+/* 品牌主渐变（按钮、进度条等） */
+.gradient-brand {
+  background: linear-gradient(135deg, #006CB2 0%, #008DB8 40%, #00A7BD 100%);
+}
+
+/* 品牌横向渐变（分隔线、LoadingBar） */
+.gradient-brand-line {
+  background: linear-gradient(to right, #006CB2, #00A7BD, #77C3CD);
+}
+
+/* 品牌进度条渐变（水平方向） */
+.gradient-brand-progress {
+  background: linear-gradient(90deg, #006CB2, #00A7BD);
+}
+
+/* ── 布局工具类 ── */
+
+/* 页面内容容器 — 统一最大宽度和水平内边距 */
+.container-page {
+  max-width: 80rem; /* max-w-7xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 640px) {
+  .container-page { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+@media (min-width: 1024px) {
+  .container-page { padding-left: 2rem; padding-right: 2rem; }
+}
+
+/* 区域标题下方的装饰线 */
+.accent-line {
+  margin-top: 0.75rem;
+  height: 1px;
+  width: 5rem;
+  background: linear-gradient(to right, var(--color-ukraine-gold-400), transparent);
+}
+
+/* 隐藏滚动条 — 用于横向滚动条 */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Hero 入场动画 */
@@ -92,4 +148,16 @@ body {
 
 .animate-hero-scroll {
   animation: hero-scroll-pulse 2.4s ease-in-out 1.5s infinite;
+}
+
+/* 项目卡片入场动画 */
+@keyframes projectCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

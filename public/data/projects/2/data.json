@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Точка опори",
+    "en": "Point of Support"
+  },
+  "description": {
+    "ua": "Забезпечуємо доступ до психологічної допомоги для людей, щоб допомогти їм впоратись із наслідками війни та повернути відчуття стабільності.",
+    "en": "We provide access to psychological support for people to help them cope with the consequences of war and regain a sense of stability."
+  },
+  "goal_amount": 2000000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["psychology", "support"]
+}

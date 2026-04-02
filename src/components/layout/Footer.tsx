@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, Link } from '@/i18n/navigation';
 import { Phone, ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
 
 /* ── Brand SVG Icons (not available in Lucide) ──────────────── */
 
@@ -63,9 +64,9 @@ export default function Footer() {
   return (
     <footer id="footer" className="bg-[#0d1b2e] text-gray-300">
       {/* 渐变分隔线 */}
-      <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
+      <div className="h-[2px] gradient-brand-line" />
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-14 sm:pt-16 pb-10">
+      <div className="container-page pt-14 sm:pt-16 pb-10">
         {/* ── 顶部：Logo + 社交 ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-14">
           <button
@@ -73,10 +74,11 @@ export default function Footer() {
             className="flex-shrink-0 cursor-pointer group"
             aria-label="Home"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={`/images/logo-${locale === 'ua' ? 'ua' : 'en'}.svg`}
               alt="Way to Health"
+              width={300}
+              height={80}
               className="h-20 w-auto opacity-90 transition-opacity group-hover:opacity-100"
             />
           </button>
@@ -203,7 +205,7 @@ export default function Footer() {
 
       {/* ── 底部版权 ── */}
       <div className="border-t border-white/8">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="container-page py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm text-gray-500">
             {t('copyright', { year: currentYear })}
           </p>

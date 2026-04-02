@@ -4,20 +4,10 @@
     "description": "Rehabilitation center for war victims in Ukraine"
   },
   "hero": {
+    "foundationLabel": "Charity Foundation",
     "subtitle": "Restoring strength and hope to those affected by war",
-    "imageAlt": "Physical therapist guiding a patient through rehabilitation exercises",
-    "donateButton": "Donate Now",
-    "learnMoreButton": "Our Programs",
-    "stats": {
-      "patients": "500+",
-      "patientsLabel": "Rehabilitated",
-      "years": "3",
-      "yearsLabel": "Years of Service",
-      "rate": "92%",
-      "rateLabel": "Recovery Rate",
-      "partners": "9",
-      "partnersLabel": "Partners"
-    }
+    "donateButton": "Donate",
+    "partnerButton": "Become a Partner"
   },
   "navigation": {
     "donate": "Donate",
@@ -33,10 +23,20 @@
   "pages": {
     "comingSoon": "Coming Soon"
   },
+  "projects": {
+    "title": "Support active projects",
+    "goalOf": "of",
+    "raised": "Raised",
+    "donateButton": "Donate",
+    "moreDetails": "More details",
+    "otherProjectsTitle": "Other projects"
+  },
   "partners": {
-    "title": "Our Partners",
-    "allPartners": "All Partners",
-"visitWebsite": "Visit website",
+    "label": "Together with us",
+    "title": "Partnerships",
+    "allPartners": "View all",
+    "becomePartner": "Become a Partner",
+    "visitWebsite": "Visit website",
     "list": {
       "amalna-foundation": { "name": "Amalna Foundation" },
       "comfy": { "name": "Comfy" },

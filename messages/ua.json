@@ -4,20 +4,10 @@
     "description": "Реабілітаційний центр для постраждалих від війни в Україні"
   },
   "hero": {
+    "foundationLabel": "Благодійний фонд",
     "subtitle": "Повертаємо сили та надію постраждалим від війни",
-    "imageAlt": "Фізіотерапевт допомагає пацієнту під час реабілітаційних вправ",
     "donateButton": "Підтримати",
-    "learnMoreButton": "Наші програми",
-    "stats": {
-      "patients": "500+",
-      "patientsLabel": "Реабілітовано",
-      "years": "3",
-      "yearsLabel": "Роки роботи",
-      "rate": "92%",
-      "rateLabel": "Одужання",
-      "partners": "9",
-      "partnersLabel": "Партнерів"
-    }
+    "partnerButton": "Запартнеритись"
   },
   "navigation": {
     "donate": "Підтримати",
@@ -33,10 +23,20 @@
   "pages": {
     "comingSoon": "Незабаром"
   },
+  "projects": {
+    "title": "Підтримайте активні проєкти",
+    "goalOf": "з",
+    "raised": "Зібрано",
+    "donateButton": "Підтримати",
+    "moreDetails": "Детальніше",
+    "otherProjectsTitle": "Інші проєкти"
+  },
   "partners": {
-    "title": "Наші партнери",
-    "allPartners": "Всі партнери",
-"visitWebsite": "Перейти на сайт",
+    "label": "Разом з нами",
+    "title": "Партнерство",
+    "allPartners": "Дивитись всіх",
+    "becomePartner": "Запартнеритись",
+    "visitWebsite": "Перейти на сайт",
     "list": {
       "amalna-foundation": { "name": "Amalna Foundation" },
       "comfy": { "name": "Comfy" },

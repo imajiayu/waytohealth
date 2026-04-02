@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Екіпаж допомоги",
+    "en": "Rescue Crew"
+  },
+  "description": {
+    "ua": "Фінансуємо карети швидкої допомоги, щоб рятувати життя та забезпечувати своєчасну медичну допомогу.",
+    "en": "We fund ambulances to save lives and provide timely medical assistance."
+  },
+  "goal_amount": 1200000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["ambulance", "emergency"]
+}

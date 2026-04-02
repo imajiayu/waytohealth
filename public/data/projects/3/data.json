@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Play to Recover",
+    "en": "Play to Recover"
+  },
+  "description": {
+    "ua": "Залучаємо підтримку для проєкту, що допомагає працювати з тривогою, стресом та поверненням до активного соціального життя.",
+    "en": "We engage support for a project that helps people deal with anxiety, stress, and return to an active social life."
+  },
+  "goal_amount": 1000000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["recovery", "social"]
+}

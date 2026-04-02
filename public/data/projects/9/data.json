@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Доступний рух",
+    "en": "Accessible Mobility"
+  },
+  "description": {
+    "ua": "Забезпечуємо перевезення пацієнтів до місць лікування через закупівлю спеціалізованого транспорту.",
+    "en": "We provide patient transportation to treatment facilities through the purchase of specialized vehicles."
+  },
+  "goal_amount": 500000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["transport", "accessibility"]
+}

@@ -6,6 +6,7 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import Image from 'next/image';
 import { triggerRouteChange } from './LoadingBar';
+import { Heart } from 'lucide-react';
 
 const menuItems = [
   { key: 'projects', sectionId: 'projects', path: '/projects' },
@@ -13,7 +14,6 @@ const menuItems = [
   { key: 'news', sectionId: 'news', path: '/news' },
   { key: 'merch', sectionId: 'merch', path: '/merch' },
   { key: 'partners', sectionId: 'partners', path: '/partners' },
-  { key: 'donate', sectionId: 'donate', path: '/donate' },
   // contacts 在所有页面都直接滚动到 footer
   { key: 'contacts', sectionId: 'footer', path: null as string | null },
 ];
@@ -28,8 +28,12 @@ export default function Navigation() {
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
   const isMenuOpenRef = useRef(false);
-  isMenuOpenRef.current = isMenuOpen;
   const otherLocale = locale === 'ua' ? 'en' : 'ua';
+
+  // 同步 ref 以供 scroll handler 读取（不能在渲染期间直接赋值）
+  useEffect(() => {
+    isMenuOpenRef.current = isMenuOpen;
+  }, [isMenuOpen]);
 
   // 向下滚动超过 60px 时隐藏导航栏，向上滚动时显示；菜单打开时不隐藏
   useEffect(() => {
@@ -95,7 +99,7 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <button
-              onClick={() => { triggerRouteChange(); router.push('/'); }}
+              onClick={() => { if (pathname !== '/') { triggerRouteChange(); router.push('/'); } }}
               className="flex-shrink-0 cursor-pointer group"
               aria-label="Home"
             >
@@ -111,6 +115,23 @@ export default function Navigation() {
 
             {/* 右侧控制按钮 */}
             <div className="flex items-center gap-1">
+              {/* Donate 按钮 — logo 渐变配色 */}
+              <button
+                onClick={() => handleMenuItemClick('donate', '/donate')}
+                className="gradient-brand group flex items-center gap-2 rounded-full
+                           px-5 py-2 text-[13px] font-bold tracking-wide text-white
+                           shadow-[0_2px_12px_rgba(0,108,178,0.35)]
+                           transition-all duration-300
+                           hover:shadow-[0_4px_20px_rgba(0,108,178,0.5)]
+                           hover:scale-[1.03] active:scale-95 cursor-pointer"
+              >
+                <Heart className="h-3.5 w-3.5 fill-current transition-transform duration-300
+                                  group-hover:scale-110" />
+                <span>{t('donate')}</span>
+              </button>
+
+              <div className="w-px h-4 bg-gray-200 mx-1" />
+
               {/* 语言切换 */}
               <span className="relative px-2.5 py-1 text-[15px] tracking-wide font-medium">
                 {locale === 'ua' ? (
@@ -195,7 +216,7 @@ export default function Navigation() {
         aria-label={t('menu')}
       >
         {/* 渐变顶线 */}
-        <div className="h-[2px] bg-gradient-to-r from-[#006CB2] via-[#00A7BD] to-[#77C3CD]" />
+        <div className="h-[2px] gradient-brand-line" />
 
         {/* 菜单项 */}
         <nav className="px-8 pt-6 flex-1">

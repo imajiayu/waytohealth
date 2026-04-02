@@ -56,7 +56,7 @@ npm run start    # 启动生产服务器
 
 | 要素 | 方案 |
 |------|------|
-| 主色 | Ukraine Blue (#076CB3) |
+| 主色 | Logo 渐变: #006CB2 → #008DB8 → #00A7BD → #77C3CD → #DCDCDC |
 | CTA | Ukraine Gold (#F5B800) |
 | 成功 | #10B981 (绿) |
 | 警告 | #E76F51 (橙) |
@@ -85,11 +85,16 @@ src/
 │       ├── news/                # 新闻动态
 │       └── partners/            # 合作伙伴
 ├── components/
-│   ├── home/                    # 首页组件（HeroSection）
+│   ├── home/                    # 首页组件（HeroSection, ProjectsSection）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar）
-│   └── partners/                # 合作伙伴组件（PartnersShowcase）
+│   ├── partners/                # 合作伙伴组件（PartnersShowcase, PartnersStrip）
+│   └── projects/                # 项目组件（ProjectCard）
+├── hooks/
+│   └── useAutoScroll.ts         # 横向自动滚动 hook
 ├── data/
-│   └── partners.json            # 合作伙伴数据
+│   ├── partners.json            # 合作伙伴原始数据
+│   ├── partners.ts              # 合作伙伴类型定义 + 类型化导出
+│   └── projects.ts              # 项目类型定义
 ├── i18n/
 │   ├── config.ts                # 语言配置（locales, defaultLocale）
 │   ├── request.ts               # next-intl 请求配置
@@ -128,7 +133,49 @@ const t = useTranslations('namespace')
 
 ---
 
-## 注意事项 (Gotchas)
+## 编码规范
+
+### 样式
+
+- **禁止在 JSX 中硬编码品牌色的 inline style**。使用 `globals.css` 中定义的工具类：
+  - `gradient-brand-full` — Logo 全色渐变（Hero 背景等大面积场景）
+  - `gradient-brand` — 品牌主渐变（按钮等）
+  - `gradient-brand-line` — 横向渐变（分隔线、LoadingBar）
+  - `gradient-brand-progress` — 进度条渐变
+- **页面内容容器**统一使用 `container-page` 类（max-w-7xl + 响应式内边距），不要手写 `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
+- **区域标题装饰线**统一使用 `accent-line` 类
+- **隐藏滚动条**统一使用 `hide-scrollbar` 类，不要写 `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`
+- Tailwind 颜色使用 `@theme` 中定义的语义化 token（如 `text-ukraine-blue-500`），不要用十六进制
+
+### TypeScript
+
+- **Locale 类型**：使用 `import { type Locale } from '@/i18n/config'`，禁止硬编码 `as 'ua' | 'en'`
+- 保持 `strict: true`，避免 `any`
+- **JSON 数据文件**必须有对应的 `.ts` 文件提供类型定义和类型化导出（如 `partners.json` → `partners.ts`），组件中导入类型化版本而非直接导入 JSON
+- **禁止 `as` 类型断言绕过类型检查**（如 `partner as { darkBg: boolean }`），应通过接口定义正确的类型
+
+### 路由链接
+
+- **内部链接**必须使用 `import { Link } from '@/i18n/navigation'`，禁止使用 `<a href="/">` 或 Next.js 原生 `<Link>`，否则会丢失 locale 前缀
+- 外部链接使用普通 `<a>` + `target="_blank" rel="noopener noreferrer"`
+
+### 图片
+
+- **始终使用 `next/image` 的 `<Image>` 组件**，禁止使用 `<img>` 标签（即使加 eslint-disable 注释也不行）
+
+### React 模式
+
+- **禁止在渲染期间更新 ref**（`ref.current = value` 不能直接写在组件函数体中），必须放在 `useEffect` 内
+- **删除死代码**：未被任何地方使用的组件、props、代码分支应及时清理，不要为假想的未来需求保留
+
+### 组件
+
+- 可复用的 hook 放在 `src/hooks/` 目录
+- 横向自动滚动使用 `useAutoScroll` hook（`src/hooks/useAutoScroll.ts`），不要重复实现 requestAnimationFrame 逻辑
+
+---
+
+## 注意��项 (Gotchas)
 
 - **Tailwind v4**: 使用 CSS-first 配置（`@import "tailwindcss"`），不再有 `tailwind.config.js`。自定义主题通过 `globals.css` 中的 `@theme` 定义
 - **Next.js 16 异步 API**: `cookies()`、`headers()`、`params`、`searchParams` 都需要 `await`

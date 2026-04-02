@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Відновлення 2.0",
+    "en": "Recovery 2.0"
+  },
+  "description": {
+    "ua": "Підтримуємо використання VR-терапії, що допомагає пришвидшити реабілітацію та повернення до активного життя.",
+    "en": "We support the use of VR therapy to help accelerate rehabilitation and return to an active life."
+  },
+  "goal_amount": 500000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["vr-therapy", "innovation"]
+}

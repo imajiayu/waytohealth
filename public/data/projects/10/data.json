@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Поруч",
+    "en": "By Your Side"
+  },
+  "description": {
+    "ua": "Забезпечуємо базову підтримку в перші години після обстрілів: тепло, їжа, вода, зв'язок і психологічна допомога.",
+    "en": "We provide basic support in the first hours after shelling: warmth, food, water, communication, and psychological assistance."
+  },
+  "goal_amount": 500000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["emergency-aid", "humanitarian"]
+}
