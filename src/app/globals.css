@@ -79,11 +79,19 @@ body {
 
 /* 区域标题下方的装饰线 */
 .accent-line {
-  margin-top: 0.75rem;
-  height: 1px;
-  width: 5rem;
-  background: linear-gradient(to right, var(--color-ukraine-gold-400), transparent);
+  height: 2px;
+  width: 3rem;
+  border-radius: 9999px;
+  background-color: var(--color-ukraine-gold-500);
 }
+
+/* ── 装饰光晕工具类 — 用于纯装饰性背景光效 ── */
+.glow-teal { background: radial-gradient(circle, var(--color-ukraine-blue-300), transparent); }
+.glow-blue { background: radial-gradient(circle, var(--color-ukraine-blue-500), transparent); }
+.glow-blue-soft { background: radial-gradient(circle, var(--color-ukraine-blue-500), transparent 70%); }
+.glow-brand-soft { background: radial-gradient(circle at 30% 30%, var(--color-ukraine-blue-500), var(--color-ukraine-blue-300), transparent 70%); }
+.glow-gold { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent); }
+.glow-gold-soft { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent 70%); }
 
 /* 隐藏滚动条 — 用于横向滚动条 */
 .hide-scrollbar {

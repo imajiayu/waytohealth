@@ -85,12 +85,14 @@ src/
 │       ├── news/                # 新闻动态
 │       └── partners/            # 合作伙伴
 ├── components/
-│   ├── home/                    # 首页组件（HeroSection, ProjectsSection）
-│   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar）
+│   ├── about/                   # 关于页组件（FadeInSection）
+│   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
+│   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersShowcase, PartnersStrip）
 │   └── projects/                # 项目组件（ProjectCard）
 ├── hooks/
-│   └── useAutoScroll.ts         # 横向自动滚动 hook
+│   ├── useAutoScroll.ts         # 横向自动滚动 hook
+│   └── useInViewOnce.ts         # 滚动入场检测（共享 IntersectionObserver）
 ├── data/
 │   ├── partners.json            # 合作伙伴原始数据
 │   ├── partners.ts              # 合作伙伴类型定义 + 类型化导出
@@ -142,6 +144,7 @@ const t = useTranslations('namespace')
   - `gradient-brand` — 品牌主渐变（按钮等）
   - `gradient-brand-line` — 横向渐变（分隔线、LoadingBar）
   - `gradient-brand-progress` — 进度条渐变
+  - `glow-teal` / `glow-blue` / `glow-blue-soft` / `glow-brand-soft` / `glow-gold` / `glow-gold-soft` — 装饰光晕背景
 - **页面内容容器**统一使用 `container-page` 类（max-w-7xl + 响应式内边距），不要手写 `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
 - **区域标题装饰线**统一使用 `accent-line` 类
 - **隐藏滚动条**统一使用 `hide-scrollbar` 类，不要写 `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`

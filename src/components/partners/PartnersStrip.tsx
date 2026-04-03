@@ -18,23 +18,23 @@ export default function PartnersStrip() {
   const items = [...partners, ...partners];
 
   return (
-    <div className="px-6 py-8 sm:px-8 sm:py-10 md:py-12">
-      {/* 标题行 */}
-      <div className="mb-6 sm:mb-8 flex items-center gap-4 sm:gap-5">
-        <h3 className="text-2xl sm:text-3xl md:text-4xl font-[family-name:var(--font-display)]
+    <div className="px-4 py-6 sm:px-8 sm:py-10 md:py-12">
+      {/* 标题行 — 移动端堆叠，桌面端并排 */}
+      <div className="mb-5 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+        <h3 className="text-xl sm:text-3xl md:text-4xl font-[family-name:var(--font-display)]
                        font-semibold text-white/90 tracking-tight">
           {t('title')}
         </h3>
         <Link
           href="/partners"
-          className="inline-flex items-center gap-2 rounded-full
-                     bg-white/15 backdrop-blur-sm px-6 py-2.5 sm:px-7 sm:py-3
-                     text-base sm:text-lg font-semibold text-white/80
+          className="inline-flex w-fit items-center gap-2 rounded-full
+                     bg-white/15 backdrop-blur-sm px-5 py-2 sm:px-7 sm:py-3
+                     text-sm sm:text-lg font-semibold text-white/80
                      hover:bg-white/25 hover:text-white
                      transition-all duration-200 group"
         >
           {t('becomePartner')}
-          <ArrowRight className="w-4.5 h-4.5 sm:w-5 sm:h-5 transition-transform
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform
                                  group-hover:translate-x-0.5" />
         </Link>
       </div>
@@ -54,7 +54,7 @@ export default function PartnersStrip() {
                        px-6 sm:px-8 md:px-10 py-4"
           >
             <div className={cn(
-              'flex items-center justify-center rounded-lg px-3 py-1.5',
+              'flex items-center justify-center rounded-lg px-2 py-1 sm:px-3 sm:py-1.5',
               partner.darkBg && 'bg-white/10'
             )}>
               <Image
@@ -62,7 +62,7 @@ export default function PartnersStrip() {
                 alt={t(`list.${partner.id}.name`)}
                 width={120}
                 height={48}
-                className="max-h-12 sm:max-h-14 md:max-h-16 w-auto object-contain"
+                className="max-h-10 sm:max-h-14 md:max-h-16 w-auto object-contain"
               />
             </div>
           </a>

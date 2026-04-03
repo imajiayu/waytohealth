@@ -12,6 +12,8 @@ interface UseAutoScrollOptions {
  *
  * 要求容器内的子元素被复制一份（[...items, ...items]），
  * 滚动到一半时自动跳回起点，实现无缝循环。
+ *
+ * 当元素不在视口中时停止 rAF 循环，避免 CPU 空转。
  */
 export function useAutoScroll<T extends HTMLElement>({
   speed = 30,
@@ -26,7 +28,9 @@ export function useAutoScroll<T extends HTMLElement>({
   const tick = useCallback(
     (timestamp: number) => {
       const el = scrollRef.current;
-      if (!el || isUserScrolling.current) {
+      if (!el) return;
+
+      if (isUserScrolling.current) {
         lastTimestamp.current = null;
         animRef.current = requestAnimationFrame(tick);
         return;
@@ -49,6 +53,22 @@ export function useAutoScroll<T extends HTMLElement>({
     [speed],
   );
 
+  // 启动 rAF 循环
+  const startAnimation = useCallback(() => {
+    if (animRef.current) return; // 已在运行
+    lastTimestamp.current = null;
+    animRef.current = requestAnimationFrame(tick);
+  }, [tick]);
+
+  // 停止 rAF 循环
+  const stopAnimation = useCallback(() => {
+    if (animRef.current) {
+      cancelAnimationFrame(animRef.current);
+      animRef.current = null;
+    }
+    lastTimestamp.current = null;
+  }, []);
+
   const handleUserScroll = useCallback(() => {
     isUserScrolling.current = true;
     lastTimestamp.current = null;
@@ -63,20 +83,32 @@ export function useAutoScroll<T extends HTMLElement>({
     const el = scrollRef.current;
     if (!el) return;
 
+    // 可见性检测：仅在元素可见时运行 rAF 循环
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startAnimation();
+        } else {
+          stopAnimation();
+        }
+      },
+      { threshold: 0 },
+    );
+    observer.observe(el);
+
     el.addEventListener('wheel', handleUserScroll, { passive: true });
     el.addEventListener('touchstart', handleUserScroll, { passive: true });
     el.addEventListener('pointerdown', handleUserScroll);
 
-    animRef.current = requestAnimationFrame(tick);
-
     return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
+      stopAnimation();
       if (resumeTimer.current) clearTimeout(resumeTimer.current);
+      observer.disconnect();
       el.removeEventListener('wheel', handleUserScroll);
       el.removeEventListener('touchstart', handleUserScroll);
       el.removeEventListener('pointerdown', handleUserScroll);
     };
-  }, [tick, handleUserScroll]);
+  }, [tick, handleUserScroll, startAnimation, stopAnimation]);
 
   return scrollRef;
 }

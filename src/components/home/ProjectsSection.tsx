@@ -3,9 +3,11 @@ import { getAllProjects } from '@/lib/data';
 import ProjectCard from '@/components/projects/ProjectCard';
 
 export default async function ProjectsSection() {
-  const t = await getTranslations('projects');
-  const tNav = await getTranslations('navigation');
-  const projects = await getAllProjects();
+  const [t, tNav, projects] = await Promise.all([
+    getTranslations('projects'),
+    getTranslations('navigation'),
+    getAllProjects(),
+  ]);
 
   const mainProjects = projects.slice(0, 3);
   const otherProjects = projects.slice(3);
@@ -13,7 +15,7 @@ export default async function ProjectsSection() {
   return (
     <>
       {/* 主项目 section */}
-      <section id="projects" className="scroll-mt-16 overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-20">
+      <section id="projects" className="scroll-mt-16 overflow-hidden pt-16 pb-12 sm:pt-32 sm:pb-20">
 
         <div className="container-page">
           {/* 区域头部 — 编辑式排版 */}
@@ -28,7 +30,7 @@ export default async function ProjectsSection() {
           </div>
 
           {/* 主项目卡片网格 — 大卡片 3 列 */}
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-6 grid gap-5 sm:mt-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {mainProjects.map((project, i) => (
               <ProjectCard
                 key={project.id}
@@ -44,7 +46,7 @@ export default async function ProjectsSection() {
 
       {/* 更多项目 section */}
       {otherProjects.length > 0 && (
-        <section className="overflow-hidden pb-24 sm:pb-32">
+        <section className="overflow-hidden pb-16 sm:pb-32">
 
           <div className="container-page">
             {/* 区域标题 */}
@@ -56,7 +58,7 @@ export default async function ProjectsSection() {
             </div>
 
             {/* 紧凑卡片 4 列 */}
-            <div className="mt-6 grid gap-4 grid-cols-2 lg:grid-cols-4 lg:gap-5">
+            <div className="mt-5 grid gap-3 grid-cols-2 sm:mt-6 sm:gap-4 lg:grid-cols-4 lg:gap-5">
               {otherProjects.map((project, i) => (
                 <ProjectCard
                   key={project.id}

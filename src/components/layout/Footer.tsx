@@ -1,9 +1,8 @@
-'use client';
-
-import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, Link } from '@/i18n/navigation';
-import { Phone, ArrowUpRight } from 'lucide-react';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { ArrowUpRight, Phone } from 'lucide-react';
 import Image from 'next/image';
+import CopyIbanButton from './CopyIbanButton';
 
 /* ── Brand SVG Icons (not available in Lucide) ──────────────── */
 
@@ -49,166 +48,201 @@ const SOCIAL_LINKS = [
   { name: 'LinkedIn', href: 'https://www.linkedin.com/company/way-to-health-ua/', icon: LinkedinIcon },
 ];
 
-const NAV_COL_1 = ['about', 'team', 'partners', 'faq'] as const;
-const NAV_COL_2 = ['programs', 'news', 'reports', 'media'] as const;
+const LEGAL_LINKS = ['terms', 'publicAgreements', 'privacy'] as const;
+
+const IBAN = 'UA363052990000026007050555233';
 
 /* ── Component ───────────────────────────────────────────────── */
 
-export default function Footer() {
-  const t = useTranslations('footer');
-  const locale = useLocale();
-  const router = useRouter();
+export default async function Footer() {
+  const [t, locale] = await Promise.all([
+    getTranslations('footer'),
+    getLocale(),
+  ]);
 
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer id="footer" className="bg-[#0d1b2e] text-gray-300">
-      {/* 渐变分隔线 */}
-      <div className="h-[2px] gradient-brand-line" />
+    <footer id="footer" className="px-3 pb-3 sm:px-6 sm:pb-4 lg:px-8">
+      {/* 圆角深色卡片 — 与 HeroSection 的圆角矩形风格一致 */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#0d1b2e] text-white sm:rounded-3xl">
+        {/* 装饰性光晕 */}
+        <div className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full opacity-15 blur-3xl glow-teal" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full opacity-10 blur-3xl glow-blue" />
 
-      <div className="container-page pt-14 sm:pt-16 pb-10">
-        {/* ── 顶部：Logo + 社交 ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-14">
-          <button
-            onClick={() => router.push('/')}
-            className="flex-shrink-0 cursor-pointer group"
-            aria-label="Home"
-          >
-            <Image
-              src={`/images/logo-${locale === 'ua' ? 'ua' : 'en'}.svg`}
-              alt="Way to Health"
-              width={300}
-              height={80}
-              className="h-20 w-auto opacity-90 transition-opacity group-hover:opacity-100"
-            />
-          </button>
+        {/* 顶部渐变装饰线 */}
+        <div className="h-[2px] gradient-brand-line" />
 
-          <div className="flex items-center gap-5">
-            <span className="hidden lg:block text-base text-gray-400 whitespace-nowrap">
-              {t('foundationPage')}
-            </span>
-            <div className="flex items-center gap-2.5">
-              {SOCIAL_LINKS.map(({ name, href, icon: Icon }) => (
+        <div className="relative container-page pt-10 sm:pt-16 pb-8 sm:pb-10">
+          {/* ── 顶部：Logo + 社交 ── */}
+          <div className="flex flex-col gap-5 mb-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:mb-12">
+            <Link
+              href="/"
+              className="flex-shrink-0 group"
+              aria-label="Home"
+            >
+              <Image
+                src={`/images/logo-${locale === 'ua' ? 'ua' : 'en'}.svg`}
+                alt="Way to Health"
+                width={300}
+                height={80}
+                className="h-14 w-auto opacity-90 transition-opacity group-hover:opacity-100 sm:h-20"
+              />
+            </Link>
+
+            <div className="flex items-center gap-5">
+              <span className="hidden lg:block text-base text-white/70 whitespace-nowrap">
+                {t('foundationPage')}
+              </span>
+              <div className="flex items-center gap-2.5">
+                {SOCIAL_LINKS.map(({ name, href, icon: Icon }) => (
+                  <a
+                    key={name}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={name}
+                    className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center
+                               text-white/70 hover:bg-white/20 hover:text-white
+                               transition-all duration-200"
+                  >
+                    <Icon className="w-5 h-5" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── 主体：左侧联系方式 + 右侧银行卡片 ── */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
+            {/* 左侧：联系方式卡片 + 法律链接 */}
+            <div className="flex flex-col gap-6">
+              {/* 联系方式卡片组 */}
+              <div className="space-y-3">
+                {/* 邮箱卡片 */}
                 <a
-                  key={name}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={name}
-                  className="w-11 h-11 rounded-full bg-white/8 flex items-center justify-center
-                             text-gray-400 hover:bg-white/15 hover:text-white
-                             transition-all duration-200"
+                  href="mailto:waytohealthfoundation@gmail.com"
+                  className="group flex items-center gap-4 rounded-xl bg-white/[0.04] border border-white/[0.08]
+                             px-4 py-4 hover:bg-white/[0.07] hover:border-white/[0.14] transition-all duration-300
+                             sm:gap-5 sm:rounded-2xl sm:px-6 sm:py-5"
                 >
-                  <Icon className="w-5 h-5" />
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg gradient-brand flex items-center justify-center
+                                  shadow-lg shadow-ukraine-blue-500/20 group-hover:shadow-ukraine-blue-500/30 transition-shadow
+                                  sm:w-12 sm:h-12 sm:rounded-xl">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-white">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium tracking-widest text-white/40 uppercase mb-1">{t('email')}</p>
+                    <p className="text-base sm:text-lg text-white truncate group-hover:text-white/90 transition-colors">
+                      waytohealthfoundation@gmail.com
+                    </p>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0
+                                           group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all duration-200" />
                 </a>
-              ))}
+
+                {/* 电话卡片 */}
+                <a
+                  href="tel:+380441234567"
+                  className="group flex items-center gap-4 rounded-xl bg-white/[0.04] border border-white/[0.08]
+                             px-4 py-4 hover:bg-white/[0.07] hover:border-white/[0.14] transition-all duration-300
+                             sm:gap-5 sm:rounded-2xl sm:px-6 sm:py-5"
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg gradient-brand flex items-center justify-center
+                                  shadow-lg shadow-ukraine-blue-500/20 group-hover:shadow-ukraine-blue-500/30 transition-shadow
+                                  sm:w-12 sm:h-12 sm:rounded-xl">
+                    <Phone className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium tracking-widest text-white/40 uppercase mb-1">{t('hotline')}</p>
+                    <p className="text-base sm:text-lg text-white font-[family-name:var(--font-data)] tracking-wide group-hover:text-white/90 transition-colors">
+                      +38 044 123 4567
+                    </p>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0
+                                           group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all duration-200" />
+                </a>
+              </div>
+
+              {/* 法律文档链接 — 带竖线分隔的精致样式 */}
+              <nav className="flex flex-wrap items-center gap-0.5 pt-2 sm:gap-1">
+                {LEGAL_LINKS.map((key, i) => (
+                  <span key={key} className="flex items-center">
+                    <span
+                      className="text-sm text-white/45 px-3 py-1.5"
+                    >
+                      {t(key)}
+                    </span>
+                    {i < LEGAL_LINKS.length - 1 && (
+                      <span className="text-white/15 select-none">·</span>
+                    )}
+                  </span>
+                ))}
+              </nav>
+            </div>
+
+            {/* 右侧：银行信息卡片 + 捐赠按钮 */}
+            <div className="space-y-4">
+              {/* 银行信息卡片 */}
+              <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-5 space-y-4 sm:rounded-2xl sm:p-7 sm:space-y-5">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+                  <p className="text-xs font-semibold tracking-[0.2em] text-white/70 uppercase sm:text-sm">
+                    {t('bankDetails')}
+                  </p>
+                  <span className="text-xs text-white/50 sm:text-sm">
+                    JSC CB &quot;PRIVATBANK&quot;
+                  </span>
+                </div>
+
+                {/* IBAN */}
+                <div>
+                  <p className="text-xs text-white/50 mb-2">IBAN</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-white font-medium tracking-wider font-[family-name:var(--font-data)] break-all leading-relaxed sm:text-lg">
+                      {IBAN}
+                    </p>
+                    <CopyIbanButton iban={IBAN} ariaLabel={t('copyIban')} />
+                  </div>
+                </div>
+
+                {/* 受款方代码 */}
+                <div className="flex items-center justify-between border-t border-white/[0.06] pt-4">
+                  <p className="text-sm text-white/50">{t('recipientCode')}</p>
+                  <p className="text-base text-white font-medium tracking-wide font-[family-name:var(--font-data)]">
+                    44947699
+                  </p>
+                </div>
+              </div>
+
+              {/* 捐赠按钮 */}
+              <Link
+                href="/donate"
+                className="w-full flex items-center justify-between gap-3
+                           bg-ukraine-gold-500 text-ukraine-blue-900 rounded-xl px-6 py-4
+                           hover:bg-ukraine-gold-400 active:scale-[0.98]
+                           transition-all duration-200 font-semibold group"
+              >
+                <span className="text-lg">{t('donate')}</span>
+                <ArrowUpRight className="w-5 h-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </Link>
+
+              {/* 法人信息 */}
+              <p className="text-sm text-white/40 leading-relaxed">
+                {t('legalEntity')}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* ── 主体：导航 + 联系方式 + CTA ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-10">
-          {/* 导航栏：移动端两列并排 */}
-          <div className="grid grid-cols-2 gap-6 lg:contents">
-            <nav className="space-y-4">
-              {NAV_COL_1.map((key) => (
-                <Link
-                  key={key}
-                  href={`/${key}`}
-                  className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
-                >
-                  {t(key)}
-                </Link>
-              ))}
-            </nav>
-
-            <nav className="space-y-4">
-              {NAV_COL_2.map((key) => (
-                <Link
-                  key={key}
-                  href={`/${key}`}
-                  className="block text-lg text-gray-300 hover:text-white transition-colors duration-150"
-                >
-                  {t(key)}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* 联系方式 */}
-          <div className="space-y-6">
-            <div>
-              <p className="text-sm text-gray-500 mb-1.5">{t('generalQuestions')}</p>
-              <a
-                href="mailto:info@waytohealth.org.ua"
-                className="text-base text-gray-200 hover:text-white transition-colors
-                           inline-flex items-center gap-1.5 group"
-              >
-                info@waytohealth.org.ua
-                <ArrowUpRight className="w-4 h-4 opacity-0 -translate-y-0.5 translate-x-0.5
-                                         group-hover:opacity-70 group-hover:translate-y-0 group-hover:translate-x-0
-                                         transition-all duration-200" />
-              </a>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1.5">{t('collaboration')}</p>
-              <a
-                href="mailto:partners@waytohealth.org.ua"
-                className="text-base text-gray-200 hover:text-white transition-colors
-                           inline-flex items-center gap-1.5 group"
-              >
-                partners@waytohealth.org.ua
-                <ArrowUpRight className="w-4 h-4 opacity-0 -translate-y-0.5 translate-x-0.5
-                                         group-hover:opacity-70 group-hover:translate-y-0 group-hover:translate-x-0
-                                         transition-all duration-200" />
-              </a>
-            </div>
-          </div>
-
-          {/* 热线 + 捐赠 */}
-          <div className="space-y-4">
-            {/* 热线卡片 */}
-            <a
-              href="tel:+380441234567"
-              className="flex items-center justify-between gap-4
-                         bg-white/6 rounded-xl px-5 py-4
-                         hover:bg-white/10 transition-colors duration-200 group"
-            >
-              <div>
-                <p className="text-sm text-gray-500 mb-1">{t('hotline')}</p>
-                <p className="text-lg text-white font-medium tracking-wide font-[family-name:var(--font-data)]">
-                  +38 044 123 4567
-                </p>
-              </div>
-              <Phone className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors flex-shrink-0" />
-            </a>
-
-            {/* 捐赠按钮 */}
-            <button
-              onClick={() => router.push('/donate')}
-              className="w-full flex items-center justify-between gap-3
-                         bg-ukraine-gold-500 text-ukraine-blue-900 rounded-xl px-5 py-4
-                         hover:bg-ukraine-gold-400 active:scale-[0.98]
-                         transition-all duration-200 cursor-pointer font-semibold group"
-            >
-              <span className="text-base">{t('donate')}</span>
-              <ArrowUpRight className="w-5 h-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </button>
-
-            {/* 法人信息 */}
-            <p className="text-sm text-gray-600 leading-relaxed mt-2">
-              {t('legalEntity')}
+        {/* ── 底部版权 ── */}
+        <div className="relative border-t border-white/[0.06]">
+          <div className="container-page py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-sm text-white/40">
+              {t('copyright', { year: currentYear })}
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* ── 底部版权 ── */}
-      <div className="border-t border-white/8">
-        <div className="container-page py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-sm text-gray-500">
-            {t('copyright', { year: currentYear })}
-          </p>
         </div>
       </div>
     </footer>

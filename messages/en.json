@@ -4,6 +4,7 @@
     "description": "Rehabilitation center for war victims in Ukraine"
   },
   "hero": {
+    "title": "WAY TO HEALTH",
     "foundationLabel": "Charity Foundation",
     "subtitle": "Restoring strength and hope to those affected by war",
     "donateButton": "Donate",
@@ -49,19 +50,157 @@
       "golfstream": { "name": "Golfstream" }
     }
   },
+  "about": {
+    "label": "About Us",
+    "title": "A path that changes lives",
+    "stats": {
+      "years": {
+        "value": "3+",
+        "label": "years of work"
+      },
+      "patients": {
+        "value": "500+",
+        "label": "patients rehabilitated"
+      },
+      "funds": {
+        "value": "10.4M+",
+        "unit": "UAH",
+        "label": "directed to help"
+      },
+      "partners": {
+        "value": "10+",
+        "label": "international partners"
+      }
+    },
+    "mission": {
+      "title": "Our Mission",
+      "text": "To respond promptly to the needs of people affected by war and become a reliable support in the struggle and recovery of the Ukrainian nation."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "text": "To develop support systems that allow helping the maximum number of people who need assistance due to the consequences of war."
+    },
+    "values": {
+      "title": "Our Values",
+      "transparency": {
+        "name": "Transparency",
+        "text": "We take responsible care of every donation and partnership support. Funds received by the foundation have a clear purpose, are reflected in reporting, and are directed to specific areas of assistance and development of our programs."
+      },
+      "speed": {
+        "name": "Speed of Help",
+        "text": "In the field of rehabilitation, the charitable foundation operates as a single ecosystem with the Way to Health medical center. Thanks to this, patients can start rehabilitation immediately, while the foundation attracts donor support and covers treatment costs later."
+      },
+      "result": {
+        "name": "Results",
+        "text": "Our goal is to be a support for those who need it during the most difficult times for the country. So we work to ensure that as many people as possible can receive the necessary help, regain their footing, and live fully again."
+      }
+    },
+    "achievements": {
+      "title": "Our Achievements",
+      "items": [
+        {
+          "title": "Recovery Support",
+          "text": "Throughout its entire period of activity, the foundation has systematically directed financial assistance to the recovery of military personnel, veterans, and civilians affected by the war.\n\nOver more than three years of work, we have supported 500+ patients who sought help with various injuries and conditions, including:",
+          "list": [
+            "mine-blast injuries",
+            "gunshot and shrapnel wounds",
+            "musculoskeletal injuries",
+            "traumatic brain injuries",
+            "severe concussions",
+            "limb amputations",
+            "post-traumatic stress disorder (PTSD)",
+            "anxiety disorders"
+          ],
+          "image": "/images/achievement-rehabilitation.jpg"
+        },
+        {
+          "title": "Ambulance Procurement",
+          "text": "Purchasing and delivering specialized medical transport for evacuating the wounded from the front lines.",
+          "image": ""
+        },
+        {
+          "title": "Humanitarian Missions",
+          "text": "Organizing and conducting humanitarian missions in de-occupied and front-line territories of Ukraine.",
+          "image": ""
+        },
+        {
+          "title": "International Projects",
+          "text": "Implementing projects with the support of international donors to scale up assistance for those affected.",
+          "image": ""
+        }
+      ]
+    },
+    "cta": "Learn more"
+  },
+  "aboutPage": {
+    "hero": {
+      "eyebrow": "About the Foundation",
+      "title": "A path that changes lives",
+      "intro": "Way to Health Charity Foundation has been working since 2021 to support those affected by war in Ukraine. We provide rehabilitation, humanitarian assistance, and hope to hundreds of people who need support during the most difficult times."
+    },
+    "story": {
+      "title": "Our Story",
+      "intro": "The foundation was born from the conviction that every person affected by war deserves quality medical care and support on the path to recovery.",
+      "items": {
+        "0": {
+          "year": "2021",
+          "title": "Foundation Established",
+          "text": "Way to Health Charity Foundation was officially registered with the goal of providing rehabilitation assistance to those affected by military conflict."
+        },
+        "1": {
+          "year": "2022",
+          "title": "Response to Full-Scale Invasion",
+          "text": "After the start of the full-scale invasion, the foundation rapidly scaled its activities: organizing evacuations, purchasing ambulances, and launching rehabilitation programs for the wounded."
+        },
+        "2": {
+          "year": "2023",
+          "title": "Scaling and Partnerships",
+          "text": "Establishing international partnerships, launching joint projects with foreign donors, and significantly expanding the number of patients receiving rehabilitation support."
+        },
+        "3": {
+          "year": "2024",
+          "title": "Sustainable Development",
+          "text": "Strengthening the ecosystem between the foundation and the Way to Health medical center, implementing new rehabilitation methods and long-term support programs."
+        }
+      }
+    },
+    "howWeWork": {
+      "title": "How We Work",
+      "intro": "The charity foundation operates as a unified ecosystem with the Way to Health medical center, enabling immediate help for those in need.",
+      "steps": {
+        "0": {
+          "title": "Patient Applies",
+          "text": "A person affected by war contacts the medical center for rehabilitation assistance."
+        },
+        "1": {
+          "title": "Immediate Treatment",
+          "text": "The patient begins rehabilitation immediately — the medical center does not wait for funding confirmation."
+        },
+        "2": {
+          "title": "Foundation Support",
+          "text": "The charity foundation attracts donor and partner support to cover treatment costs."
+        },
+        "3": {
+          "title": "Full Recovery",
+          "text": "The patient receives comprehensive care and support throughout the entire recovery journey."
+        }
+      }
+    },
+    "cta": {
+      "title": "Join Our Mission",
+      "text": "Every contribution — whether a donation or partnership — brings us closer to our goal: helping as many people as possible regain their health and live fully again.",
+      "donateButton": "Support the Foundation",
+      "partnerButton": "Become a Partner"
+    }
+  },
   "footer": {
-    "about": "About Center",
-    "team": "Our Team",
-    "partners": "Partners",
-    "faq": "FAQ",
-    "programs": "Programs",
-    "news": "News",
-    "reports": "Reports",
-    "media": "Media",
-    "generalQuestions": "General questions:",
-    "collaboration": "Collaboration:",
-    "volunteers": "For volunteers:",
-    "volunteerForm": "Fill out the form",
+    "terms": "Terms and Conditions",
+    "publicAgreements": "Public Agreements",
+    "privacy": "Privacy Policy",
+    "email": "Email:",
+    "bankDetails": "Bank Details",
+    "recipientCode": "Recipient Code (EDRPOU)",
+    "copyIban": "Copy IBAN",
     "hotline": "Hotline",
     "donate": "Donate",
     "foundationPage": "Foundation page",

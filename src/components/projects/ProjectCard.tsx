@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { type Locale } from '@/i18n/config';
 import { type ProjectData } from '@/data/projects';
 import { ArrowUpRight, Heart } from 'lucide-react';
-import { useRef, useEffect, useState } from 'react';
+import { useInViewOnce } from '@/hooks/useInViewOnce';
 
 interface ProjectCardProps {
   id: number;
@@ -45,29 +45,13 @@ function formatGoal(amount: number, currency: string) {
 export default function ProjectCard({ id, data, cover, index, compact }: ProjectCardProps) {
   const t = useTranslations('projects');
   const locale = useLocale() as Locale;
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const { ref: cardRef, isVisible } = useInViewOnce<HTMLDivElement>();
 
   const title = data.title[locale];
   const description = data.description[locale];
   const progress = data.goal_amount
     ? Math.min((data.raised_amount / data.goal_amount) * 100, 100)
     : 0;
-
-  // 滚动入场动画
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    if (cardRef.current) observer.observe(cardRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <div

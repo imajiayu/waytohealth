@@ -8,16 +8,17 @@ export default function LoadingBar() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [finishing, setFinishing] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   const startLoading = useCallback(() => {
     setLoading(true);
     setFinishing(false);
     setProgress(0);
+    startTimeRef.current = performance.now();
   }, []);
 
   const stopLoading = useCallback(() => {
-    // 快速填满，动画结束后恢复静态渐变
     setProgress(100);
     setFinishing(true);
     setTimeout(() => {
@@ -42,23 +43,32 @@ export default function LoadingBar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // 加载中缓慢前进
+  // 使用 rAF 驱动进度（替代 setInterval，避免高频 state 更新）
   useEffect(() => {
-    if (loading && !finishing) {
-      timerRef.current = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 90) return prev;
-          // 越接近 90 越慢
-          const increment = (90 - prev) * 0.08;
-          return prev + Math.max(increment, 0.5);
-        });
-      }, 100);
-    } else if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+    if (!loading || finishing) {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      return;
     }
+
+    let lastUpdate = 0;
+    function tick(now: number) {
+      // 每 200ms 更新一次 state（比原来 100ms 更低频）
+      if (now - lastUpdate > 200) {
+        const elapsed = (now - startTimeRef.current) / 1000;
+        // 渐近 90%：1 - e^(-t/4) 曲线
+        const target = 90 * (1 - Math.exp(-elapsed / 4));
+        setProgress(target);
+        lastUpdate = now;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }
+
+    rafRef.current = requestAnimationFrame(tick);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [loading, finishing]);
 
@@ -79,7 +89,7 @@ export default function LoadingBar() {
               width: `${progress}%`,
               transition: finishing
                 ? 'width 200ms ease-out'
-                : 'width 100ms linear',
+                : 'width 200ms linear',
             }}
           />
         </>

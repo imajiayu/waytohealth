@@ -6,16 +6,15 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import Image from 'next/image';
 import { triggerRouteChange } from './LoadingBar';
-import { Heart } from 'lucide-react';
 
 const menuItems = [
-  { key: 'projects', sectionId: 'projects', path: '/projects' },
-  { key: 'about', sectionId: 'about', path: '/about' },
-  { key: 'news', sectionId: 'news', path: '/news' },
-  { key: 'merch', sectionId: 'merch', path: '/merch' },
-  { key: 'partners', sectionId: 'partners', path: '/partners' },
+  { key: 'projects', path: '/projects' },
+  { key: 'about', path: '/about' },
+  { key: 'news', path: '/news' },
+  { key: 'merch', path: '/merch' },
+  { key: 'partners', path: '/partners' },
   // contacts 在所有页面都直接滚动到 footer
-  { key: 'contacts', sectionId: 'footer', path: null as string | null },
+  { key: 'contacts', path: null as string | null },
 ];
 
 export default function Navigation() {
@@ -72,18 +71,18 @@ export default function Navigation() {
     });
   }
 
-  function handleMenuItemClick(sectionId: string, path: string | null) {
+  function handleMenuItemClick(path: string | null) {
     setIsMenuOpen(false);
-    if (!path || pathname === '/') {
-      // 无路由（如 contacts）或在首页：直接滚动到对应元素
+    if (!path) {
+      // contacts：滚动到 footer
       setTimeout(() => {
-        const el = document.getElementById(sectionId);
+        const el = document.getElementById('footer');
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }
       }, 350);
     } else {
-      // 其他页面：跳转到对应路由
+      // 跳转到对应页面
       triggerRouteChange();
       router.push(path);
     }
@@ -105,7 +104,7 @@ export default function Navigation() {
             >
               <Image
                 src="/images/logo.png"
-                alt="Way to Health"
+                alt={locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health'}
                 width={1678}
                 height={323}
                 className="h-7 sm:h-9 w-auto transition-opacity group-hover:opacity-80"
@@ -115,19 +114,17 @@ export default function Navigation() {
 
             {/* 右侧控制按钮 */}
             <div className="flex items-center gap-1">
-              {/* Donate 按钮 — logo 渐变配色 */}
+              {/* Donate 按钮 — 圆角矩形 */}
               <button
-                onClick={() => handleMenuItemClick('donate', '/donate')}
-                className="gradient-brand group flex items-center gap-2 rounded-full
+                onClick={() => handleMenuItemClick('/donate')}
+                className="gradient-brand flex items-center rounded-xl
                            px-5 py-2 text-[13px] font-bold tracking-wide text-white
                            shadow-[0_2px_12px_rgba(0,108,178,0.35)]
                            transition-all duration-300
                            hover:shadow-[0_4px_20px_rgba(0,108,178,0.5)]
                            hover:scale-[1.03] active:scale-95 cursor-pointer"
               >
-                <Heart className="h-3.5 w-3.5 fill-current transition-transform duration-300
-                                  group-hover:scale-110" />
-                <span>{t('donate')}</span>
+                {t('donate')}
               </button>
 
               <div className="w-px h-4 bg-gray-200 mx-1" />
@@ -165,7 +162,7 @@ export default function Navigation() {
 
               {/* 汉堡菜单按钮 */}
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen(prev => !prev)}
                 className="relative w-8 h-8 flex items-center justify-center
                            text-ukraine-blue-600 hover:text-ukraine-blue-800
                            transition-colors cursor-pointer"
@@ -221,25 +218,42 @@ export default function Navigation() {
         {/* 菜单项 */}
         <nav className="px-8 pt-6 flex-1">
           <ul>
-            {menuItems.map((item, i) => (
-              <li key={item.key}>
-                <button
-                  onClick={() => handleMenuItemClick(item.sectionId, item.path)}
-                  className={`w-full text-left py-[14px] text-[20px]
-                             font-[family-name:var(--font-display)] font-medium tracking-wide
-                             text-ukraine-blue-800 hover:text-ukraine-gold-500
-                             transition-[opacity,transform,color] duration-300 cursor-pointer
-                             border-b border-gray-100
-                             group
-                             ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
-                  style={{ transitionDelay: isMenuOpen ? `${80 + i * 50}ms` : '0ms' }}
-                >
-                  <span className="transition-transform duration-200 group-hover:translate-x-1">
-                    {t(item.key)}
-                  </span>
-                </button>
-              </li>
-            ))}
+            {menuItems.map((item, i) => {
+              const isActive = item.path && pathname === item.path;
+              return (
+                <li key={item.key}>
+                  {isActive ? (
+                    <span
+                      className={`block w-full text-left py-[14px] text-[20px]
+                                 font-[family-name:var(--font-display)] font-medium tracking-wide
+                                 text-ukraine-gold-500
+                                 transition-[opacity,transform] duration-300
+                                 border-b border-gray-100
+                                 ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
+                      style={{ transitionDelay: isMenuOpen ? `${80 + i * 50}ms` : '0ms' }}
+                    >
+                      {t(item.key)}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleMenuItemClick(item.path)}
+                      className={`w-full text-left py-[14px] text-[20px]
+                                 font-[family-name:var(--font-display)] font-medium tracking-wide
+                                 text-ukraine-blue-800 hover:text-ukraine-gold-500
+                                 transition-[opacity,transform,color] duration-300 cursor-pointer
+                                 border-b border-gray-100
+                                 group
+                                 ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
+                      style={{ transitionDelay: isMenuOpen ? `${80 + i * 50}ms` : '0ms' }}
+                    >
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">
+                        {t(item.key)}
+                      </span>
+                    </button>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
@@ -248,7 +262,7 @@ export default function Navigation() {
           <div className="h-px bg-gradient-to-r from-ukraine-blue-200 via-ukraine-gold-200 to-transparent" />
           <Image
             src="/images/logo.png"
-            alt="Way to Health"
+            alt={locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health'}
             width={1678}
             height={323}
             className="mt-4 h-6 w-auto"

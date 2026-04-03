@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { Source_Sans_3, Fraunces } from 'next/font/google';
+import { Source_Sans_3, Fraunces, JetBrains_Mono } from 'next/font/google';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import LoadingBar from '@/components/layout/LoadingBar';
@@ -17,6 +17,11 @@ const sourceSans = Source_Sans_3({
 const fraunces = Fraunces({
   variable: '--font-display',
   subsets: ['latin'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-data',
+  subsets: ['latin', 'cyrillic'],
 });
 
 type Props = {
@@ -45,7 +50,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = (await import(`../../../messages/${locale}.json`)).default;
 
   return (
-    <html lang={locale} className={`${sourceSans.variable} ${fraunces.variable} h-full antialiased`}>
+    <html lang={locale} className={`${sourceSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LoadingBar />
