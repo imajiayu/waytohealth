@@ -91,7 +91,7 @@ export default function Navigation() {
   return (
     <>
       {/* 顶部导航栏 */}
-      <nav className={`sticky top-0 z-50 bg-white border-b border-gray-100
+      <nav className={`sticky top-0 z-50 bg-white/90 backdrop-blur-lg border-b border-gray-100/80
                        transition-transform duration-300 ease-out mt-[2px]
                        ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,12 +113,13 @@ export default function Navigation() {
             </button>
 
             {/* 右侧控制按钮 */}
-            <div className="flex items-center gap-1">
-              {/* Donate 按钮 — 圆角矩形 */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Donate 按钮 */}
               <button
                 onClick={() => handleMenuItemClick('/donate')}
                 className="gradient-brand flex items-center rounded-xl
-                           px-5 py-2 text-[13px] font-bold tracking-wide text-white
+                           px-3.5 sm:px-5 py-1.5 sm:py-2 text-[12px] sm:text-[13px]
+                           font-bold tracking-wide text-white
                            shadow-[0_2px_12px_rgba(0,108,178,0.35)]
                            transition-all duration-300
                            hover:shadow-[0_4px_20px_rgba(0,108,178,0.5)]
@@ -127,45 +128,39 @@ export default function Navigation() {
                 {t('donate')}
               </button>
 
-              <div className="w-px h-4 bg-gray-200 mx-1" />
-
-              {/* 语言切换 */}
-              <span className="relative px-2.5 py-1 text-[15px] tracking-wide font-medium">
-                {locale === 'ua' ? (
-                  <span className="text-ukraine-blue-600/40">UA</span>
-                ) : (
-                  <button
-                    onClick={handleLocaleSwitch}
-                    disabled={isPending}
-                    className="text-ukraine-blue-600 hover:text-ukraine-blue-800
-                               transition-colors disabled:opacity-40 cursor-pointer"
-                  >
-                    UA
-                  </button>
-                )}
-                <span className="mx-1 opacity-20">/</span>
-                {locale === 'en' ? (
-                  <span className="text-ukraine-blue-600/40">EN</span>
-                ) : (
-                  <button
-                    onClick={handleLocaleSwitch}
-                    disabled={isPending}
-                    className="text-ukraine-blue-600 hover:text-ukraine-blue-800
-                               transition-colors disabled:opacity-40 cursor-pointer"
-                  >
-                    EN
-                  </button>
-                )}
-              </span>
-
-              <div className="w-px h-4 bg-gray-200 mx-1" />
+              {/* 语言切换胶囊 */}
+              <div className="inline-flex items-center rounded-full bg-gray-100 p-[2px]">
+                <button
+                  onClick={locale !== 'ua' ? handleLocaleSwitch : undefined}
+                  disabled={isPending || locale === 'ua'}
+                  className={`rounded-full px-2 sm:px-2.5 py-[3px] text-[11px] sm:text-[12px]
+                             font-semibold tracking-wide transition-all duration-300 cursor-pointer
+                             ${locale === 'ua'
+                               ? 'bg-white text-ukraine-blue-700 shadow-sm'
+                               : 'text-gray-400 hover:text-ukraine-blue-600'}`}
+                >
+                  UA
+                </button>
+                <button
+                  onClick={locale !== 'en' ? handleLocaleSwitch : undefined}
+                  disabled={isPending || locale === 'en'}
+                  className={`rounded-full px-2 sm:px-2.5 py-[3px] text-[11px] sm:text-[12px]
+                             font-semibold tracking-wide transition-all duration-300 cursor-pointer
+                             ${locale === 'en'
+                               ? 'bg-white text-ukraine-blue-700 shadow-sm'
+                               : 'text-gray-400 hover:text-ukraine-blue-600'}`}
+                >
+                  EN
+                </button>
+              </div>
 
               {/* 汉堡菜单按钮 */}
               <button
                 onClick={() => setIsMenuOpen(prev => !prev)}
-                className="relative w-8 h-8 flex items-center justify-center
+                className="relative w-9 h-9 flex items-center justify-center
                            text-ukraine-blue-600 hover:text-ukraine-blue-800
-                           transition-colors cursor-pointer"
+                           transition-colors cursor-pointer rounded-lg
+                           hover:bg-ukraine-blue-50 active:bg-ukraine-blue-100"
                 aria-label={t('menu')}
                 aria-expanded={isMenuOpen}
               >
