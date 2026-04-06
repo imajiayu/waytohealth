@@ -24,6 +24,12 @@ export function useAutoScroll<T extends HTMLElement>({
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isUserScrolling = useRef(false);
   const lastTimestamp = useRef<number | null>(null);
+  // iOS Safari 会把 scrollLeft 取整到整数像素，直接 `+= 0.5` 这种亚像素增量会被丢掉，
+  // 表现为完全不滚动。这里用一个浮点内部状态累积位置，再写入 scrollLeft，
+  // 这样无论 Safari 如何取整，内部状态都不会丢失精度。
+  const scrollPos = useRef(0);
+  // rAF 自递归用 ref 跳板，避免 useCallback 内部引用自身触发 hooks lint 报错
+  const tickRef = useRef<(timestamp: number) => void>(() => {});
 
   const tick = useCallback(
     (timestamp: number) => {
@@ -32,33 +38,42 @@ export function useAutoScroll<T extends HTMLElement>({
 
       if (isUserScrolling.current) {
         lastTimestamp.current = null;
-        animRef.current = requestAnimationFrame(tick);
+        // 用户手动滚动期间同步内部状态，恢复自动滚动时才能从用户位置继续
+        scrollPos.current = el.scrollLeft;
+        animRef.current = requestAnimationFrame((ts) => tickRef.current(ts));
         return;
       }
 
       if (lastTimestamp.current !== null) {
         const delta = (timestamp - lastTimestamp.current) / 1000;
-        el.scrollLeft += speed * delta;
+        scrollPos.current += speed * delta;
 
         // 滚动到复制区域一半时无缝跳回起点
         const halfScroll = el.scrollWidth / 2;
-        if (el.scrollLeft >= halfScroll) {
-          el.scrollLeft -= halfScroll;
+        if (halfScroll > 0 && scrollPos.current >= halfScroll) {
+          scrollPos.current -= halfScroll;
         }
+
+        el.scrollLeft = scrollPos.current;
       }
 
       lastTimestamp.current = timestamp;
-      animRef.current = requestAnimationFrame(tick);
+      animRef.current = requestAnimationFrame((ts) => tickRef.current(ts));
     },
     [speed],
   );
+
+  // 保持 tickRef 指向最新 tick 闭包
+  useEffect(() => {
+    tickRef.current = tick;
+  }, [tick]);
 
   // 启动 rAF 循环
   const startAnimation = useCallback(() => {
     if (animRef.current) return; // 已在运行
     lastTimestamp.current = null;
-    animRef.current = requestAnimationFrame(tick);
-  }, [tick]);
+    animRef.current = requestAnimationFrame((ts) => tickRef.current(ts));
+  }, []);
 
   // 停止 rAF 循环
   const stopAnimation = useCallback(() => {
@@ -108,7 +123,7 @@ export function useAutoScroll<T extends HTMLElement>({
       el.removeEventListener('touchstart', handleUserScroll);
       el.removeEventListener('pointerdown', handleUserScroll);
     };
-  }, [tick, handleUserScroll, startAnimation, stopAnimation]);
+  }, [handleUserScroll, startAnimation, stopAnimation]);
 
   return scrollRef;
 }
