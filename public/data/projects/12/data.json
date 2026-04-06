@@ -1,0 +1,14 @@
+{
+  "title": {
+    "ua": "Місце сили",
+    "en": "Place of Power"
+  },
+  "description": {
+    "ua": "Залучаємо ресурси на відкриття стаціонарного відділення, щоб розширити доступ до якісної реабілітації для пацієнтів з різних міст.",
+    "en": "We are raising resources to open an inpatient department to expand access to quality rehabilitation for patients from different cities."
+  },
+  "goal_amount": 10000000,
+  "raised_amount": 0,
+  "currency": "UAH",
+  "tags": ["rehabilitation", "infrastructure"]
+}

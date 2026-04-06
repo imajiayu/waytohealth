@@ -41,7 +41,7 @@ export default async function AboutSection() {
   ]);
 
   return (
-    <section id="about" className="relative scroll-mt-16 overflow-hidden pb-16 sm:pb-32">
+    <section id="about" className="relative scroll-mt-16 overflow-hidden pt-16 pb-16 sm:pt-20 sm:pb-20">
       {/* 背景装饰 */}
       <div className="pointer-events-none absolute -right-40 -bottom-40 h-[480px] w-[480px] rounded-full opacity-[0.07] glow-brand-soft" />
       <div className="pointer-events-none absolute -left-20 top-20 h-60 w-60 rounded-full opacity-[0.04] glow-gold-soft" />

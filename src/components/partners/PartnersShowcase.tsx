@@ -16,33 +16,35 @@ interface PartnersShowcaseProps {
 
 function PartnerLogo({ logo, url, name, darkBg }: {
   logo: string;
-  url: string;
+  url?: string;
   name: string;
   darkBg?: boolean;
 }) {
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex items-center justify-center rounded-xl p-5
-                 hover:bg-ukraine-blue-50/60 transition-colors duration-300"
-    >
-      <div className={cn(
-        'flex items-center justify-center rounded-lg px-3 py-2',
-        darkBg && 'bg-slate-800'
-      )}>
-        <Image
-          src={logo}
-          alt={name}
-          width={140}
-          height={56}
-          className="max-h-12 w-auto object-contain
-                     grayscale opacity-60 group-hover:opacity-90
-                     transition-opacity duration-300"
-        />
-      </div>
+  const inner = (
+    <div className={cn(
+      'flex items-center justify-center rounded-lg px-3 py-2',
+      darkBg && 'bg-slate-800'
+    )}>
+      <Image
+        src={logo}
+        alt={name}
+        width={140}
+        height={56}
+        className="max-h-12 w-auto object-contain
+                   grayscale opacity-60 group-hover:opacity-90
+                   transition-opacity duration-300"
+      />
+    </div>
+  );
+  const wrapperClass =
+    'group flex items-center justify-center rounded-xl p-5 hover:bg-ukraine-blue-50/60 transition-colors duration-300';
+  // 无 url 的合作伙伴渲染为非可点击元素
+  return url ? (
+    <a href={url} target="_blank" rel="noopener noreferrer" className={wrapperClass}>
+      {inner}
     </a>
+  ) : (
+    <div className={wrapperClass}>{inner}</div>
   );
 }
 

@@ -24,6 +24,12 @@
   "pages": {
     "comingSoon": "Незабаром"
   },
+  "requestAssistance": {
+    "label": "Допомога",
+    "title": "Потрібна підтримка?",
+    "description": "Якщо ви або ваші близькі потребуєте реабілітації після наслідків війни, ми готові допомогти. Незабаром тут з'явиться форма звернення для прямого контакту з нашою командою.",
+    "comingSoon": "Незабаром"
+  },
   "projects": {
     "title": "Підтримайте активні проєкти",
     "goalOf": "з",
@@ -37,6 +43,7 @@
     "title": "Партнерство",
     "allPartners": "Дивитись всіх",
     "becomePartner": "Запартнеритись",
+    "requestAssistance": "Звернутися по допомогу",
     "visitWebsite": "Перейти на сайт",
     "list": {
       "amalna-foundation": { "name": "Amalna Foundation" },
@@ -46,8 +53,11 @@
       "medux": { "name": "Medux" },
       "pizza-day": { "name": "Pizza Day" },
       "rehau": { "name": "REHAU" },
-      "work-ua": { "name": "Work.ua" },
-      "golfstream": { "name": "Golfstream" }
+      "golfstream": { "name": "Golfstream" },
+      "vataga": { "name": "VATAGA" },
+      "hto-yakshcho-ne-my": { "name": "Хто, якщо не ми?" },
+      "sunflower-scotland": { "name": "Sunflower Scotland" },
+      "logo-horizontal-2": { "name": "Partner" }
     }
   },
   "about": {

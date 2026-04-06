@@ -22,7 +22,7 @@ export default function HeroSection() {
             <span className="text-sm font-semibold tracking-[0.35em] text-white/70 uppercase sm:text-base md:text-lg">
               {t('foundationLabel')}
             </span>
-            <h1 className="mt-3 text-center font-[family-name:var(--font-display)] text-[clamp(2.5rem,10vw,8rem)] leading-none font-bold tracking-tight text-white sm:mt-4">
+            <h1 className="mt-3 text-center text-[clamp(2.5rem,10vw,8rem)] leading-none font-bold tracking-tight text-white uppercase sm:mt-4">
               {t('title')}
             </h1>
           </div>

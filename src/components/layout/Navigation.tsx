@@ -103,10 +103,10 @@ export default function Navigation() {
               aria-label="Home"
             >
               <Image
-                src="/images/logo.png"
+                src={locale === 'ua' ? '/images/logo-ua.png' : '/images/logo-en.png'}
                 alt={locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health'}
-                width={1678}
-                height={323}
+                width={locale === 'ua' ? 826 : 1678}
+                height={locale === 'ua' ? 165 : 323}
                 className="h-7 sm:h-9 w-auto transition-opacity group-hover:opacity-80"
                 priority
               />
@@ -256,10 +256,10 @@ export default function Navigation() {
         <div className="px-8 pb-8">
           <div className="h-px bg-gradient-to-r from-ukraine-blue-200 via-ukraine-gold-200 to-transparent" />
           <Image
-            src="/images/logo.png"
+            src={locale === 'ua' ? '/images/logo-ua.png' : '/images/logo-en.png'}
             alt={locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health'}
-            width={1678}
-            height={323}
+            width={locale === 'ua' ? 826 : 1678}
+            height={locale === 'ua' ? 165 : 323}
             className="mt-4 h-6 w-auto"
           />
         </div>

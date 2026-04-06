@@ -24,6 +24,12 @@
   "pages": {
     "comingSoon": "Coming Soon"
   },
+  "requestAssistance": {
+    "label": "Assistance",
+    "title": "Need Support?",
+    "description": "If you or your loved ones need rehabilitation following the consequences of the war, we are here to help. A request form for direct contact with our team will be available here soon.",
+    "comingSoon": "Coming Soon"
+  },
   "projects": {
     "title": "Support active projects",
     "goalOf": "of",
@@ -37,6 +43,7 @@
     "title": "Partnerships",
     "allPartners": "View all",
     "becomePartner": "Become a Partner",
+    "requestAssistance": "Request Assistance",
     "visitWebsite": "Visit website",
     "list": {
       "amalna-foundation": { "name": "Amalna Foundation" },
@@ -46,8 +53,11 @@
       "medux": { "name": "Medux" },
       "pizza-day": { "name": "Pizza Day" },
       "rehau": { "name": "REHAU" },
-      "work-ua": { "name": "Work.ua" },
-      "golfstream": { "name": "Golfstream" }
+      "golfstream": { "name": "Golfstream" },
+      "vataga": { "name": "VATAGA" },
+      "hto-yakshcho-ne-my": { "name": "Who, If Not Us? Foundation" },
+      "sunflower-scotland": { "name": "Sunflower Scotland" },
+      "logo-horizontal-2": { "name": "Partner" }
     }
   },
   "about": {

@@ -2,7 +2,8 @@
 export interface Partner {
   id: string;
   logo: string;
-  url: string;
+  /** 官网链接；省略时渲染为非可点击的 logo（暂未公开/无独立官网） */
+  url?: string;
   darkBg?: boolean;
 }
 

@@ -9,13 +9,13 @@ export default async function ProjectsSection() {
     getAllProjects(),
   ]);
 
-  const mainProjects = projects.slice(0, 3);
-  const otherProjects = projects.slice(3);
+  const mainProjects = projects.slice(0, 6);
+  const otherProjects = projects.slice(6);
 
   return (
     <>
       {/* 主项目 section */}
-      <section id="projects" className="scroll-mt-16 overflow-hidden pt-16 pb-12 sm:pt-32 sm:pb-20">
+      <section id="projects" className="scroll-mt-16 overflow-x-clip pt-16 pb-6 sm:pt-20 sm:pb-8">
 
         <div className="container-page">
           {/* 区域头部 — 编辑式排版 */}
@@ -46,7 +46,7 @@ export default async function ProjectsSection() {
 
       {/* 更多项目 section */}
       {otherProjects.length > 0 && (
-        <section className="overflow-hidden pb-16 sm:pb-32">
+        <section className="overflow-x-clip pt-6 pb-12 sm:pt-8 sm:pb-16">
 
           <div className="container-page">
             {/* 区域标题 */}
@@ -57,15 +57,15 @@ export default async function ProjectsSection() {
               <div className="mt-2 h-[2px] w-10 rounded-full bg-ukraine-gold-500" />
             </div>
 
-            {/* 紧凑卡片 4 列 */}
-            <div className="mt-5 grid gap-3 grid-cols-2 sm:mt-6 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+            {/* 紧凑卡片 5 列 */}
+            <div className="mt-5 grid gap-3 grid-cols-2 sm:mt-6 sm:gap-4 md:grid-cols-3 lg:grid-cols-5 lg:gap-5">
               {otherProjects.map((project, i) => (
                 <ProjectCard
                   key={project.id}
                   id={project.id}
                   data={project}
                   cover={project.cover}
-                  index={i + 3}
+                  index={i + 6}
                   compact
                 />
               ))}

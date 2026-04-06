@@ -86,7 +86,7 @@ src/
 │       └── partners/            # 合作伙伴
 ├── components/
 │   ├── about/                   # 关于页组件（FadeInSection）
-│   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
+│   ├── home/                    # 首页组件（HeroSection, ProjectsSection, RequestAssistanceSection, AboutSection, ValuesAccordion, AchievementsCarousel）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersShowcase, PartnersStrip）
 │   └── projects/                # 项目组件（ProjectCard）

@@ -11,7 +11,7 @@
   },
   {
     "id": "serce-ukrainskoi-nacii",
-    "logo": "/images/partners/serce-ukrainskoi-nacii.png",
+    "logo": "/images/partners/serce-ukrainskoi-nacii.webp",
     "url": "https://heartofukrnation.com"
   },
   {
@@ -36,15 +36,26 @@
     "url": "https://rehau-ua.com"
   },
   {
-    "id": "work-ua",
-    "logo": "/images/partners/work-ua.svg",
-    "url": "https://www.work.ua",
-    "darkBg": true
-  },
-  {
     "id": "golfstream",
     "logo": "/images/partners/golfstream.png",
     "url": "https://golfstrimfish.com",
     "darkBg": true
+  },
+  {
+    "id": "vataga",
+    "logo": "/images/partners/vataga.png"
+  },
+  {
+    "id": "hto-yakshcho-ne-my",
+    "logo": "/images/partners/hto-yakshcho-ne-my.png",
+    "darkBg": true
+  },
+  {
+    "id": "sunflower-scotland",
+    "logo": "/images/partners/sunflower-scotland.png"
+  },
+  {
+    "id": "logo-horizontal-2",
+    "logo": "/images/partners/logo-horizontal-2.svg"
   }
 ]

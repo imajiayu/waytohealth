@@ -77,17 +77,10 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
             alt={title}
             fill
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-            sizes={compact ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
+            sizes={compact ? '(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw' : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
           />
           {/* 底部渐变遮罩 — 增强文字对比 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-          {/* 项目序号标签 */}
-          <div className={`absolute flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm ${compact ? 'top-2.5 left-2.5 h-6 w-6' : 'top-4 left-4 h-8 w-8'}`}>
-            <span className={`font-[family-name:var(--font-data)] font-bold text-ukraine-blue-600 ${compact ? 'text-[0.6rem]' : 'text-xs'}`}>
-              {String(index + 1).padStart(2, '0')}
-            </span>
-          </div>
         </div>
 
         {/* 内容区 */}
@@ -102,10 +95,10 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
             {description}
           </p>
 
-          {/* 进度 + 金额 — 紧贴底部 */}
+          {/* 底部区 — 紧贴底部 */}
           <div className={`mt-auto ${compact ? 'pt-3' : 'pt-5'}`}>
-            {/* 进度条 — 精细线条风格 */}
-            {data.goal_amount && (
+            {/* 进度条 + 金额 — 仅非 compact 模式显示 */}
+            {!compact && data.goal_amount && (
               <div className="relative">
                 <div className="h-1 w-full overflow-hidden rounded-full bg-ukraine-blue-50">
                   <div
@@ -113,16 +106,16 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
                     style={{ width: `${Math.max(progress, 2)}%` }}
                   >
                     {/* 进度条末端光点 */}
-                    <div className={`absolute -right-1 top-1/2 -translate-y-1/2 rounded-full bg-ukraine-blue-300 shadow-[0_0_8px_rgba(0,167,189,0.5)] ${compact ? 'h-2 w-2' : 'h-2.5 w-2.5'}`} />
+                    <div className="absolute -right-1 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-ukraine-blue-300 shadow-[0_0_8px_rgba(0,167,189,0.5)]" />
                   </div>
                 </div>
 
                 {/* 金额行 */}
-                <div className={`flex items-baseline justify-between ${compact ? 'mt-2' : 'mt-2.5'}`}>
-                  <span className={`font-[family-name:var(--font-data)] font-semibold text-ukraine-blue-500 ${compact ? 'text-xs' : 'text-sm'}`}>
+                <div className="mt-2.5 flex items-baseline justify-between">
+                  <span className="font-[family-name:var(--font-data)] text-sm font-semibold text-ukraine-blue-500">
                     {formatAmount(data.raised_amount, data.currency)}
                   </span>
-                  <span className={`font-[family-name:var(--font-data)] text-gray-400 ${compact ? 'text-[0.65rem]' : 'text-xs'}`}>
+                  <span className="font-[family-name:var(--font-data)] text-xs text-gray-400">
                     {t('goalOf')} {formatGoal(data.goal_amount, data.currency)}
                   </span>
                 </div>
@@ -136,7 +129,7 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
                 e.stopPropagation();
                 window.location.href = `/${locale}/donate?project=${id}`;
               }}
-              className={`flex w-full items-center justify-center font-semibold transition-all duration-300 cursor-pointer bg-ukraine-blue-500 text-white hover:bg-ukraine-blue-400 hover:shadow-[0_4px_20px_rgba(0,108,178,0.25)] active:scale-[0.98] ${compact ? 'mt-3 gap-1.5 rounded-lg py-2 text-xs' : 'mt-4 gap-2.5 rounded-xl py-3 text-sm'}`}
+              className={`flex w-full items-center justify-center font-semibold transition-all duration-300 cursor-pointer bg-ukraine-blue-500 text-white hover:bg-ukraine-blue-400 hover:shadow-[0_4px_20px_rgba(0,108,178,0.25)] active:scale-[0.98] ${compact ? 'gap-1.5 rounded-lg py-2 text-xs' : 'mt-4 gap-2.5 rounded-xl py-3 text-sm'}`}
             >
               <Heart className={compact ? 'h-3 w-3' : 'h-4 w-4'} strokeWidth={2.5} />
               {t('donateButton')}

@@ -1,5 +1,5 @@
 // 项目 ID 注册表 — 编译时类型检查
-export const PROJECTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+export const PROJECTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12] as const;
 export type ProjectId = (typeof PROJECTS)[number];
 
 // 项目静态数据类型

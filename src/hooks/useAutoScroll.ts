@@ -8,12 +8,15 @@ interface UseAutoScrollOptions {
 }
 
 /**
- * 自动横向滚动 hook — 用于合作伙伴 logo 无缝循环滚动
+ * 自动横向无限循环滚动 hook — 从左向右匀速滚动，到末尾无缝衔接
  *
- * 要求容器内的子元素被复制一份（[...items, ...items]），
- * 滚动到一半时自动跳回起点，实现无缝循环。
+ * 循环原理：当第一个子元素完全滚出左边界时，将其 appendChild 到容器末尾，
+ * 同时把 scrollLeft 减去它的 stride（offsetWidth + flex gap），视觉上零跳变。
+ * JSX 中只需渲染一份数据，不需要复制内容。
  *
- * 当元素不在视口中时停止 rAF 循环，避免 CPU 空转。
+ * - 不在视口时暂停 rAF，避免 CPU 空转
+ * - 用户手动滚动时暂停，resumeDelay 后恢复（从用户当前位置继续循环）
+ * - 亚像素增量在内部累积，兼容 iOS Safari 对 scrollLeft 的整数取整
  */
 export function useAutoScroll<T extends HTMLElement>({
   speed = 30,
@@ -29,24 +32,45 @@ export function useAutoScroll<T extends HTMLElement>({
     let lastTs: number | null = null;
     let isUserScrolling = false;
     let resumeTimer: ReturnType<typeof setTimeout> | null = null;
-    // iOS Safari 会把 scrollLeft 取整到整数像素，直接 `+= 0.5` 这种亚像素增量会被丢掉，
-    // 表现为完全不滚动。这里用一个浮点内部状态累积位置，再写入 scrollLeft，
-    // 这样无论 Safari 如何取整，内部状态都不会丢失精度。
-    let scrollPos = 0;
+    // iOS Safari 会把 scrollLeft 取整为整数，亚像素增量会被丢弃。
+    // 用浮点累积亚像素，每帧只写入整数部分到 scrollLeft。
+    let fractional = 0;
+
+    const stop = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      lastTs = null;
+    };
 
     const loop = (ts: number) => {
       if (isUserScrolling) {
-        // 用户手动滚动期间同步内部状态，恢复自动滚动时才能从用户位置继续
-        scrollPos = el.scrollLeft;
+        // 用户手动滚动期间不累积，恢复时从用户当前位置继续
+        fractional = 0;
         lastTs = null;
       } else if (lastTs !== null) {
-        scrollPos += (speed * (ts - lastTs)) / 1000;
+        fractional += (speed * (ts - lastTs)) / 1000;
+        const delta = Math.floor(fractional);
+        if (delta > 0) {
+          fractional -= delta;
+          let newLeft = el.scrollLeft + delta;
 
-        // 滚动到复制区域一半时无缝跳回起点
-        const half = el.scrollWidth / 2;
-        if (half > 0 && scrollPos >= half) scrollPos -= half;
+          // 无缝循环：若第一个子元素已完全滚出左侧，将其搬到末尾，
+          // 并从 scrollLeft 扣除它占用的 stride（第二个子元素的 offsetLeft，
+          // 天然包含 flex gap），视觉上完全连续。
+          const first = el.firstElementChild as HTMLElement | null;
+          const second = first?.nextElementSibling as HTMLElement | null;
+          if (first && second) {
+            const stride = second.offsetLeft;
+            if (stride > 0 && newLeft >= stride) {
+              newLeft -= stride;
+              el.appendChild(first);
+            }
+          }
 
-        el.scrollLeft = scrollPos;
+          el.scrollLeft = newLeft;
+        }
       }
       lastTs = ts;
       rafId = requestAnimationFrame(loop);
@@ -56,14 +80,6 @@ export function useAutoScroll<T extends HTMLElement>({
       if (rafId !== null) return;
       lastTs = null;
       rafId = requestAnimationFrame(loop);
-    };
-
-    const stop = () => {
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-      lastTs = null;
     };
 
     const handleUserScroll = () => {
