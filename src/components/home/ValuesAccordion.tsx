@@ -33,13 +33,13 @@ export default async function ValuesAccordion() {
   const t = await getTranslations('about.values');
 
   return (
-    <div className="mt-10 sm:mt-16">
+    <div className="mt-10 sm:mt-12">
       <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
         {t('title')}
       </h3>
       <div className="mt-2 accent-line" />
 
-      <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-6 lg:grid-cols-3">
+      <div className="mt-2 grid gap-3 sm:mt-3 sm:gap-6 lg:grid-cols-3">
         {VALUE_KEYS.map(key => (
           <div
             key={key}

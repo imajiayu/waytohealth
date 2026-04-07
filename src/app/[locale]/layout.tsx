@@ -55,7 +55,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LoadingBar />
           <Navigation />
-          <main className="flex-1">{children}</main>
+          <main className="ambient-canvas flex-1">{children}</main>
           <Footer />
         </NextIntlClientProvider>
       </body>

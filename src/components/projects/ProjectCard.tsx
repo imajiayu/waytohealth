@@ -56,10 +56,10 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
   return (
     <div
       ref={cardRef}
-      className="opacity-0 translate-y-8"
+      className="opacity-0 translate-y-2"
       style={{
         animation: isVisible
-          ? `projectCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.12}s forwards`
+          ? `projectCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(index, 5) * 0.06}s forwards`
           : 'none',
       }}
     >

@@ -41,10 +41,22 @@ export default async function AboutSection() {
   ]);
 
   return (
-    <section id="about" className="relative scroll-mt-16 overflow-hidden pt-16 pb-16 sm:pt-20 sm:pb-20">
-      {/* 背景装饰 */}
-      <div className="pointer-events-none absolute -right-40 -bottom-40 h-[480px] w-[480px] rounded-full opacity-[0.07] glow-brand-soft" />
-      <div className="pointer-events-none absolute -left-20 top-20 h-60 w-60 rounded-full opacity-[0.04] glow-gold-soft" />
+    <section id="about" className="section-y relative scroll-mt-16 overflow-hidden">
+      {/* 背景装饰 — 右下主光晕(品牌青绿,主光源) */}
+      <div className="aura-teal-md pointer-events-none absolute -right-40 -bottom-40 h-[600px] w-[600px] rounded-full opacity-90 blur-3xl" />
+      {/* 背景装饰 — 左下温暖金光(与 ProjectsSection 左下蓝光形成对位) */}
+      <div className="aura-gold-lg pointer-events-none absolute -left-32 bottom-24 h-[460px] w-[460px] rounded-full opacity-80 blur-3xl" />
+      {/* 背景装饰 — 左上次光晕(微金,平衡上方) */}
+      <div className="aura-gold-lg pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full opacity-50 blur-3xl" />
+      {/* 背景装饰 — 右上点阵(精密感) */}
+      <div
+        className="pointer-events-none absolute right-[5%] top-16 hidden h-40 w-40 opacity-[0.22] lg:block"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle, var(--color-ukraine-blue-300) 1px, transparent 1.5px)',
+          backgroundSize: '14px 14px',
+        }}
+      />
 
       <div className="container-page relative">
         {/* 区域标签 + 标题 */}
@@ -59,11 +71,11 @@ export default async function AboutSection() {
         </div>
 
         {/* 照片 + 数据卡片 + 使命/愿景 — 两列布局 */}
-        <div className="mt-8 grid items-stretch gap-8 sm:mt-10 sm:gap-10 lg:grid-cols-2 lg:gap-12">
+        <div className="mt-2 grid items-stretch gap-8 sm:mt-3 sm:gap-12 lg:grid-cols-2">
           {/* 左侧：照片（高度撑满右列） */}
           <div className="relative aspect-[4/3] lg:aspect-auto lg:h-full">
-            {/* 装饰色块 — 照片后方偏移 */}
-            <div className="absolute -top-4 -left-4 h-full w-full rounded-2xl gradient-brand opacity-10" />
+            {/* 装饰色块 — 照片后方向左下偏移，呼应左下金光的视觉重心 */}
+            <div className="absolute -bottom-4 -left-4 h-full w-full rounded-2xl gradient-brand opacity-10" />
             <div className="relative h-full overflow-hidden rounded-2xl">
               <Image
                 src="/images/about-team.jpg"

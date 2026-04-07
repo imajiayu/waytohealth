@@ -34,8 +34,13 @@
 
 body {
   font-family: var(--font-body);
-  background: #ffffff;
   color: #1a1a1a;
+  background:
+    radial-gradient(ellipse 1100px 700px at 92% 8%, rgba(0, 167, 189, 0.16) 0%, transparent 62%),
+    radial-gradient(ellipse 900px 600px at 6% 96%, rgba(245, 184, 0, 0.10) 0%, transparent 58%),
+    radial-gradient(ellipse 900px 600px at 50% 50%, rgba(119, 195, 205, 0.09) 0%, transparent 65%),
+    linear-gradient(180deg, #ffffff 0%, #f3f8fa 50%, #f1f7f9 75%, #ffffff 100%);
+  background-attachment: fixed;
 }
 
 /* ── 品牌渐变工具类 ── */
@@ -85,6 +90,38 @@ body {
   background-color: var(--color-ukraine-gold-500);
 }
 
+/* ── 节段垂直内边距规范 ──
+ * 关键原则：相邻 section 的 padding 会叠加，所以下方的值是单 section 的 padding，
+ * 实际两 section 间总间距 = padding × 2。
+ *
+ * 标准 (section-y):    移动 24px / 桌面 32px → 两 section 间 48px / 64px
+ * 宽松 (section-y-lg): 移动 32px / 桌面 48px → 两 section 间 64px / 96px
+ * 紧凑 (section-y-sm): 移动 16px / 桌面 24px → 两 section 间 32px / 48px
+ */
+.section-y {
+  padding-top: 1.5rem; /* 24px */
+  padding-bottom: 1.5rem;
+}
+@media (min-width: 640px) {
+  .section-y { padding-top: 2rem; padding-bottom: 2rem; } /* 32px */
+}
+
+.section-y-lg {
+  padding-top: 2rem; /* 32px */
+  padding-bottom: 2rem;
+}
+@media (min-width: 640px) {
+  .section-y-lg { padding-top: 3rem; padding-bottom: 3rem; } /* 48px */
+}
+
+.section-y-sm {
+  padding-top: 1rem; /* 16px */
+  padding-bottom: 1rem;
+}
+@media (min-width: 640px) {
+  .section-y-sm { padding-top: 1.5rem; padding-bottom: 1.5rem; } /* 24px */
+}
+
 /* ── 装饰光晕工具类 — 用于纯装饰性背景光效 ── */
 .glow-teal { background: radial-gradient(circle, var(--color-ukraine-blue-300), transparent); }
 .glow-blue { background: radial-gradient(circle, var(--color-ukraine-blue-500), transparent); }
@@ -92,6 +129,72 @@ body {
 .glow-brand-soft { background: radial-gradient(circle at 30% 30%, var(--color-ukraine-blue-500), var(--color-ukraine-blue-300), transparent 70%); }
 .glow-gold { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent); }
 .glow-gold-soft { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent 70%); }
+
+/* ── 全局环境光底层 — 「光与水」呼吸渐变 ── */
+/* 用于 main 容器,营造 Hero 之后到 Footer 之前的连续天光氛围 */
+.ambient-canvas {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 1100px 700px at 92% 8%, rgba(0, 167, 189, 0.16) 0%, transparent 62%),
+    radial-gradient(ellipse 900px 600px at 6% 96%, rgba(245, 184, 0, 0.10) 0%, transparent 58%),
+    radial-gradient(ellipse 900px 600px at 50% 50%, rgba(119, 195, 205, 0.09) 0%, transparent 65%),
+    linear-gradient(180deg, #ffffff 0%, #f3f8fa 50%, #f1f7f9 75%, #ffffff 100%);
+  background-attachment: fixed;
+}
+
+/* SVG noise 叠层 — 极细腻的颗粒,仅在 ambient-canvas 之上叠加 */
+.ambient-canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ── 装饰性巨型光源(柔光球)— 工具类,避免 JSX inline 渐变 ── */
+.aura-cyan-xl {
+  background: radial-gradient(circle, rgba(119, 195, 205, 0.55) 0%, rgba(0, 167, 189, 0.28) 40%, transparent 72%);
+}
+.aura-blue-lg {
+  background: radial-gradient(circle, rgba(0, 108, 178, 0.32) 0%, transparent 70%);
+}
+.aura-gold-lg {
+  background: radial-gradient(circle, rgba(245, 184, 0, 0.30) 0%, transparent 70%);
+}
+.aura-teal-md {
+  background: radial-gradient(circle, rgba(0, 167, 189, 0.22) 0%, transparent 70%);
+}
+
+/* ── Section 间过渡分隔带 ── */
+.section-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0;
+}
+.section-divider__line {
+  height: 1px;
+  width: 5rem;
+  background: linear-gradient(90deg, transparent, var(--color-ukraine-gold-500), transparent);
+}
+.section-divider__dot {
+  height: 3px;
+  width: 3px;
+  border-radius: 9999px;
+  background-color: var(--color-ukraine-blue-200);
+}
+.section-divider__dot--gold {
+  height: 5px;
+  width: 5px;
+  background-color: var(--color-ukraine-gold-500);
+  box-shadow: 0 0 0 3px rgba(245, 184, 0, 0.12);
+}
 
 /* 隐藏滚动条 — 用于横向滚动条 */
 .hide-scrollbar {
@@ -162,7 +265,7 @@ body {
 @keyframes projectCardIn {
   from {
     opacity: 0;
-    transform: translateY(32px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

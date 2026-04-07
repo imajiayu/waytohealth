@@ -73,7 +73,7 @@ export default async function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer id="footer" className="px-3 pb-3 sm:px-6 sm:pb-4 lg:px-8">
+    <footer id="footer" className="ambient-canvas px-3 pb-3 sm:px-6 sm:pb-4 lg:px-8">
       {/* 圆角深色卡片 — 与 HeroSection 的圆角矩形风格一致 */}
       <div className="relative overflow-hidden rounded-2xl bg-[#0d1b2e] text-white sm:rounded-3xl">
         {/* 装饰性光晕 */}

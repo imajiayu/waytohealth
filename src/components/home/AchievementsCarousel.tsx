@@ -90,7 +90,7 @@ export default function AchievementsCarousel() {
   });
 
   return (
-    <div className="mt-10 sm:mt-16">
+    <div className="mt-10 sm:mt-12">
       {/* 标题行 + 导航箭头 */}
       <div className="flex items-end justify-between">
         <div>
@@ -127,7 +127,7 @@ export default function AchievementsCarousel() {
       {/* 横向滚动容器 — 默认 align-items: stretch 让所有卡片自动对齐到最高那张的高度 */}
       <div
         ref={scrollRef}
-        className="hide-scrollbar -mx-4 mt-6 flex gap-4 overflow-x-auto px-4 sm:-mx-6 sm:mt-8 sm:gap-6 sm:px-6 lg:-mx-8 lg:gap-8 lg:px-8 snap-x snap-mandatory"
+        className="hide-scrollbar -mx-4 mt-2 flex gap-4 overflow-x-auto px-4 sm:-mx-6 sm:mt-3 sm:gap-6 sm:px-6 lg:-mx-8 lg:gap-8 lg:px-8 snap-x snap-mandatory"
       >
         {items.map((item, i) => {
           const placeholder = PLACEHOLDERS[i];
