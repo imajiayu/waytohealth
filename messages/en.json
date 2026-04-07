@@ -24,12 +24,6 @@
   "pages": {
     "comingSoon": "Coming Soon"
   },
-  "requestAssistance": {
-    "label": "Assistance",
-    "title": "Need Support?",
-    "description": "If you or your loved ones need rehabilitation following the consequences of the war, we are here to help. A request form for direct contact with our team will be available here soon.",
-    "comingSoon": "Coming Soon"
-  },
   "projects": {
     "title": "Support active projects",
     "goalOf": "of",
@@ -125,18 +119,22 @@
         },
         {
           "title": "Ambulance Procurement",
-          "text": "Purchasing and delivering specialized medical transport for evacuating the wounded from the front lines.",
-          "image": ""
+          "text": "From the very first days of the full-scale invasion of Ukraine, our international friends have actively supported our work. Among them is Strategic Edge — a company with which we share a long and trusted partnership.\n\nTogether with them, Swiss combat paramedics travelled to Ukraine — people who don't merely voice their support, but who are ready to work personally in conditions close to those of the front lines.\n\nOne day they made a proposal that turned out to be extraordinarily important to us — to hand over an ambulance to our foundation. We accepted without hesitation.\n\nThe official handover took place at the Embassy of Switzerland in Ukraine, in Kyiv. It was not just a formality, but a symbol of trust, partnership, and international support for Ukraine. Our Swiss partners, the paramedics, and representatives of the foundation all took part in the event.",
+          "image": "/images/achievement-ambulance.webp"
         },
         {
           "title": "Humanitarian Missions",
-          "text": "Organizing and conducting humanitarian missions in de-occupied and front-line territories of Ukraine.",
-          "image": ""
+          "text": "The first mission using the new ambulance took place in eastern Ukraine, in the city of Lyman.\n\nTogether with our friends from abroad, we carried out medical check-ups for the local population and provided free medicine and medical assistance. In regions affected by combat, access to healthcare is often limited or entirely absent — especially for the elderly, for children, and for those who have been unable to leave.\n\nIn addition, our international partners delivered paramedic training to Ukrainian soldiers — a brigade that stands directly in defence of our country. It was an extraordinarily valuable exchange of experience, both for our military and for the instructors themselves. In such conditions, knowledge can mean only one thing — a life saved.\n\nThis entire mission was organised by the «Way to Health» Charitable Foundation. It is just one example of the work we carry out in Ukraine every day.",
+          "image": "/images/achievement-humanitarian.webp"
         },
         {
-          "title": "International Projects",
-          "text": "Implementing projects with the support of international donors to scale up assistance for those affected.",
-          "image": ""
+          "title": "Implementing International Projects",
+          "text": "As part of the «Overcoming PTSD and Anxiety Disorders» project, we worked to restore the psychological well-being of people affected by the war. The main goal was to help them cope with PTSD and other traumatic conditions linked to their experiences.\n\nA separate strand of the project focused on training psychological ambassadors — specialists who could go on supporting those affected long after the project itself. This part was carried out with the support of Edessa Ramos.\n\nProject outcomes:",
+          "list": [
+            "1,100 individual and group consultations were held for people affected by the war — both offline and online, across Ukraine;",
+            "7 psychological ambassadors were trained, and they continue to provide support within their communities."
+          ],
+          "image": "/images/achievement-international.webp"
         }
       ]
     },
@@ -203,8 +201,263 @@
       "partnerButton": "Become a Partner"
     }
   },
+  "termsPage": {
+    "hero": {
+      "eyebrow": "Legal",
+      "title": "Terms & Conditions",
+      "effectiveDateLabel": "Effective Date",
+      "effectiveDate": "September 24, 2022",
+      "intro": "Welcome to the website of the \"Way to Health\" Charitable Foundation (\"Website\"). Please read these Terms and Conditions (\"Terms\") carefully before using our Website. By accessing and using this Website, you agree to be bound by these Terms."
+    },
+    "tocLabel": "Document contents",
+    "sections": {
+      "use": {
+        "number": "01",
+        "title": "Use of the Website",
+        "0": "You agree to use the Website only for lawful purposes and in compliance with applicable Ukrainian laws.",
+        "1": "Any use of the Website that may harm its functionality or violate the rights of third parties is strictly prohibited."
+      },
+      "ip": {
+        "number": "02",
+        "title": "Intellectual Property",
+        "0": "All content on the Website (texts, images, logos, videos, etc.) is the property of the \"Way to Health\" Charitable Foundation or is used with appropriate permission.",
+        "1": "Any reproduction, distribution, or use of materials without written consent is prohibited."
+      },
+      "donations": {
+        "number": "03",
+        "title": "Donations and Payments",
+        "0": "All donations made through the Website are voluntary and non-refundable.",
+        "1": "If you made an error in processing your payment, please contact us using the details provided."
+      },
+      "disclaimer": {
+        "number": "04",
+        "title": "Disclaimer",
+        "0": "We make every effort to ensure the accuracy and relevance of the information on this Website, but we do not guarantee the absence of errors.",
+        "1": "The \"Way to Health\" Charitable Foundation is not responsible for any technical failures that may affect access to the Website."
+      },
+      "links": {
+        "number": "05",
+        "title": "External Links",
+        "0": "Our Website may contain links to third-party websites. We are not responsible for their content or privacy policies."
+      },
+      "changes": {
+        "number": "06",
+        "title": "Changes to the Terms",
+        "0": "We reserve the right to modify these Terms without prior notice. Updated versions will be published on this page."
+      }
+    },
+    "contact": {
+      "number": "07",
+      "title": "Contact Information",
+      "intro": "If you have any questions regarding these Terms, please reach out to us through any of the channels below.",
+      "emailLabel": "Email",
+      "email": "Waytohealthfoundation@gmail.com",
+      "addressLabel": "Address",
+      "address": "Slobozhanske village, street Heroiv Ukrainy 27C",
+      "phoneLabel": "Phone",
+      "phone": "+380 63 748 2530"
+    }
+  },
+  "privacyPage": {
+    "hero": {
+      "eyebrow": "Privacy",
+      "title": "Privacy Policy",
+      "effectiveDateLabel": "Effective Date",
+      "effectiveDate": "September 24, 2022",
+      "intro": "\"Way to Health\" Charity foundation (hereinafter referred to as \"we,\" \"our,\" or \"the Foundation\") respects your privacy and is committed to protecting the personal data you provide to us. This Privacy Policy explains what information we collect, how we use it, and how we store it."
+    },
+    "tocLabel": "Document contents",
+    "sections": {
+      "collect": {
+        "number": "01",
+        "title": "What Information Do We Collect?",
+        "lead": "We may collect and process the following personal data:",
+        "0": "Name, surname, and contact details (phone, email) when you fill out a feedback form.",
+        "1": "Payment information in case of voluntary donations or charitable contributions.",
+        "2": "Data automatically collected when visiting the website (IP address, cookies, browsing behavior)."
+      },
+      "use": {
+        "number": "02",
+        "title": "How Do We Use Your Information?",
+        "lead": "The information collected is used for:",
+        "0": "Providing you with information about our services and activities.",
+        "1": "Processing your inquiries and feedback.",
+        "2": "Administering donations and financial support for our center.",
+        "3": "Improving website functionality and personalizing user experience."
+      },
+      "sharing": {
+        "number": "03",
+        "title": "Data Sharing with Third Parties",
+        "0": "We do not transfer, sell, or disclose your personal data to third parties without your consent, except as required by Ukrainian law."
+      },
+      "security": {
+        "number": "04",
+        "title": "Data Security",
+        "0": "We take all necessary technical and organizational measures to protect your personal data from unauthorized access, loss, or alteration."
+      },
+      "rights": {
+        "number": "05",
+        "title": "Your Rights",
+        "lead": "You have the right to:",
+        "0": "Request information about the data we store about you.",
+        "1": "Request correction or deletion of your personal data.",
+        "2": "Withdraw your consent for data processing."
+      },
+      "cookies": {
+        "number": "06",
+        "title": "Cookies",
+        "0": "Our website uses cookies to collect statistical information and enhance user experience. You can manage cookie settings in your browser."
+      },
+      "changes": {
+        "number": "07",
+        "title": "Changes to the Privacy Policy",
+        "0": "We reserve the right to update this Privacy Policy. Any changes will be published on this page."
+      }
+    },
+    "contact": {
+      "number": "08",
+      "title": "Contact Information",
+      "intro": "If you have any questions regarding this Privacy Policy, please reach out to us through any of the channels below.",
+      "emailLabel": "Email",
+      "email": "Waytohealthfoundation@gmail.com",
+      "addressLabel": "Address",
+      "address": "Slobozhanske village, street Heroiv Ukrainy 27C",
+      "phoneLabel": "Phone",
+      "phone": "+380 63 748 2530"
+    }
+  },
+  "publicAgreementPage": {
+    "hero": {
+      "eyebrow": "Legal",
+      "title": "Public Agreement (Offer)",
+      "subtitle": "on Making a Charitable Contribution",
+      "effectiveDateLabel": "Status",
+      "effectiveDate": "Current Version",
+      "intro": "This Public Offer governs the relationship between the \"Way to Health\" Charitable Foundation and any individual who voluntarily makes a charitable donation through the Website."
+    },
+    "tocLabel": "Document contents",
+    "preamble": {
+      "p1": "This agreement is an official and public proposal for making donations for charitable purposes (hereinafter – the \"Offer\") and is addressed to an indefinite number of individuals (hereinafter – the \"Donor\"), who are visitors of the official website https://www.waytohealthua.org/ (hereinafter – the \"Website\") and wish to make a charitable donation under the terms of this public offer (hereinafter – the \"Charitable Donation Agreement\"). The Offer and the Donor together are referred to as the \"Parties,\" and each individually – the \"Party.\"",
+      "p2": "The text of the Offer is an official proposal of the charitable organization \"WAY TO HEALTH\" CHARITABLE FOUNDATION, represented by the Head of the Foundation, Mykyta Zhalnin, acting on the basis of the Charter, to enter into a charitable contribution agreement (hereinafter – the \"Agreement\"), the essence of which is outlined below."
+    },
+    "sections": {
+      "definitions": {
+        "number": "01",
+        "title": "Definitions",
+        "i1": "Public Offer – a valid proposal by the Organization, posted on the Website, to provide a charitable contribution, addressed to an indefinite number of persons, including the Donor.",
+        "i2": "Acceptance – full and unconditional acceptance of the Public Offer by performing the actions necessary for making a monetary transfer using the payment forms and means available on the Website or by transferring funds to the Organization's bank account via banking institutions. The moment of Acceptance is the date the funds are credited to the Organization's bank account.",
+        "i3": "Charitable Donation – a voluntary and gratuitous transfer of funds and/or property by the Donor to the ownership of the Organization to achieve specific pre-determined objectives of the Organization's activities in accordance with the Agreement and the Law of Ukraine \"On Charitable Activities and Charitable Organizations.\"",
+        "i4": "Seller – the charitable organization \"WAY TO HEALTH\" CHARITABLE FOUNDATION (Identification Code 44719925), a legal entity established and operating under the laws of Ukraine, located at: Ukraine, 52005, Dnipropetrovsk region, Dnipro district, town of Slobozhanske, Teplychna St., 27C."
+      },
+      "subject": {
+        "number": "02",
+        "title": "Subject of the Agreement",
+        "i1": "The subject of this Agreement is the voluntary and gratuitous transfer of funds by the Donor to the Organization through voluntary donations for the implementation of the statutory objectives and activities of the Organization, as well as for providing charitable assistance in accordance with the Law of Ukraine \"On Charitable Activities and Charitable Organizations\" and the Foundation's programs.",
+        "i2": "The Donor independently determines the amount and size of the charitable donation at their discretion.",
+        "i3": "The execution of the terms of the Offer by the Parties is not aimed at obtaining profit or any benefits for either Party.",
+        "i4": "The Parties confirm that generating profit (directly or indirectly) is not the subject of this Offer.",
+        "i5": "The Donor accepts this Public Offer by making a Charitable Donation."
+      },
+      "acceptance": {
+        "number": "03",
+        "title": "Acceptance of the Offer",
+        "i1": "Acceptance of the Offer (agreement to the Offer's terms) means that the Donor agrees with all its provisions, has reviewed the Organization's Charter, which is available electronically on the Website, fully understands and agrees with the subject of the Agreement, the purpose and objectives of the public fundraising campaign, and the right of the Foundation to use part of the Donor's Charitable Donation for administrative expenses of the Foundation, in an amount not exceeding the limit established by the laws of Ukraine.",
+        "i2": "The Donor and the Organization, in accordance with Articles 207, Part 2 of Article 639, Articles 641, and 642 of the Civil Code of Ukraine, agree that from the moment of Acceptance of the Offer, the Charitable Donation Agreement is considered concluded.",
+        "i3": "The Parties agree that failure to maintain a written form of the Charitable Donation Agreement does not invalidate it."
+      },
+      "rightsOrganization": {
+        "number": "04",
+        "title": "Rights and Obligations of the Organization",
+        "sub1": "The Organization has the right to:",
+        "i411": "Receive Charitable Donations and use them in accordance with the terms of the Offer and the Charitable Donation Agreement.",
+        "i412": "Change the direction of charitable donations within the scope of the Organization's statutory activities.",
+        "i413": "Use part of the Charitable Donation for administrative expenses of the Organization without the Donor's consent, in an amount not exceeding the limit established by Ukrainian law.",
+        "sub2": "The Organization is obliged to:",
+        "i421": "Provide the necessary conditions for the Donor to make a Charitable Donation under the terms of the Offer.",
+        "i422": "Use received Charitable Donations to achieve the goals outlined in the Organization's Charter.",
+        "i423": "Maintain the confidentiality of information (including personal data) received from the Donor and not disclose it to third parties without the Donor's consent, except as provided by the Offer and the laws of Ukraine."
+      },
+      "rightsDonor": {
+        "number": "05",
+        "title": "Rights and Obligations of the Donor",
+        "sub1": "The Donor has the right to:",
+        "i511": "Transfer a voluntary Charitable Donation to the Organization's account in the manner specified in the Agreement.",
+        "i512": "Request a report from the Organization on the use of Charitable Donations.",
+        "sub2": "The Donor is obliged to:",
+        "i521": "Carefully review and accept all the terms of the Offer before making a Charitable Donation, as well as all additional rules governing the Parties' relations under the Offer."
+      },
+      "location": {
+        "number": "06",
+        "title": "Location and Duration of Charitable Fundraising",
+        "i1": "The public fundraising of donations is conducted in any country worldwide in accordance with Article 7 of the Law of Ukraine \"On Charitable Activities and Charitable Organizations.\" The direct activities of the Organization related to the public fundraising of donations under this Agreement are carried out at the location of the Foundation.",
+        "i2": "Public fundraising continues until the Organization is liquidated unless another period is determined by the Organization."
+      },
+      "procedure": {
+        "number": "07",
+        "title": "Procedure for Making a Charitable Donation",
+        "i1": "The Organization provides the Donor with the ability to make a Charitable Donation via electronic payment on the Website or by transferring funds to the Organization's bank account IBAN UA363052990000026007050555233. The Donor may choose a one-time or recurring donation (with the ability to cancel recurring payments at any time).",
+        "i2": "A payment is considered made when the transaction is confirmed as successful by the bank or payment system. The Donor bears all costs associated with making a donation.",
+        "i3": "A Charitable Donation made by the Donor is non-refundable under any circumstances."
+      },
+      "use": {
+        "number": "08",
+        "title": "Use of Charitable Donations",
+        "i1": "Collected Charitable Donations under this Agreement are used in accordance with the Organization's statutory goals. The Organization manages Charitable Donations at its discretion. Received Charitable Donations are non-refundable.",
+        "i2": "The Donor or their authorized representatives have the right to monitor the targeted use of the Charitable Donation."
+      },
+      "responsibility": {
+        "number": "09",
+        "title": "Responsibility of the Parties",
+        "i1": "In case of failure to perform or improper performance of their obligations under the Offer, the Parties shall bear responsibility in accordance with the current legislation of Ukraine and the terms of this Offer.",
+        "i2": "The Organization shall not be liable in the event of acts or omissions of third parties as a result of which the Organization was unable to fulfill its obligations under the Offer."
+      },
+      "confidentiality": {
+        "number": "10",
+        "title": "Confidentiality and Protection of Personal Data",
+        "i1": "By performing the Acceptance, the Donor confirms that they have been informed of and consent to the collection and processing of their personal data.",
+        "i2": "The Organization collects and processes the Donor's personal data for the purpose of fulfilling its obligations under the Offer and in accordance with the Law of Ukraine \"On the Protection of Personal Data.\"",
+        "i3": "The Donor agrees that after providing information about themselves when making a Charitable Donation or subscribing to the Organization's news on the Website, they may receive reports on the results of public fundraising and the use of charitable donations by the Organization, as well as letters and messages, including those of a promotional nature.",
+        "i4": "The Organization undertakes not to transfer the email address or any other information about donors to third parties, except in cases provided for by the current legislation of Ukraine.",
+        "i5": "The Organization shall not be liable for the disclosure of personal data that occurred as a result of unlawful actions of third parties or in cases where such disclosure took place with the Donor's consent."
+      },
+      "term": {
+        "number": "11",
+        "title": "Term of the Offer. Procedure for Amendments",
+        "i1": "The Public Offer enters into force from the moment of its publication on the Website and remains in effect until the liquidation of the Organization, unless a different term is determined by the Organization. The provisions of this clause also apply to amendments (changes) to the Offer.",
+        "i2": "The Organization has the right to amend the terms of the Public Offer without the Donor's consent. The Organization reserves the right to unilaterally change the terms of the Offer at any time, without any restrictions, by publishing a new version of the Offer on the Website.",
+        "i3": "The Donor is obliged to independently monitor changes to the terms of the Offer by reviewing the current (updated) version published on the Website."
+      },
+      "disputes": {
+        "number": "12",
+        "title": "Dispute Resolution",
+        "i1": "Disputes and disagreements arising during the performance of the Charitable Donation Agreement concluded under the terms of the Offer shall be resolved through written negotiations.",
+        "i2": "A claim shall be submitted to a Party in writing by sending a registered letter with acknowledgment of receipt, within a period of no more than 10 (ten) calendar days from the date the issues forming the basis of the dispute arose. The claim shall be reviewed within 10 (ten) calendar days, calculated from the day it is delivered to the Party to which it is addressed.",
+        "i3": "If the Parties are unable to reach an agreement through written negotiations, the dispute shall be subject to consideration in accordance with the procedure established by the current legislation of Ukraine.",
+        "i4": "On all other matters not provided for by this Offer, the Parties shall be governed by the current legislation of Ukraine."
+      },
+      "forceMajeure": {
+        "number": "13",
+        "title": "Force Majeure",
+        "i1": "The Parties shall be released from liability for failure to perform or improper performance of obligations under the terms of the Offer if such failure is the result of force majeure circumstances and their consequences, namely: fires, epidemics, floods, earthquakes or other natural disasters, war and military actions, strike(s), sabotage, accidents, mass disorder and unrest, quarantine restrictions, acts of state authorities or governing bodies, international sanctions, etc., which directly affect the performance of the Agreement and arose after its conclusion. In such cases, the period for fulfilling obligations under the Agreement shall be extended for the duration of the said circumstances and their consequences.",
+        "i2": "The Party unable to fulfill its obligations under the Agreement as a result of force majeure circumstances and their consequences shall, within 15 days, notify the other Party in writing of the beginning or end of such circumstances, and provide documentary confirmation of their occurrence and existence.",
+        "i3": "Failure to notify or untimely notification of force majeure circumstances shall deprive the relevant Party of the right to invoke such circumstances as those releasing it from liability. Notification by the Foundation of the occurrence of force majeure circumstances may be made, among other ways, by posting relevant information on the Website.",
+        "i4": "Certificates issued by the authorized state authorities of Ukraine shall serve as confirmation of the existence and duration of force majeure circumstances."
+      }
+    },
+    "contact": {
+      "number": "14",
+      "title": "Contact Information",
+      "intro": "If you have any questions regarding this Public Offer, please contact the Foundation through any of the channels below.",
+      "emailLabel": "Email",
+      "email": "waytohealthfoundation@gmail.com",
+      "addressLabel": "Address",
+      "address": "27C Teplychna St., Slobozhanske, Dnipro district, Dnipropetrovsk region, 52005, Ukraine",
+      "phoneLabel": "Phone",
+      "phone": "+380 63 748 2530"
+    }
+  },
   "footer": {
-    "terms": "Terms and Conditions",
+    "terms": "Terms & Conditions",
     "publicAgreements": "Public Agreements",
     "privacy": "Privacy Policy",
     "email": "Email:",
@@ -212,6 +465,8 @@
     "recipientCode": "Recipient Code (EDRPOU)",
     "copyIban": "Copy IBAN",
     "hotline": "Hotline",
+    "addressLabel": "Address",
+    "address": "Slobozhanske village, Heroiv Ukrainy str. 27C",
     "donate": "Donate",
     "foundationPage": "Foundation page",
     "legalEntity": "CO \"Way to Health Charity Foundation\" (EDRPOU Code 44947699)",

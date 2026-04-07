@@ -83,13 +83,17 @@ src/
 │       ├── donate/              # 捐赠页
 │       ├── merch/               # 周边商品
 │       ├── news/                # 新闻动态
-│       └── partners/            # 合作伙伴
+│       ├── partners/            # 合作伙伴
+│       ├── terms/               # 条款与条件
+│       ├── privacy/             # 隐私政策
+│       └── public-agreements/   # 公共协议（捐赠公开要约）
 ├── components/
 │   ├── about/                   # 关于页组件（FadeInSection）
-│   ├── home/                    # 首页组件（HeroSection, ProjectsSection, RequestAssistanceSection, AboutSection, ValuesAccordion, AchievementsCarousel）
+│   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersShowcase, PartnersStrip）
-│   └── projects/                # 项目组件（ProjectCard）
+│   ├── projects/                # 项目组件（ProjectCard）
+│   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook
 │   └── useInViewOnce.ts         # 滚动入场检测（共享 IntersectionObserver）

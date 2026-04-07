@@ -17,12 +17,12 @@ export default function PartnersStrip() {
   return (
     <div className="px-4 py-5 sm:px-8 sm:py-8 md:py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-6 md:gap-8">
-        {/* CTA 按钮组 — 移动端横排、桌面端纵排堆叠 */}
-        <div className="flex flex-row gap-2.5 sm:flex-col sm:flex-shrink-0 sm:justify-center sm:gap-3">
+        {/* CTA 按钮组 — 移动端和桌面端都竖排堆叠（避免乌克兰语长词在横排时溢出） */}
+        <div className="flex flex-col gap-2.5 sm:flex-shrink-0 sm:justify-center sm:gap-3">
           {/* 主 CTA: Request Assistance — 白底实心，最强对比 */}
           <Link
             href="/#request-assistance"
-            className="group inline-flex flex-1 items-center justify-between gap-3
+            className="group inline-flex items-center justify-between gap-3
                        rounded-full bg-white px-5 py-3
                        text-[0.8rem] font-bold tracking-[0.12em] text-ukraine-blue-600 uppercase
                        shadow-[0_8px_30px_-8px_rgba(0,0,0,0.35)]
@@ -30,7 +30,7 @@ export default function PartnersStrip() {
                        transition-all duration-300
                        hover:bg-ukraine-blue-600 hover:text-white hover:ring-white/30
                        hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.45)]
-                       sm:flex-none sm:px-7 sm:py-3.5 sm:text-sm"
+                       sm:px-7 sm:py-3.5 sm:text-sm"
           >
             <span className="flex items-center gap-2">
               <HeartHandshake className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={2.25} />
@@ -45,13 +45,13 @@ export default function PartnersStrip() {
           {/* 次 CTA: Become a Partner — 玻璃感 outline */}
           <Link
             href="/partners"
-            className="group inline-flex flex-1 items-center justify-between gap-3
+            className="group inline-flex items-center justify-between gap-3
                        rounded-full bg-white/10 px-5 py-3 backdrop-blur-sm
                        text-[0.8rem] font-semibold tracking-[0.12em] text-white/85 uppercase
                        ring-1 ring-inset ring-white/25
                        transition-all duration-300
                        hover:bg-white/20 hover:text-white hover:ring-white/45
-                       sm:flex-none sm:px-7 sm:py-3.5 sm:text-sm"
+                       sm:px-7 sm:py-3.5 sm:text-sm"
           >
             <span className="flex items-center gap-2">
               <Handshake className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={2.25} />

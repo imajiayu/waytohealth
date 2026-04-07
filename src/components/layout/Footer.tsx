@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { ArrowUpRight, Phone } from 'lucide-react';
+import { ArrowUpRight, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 import CopyIbanButton from './CopyIbanButton';
 
@@ -48,9 +48,19 @@ const SOCIAL_LINKS = [
   { name: 'LinkedIn', href: 'https://www.linkedin.com/company/way-to-health-ua/', icon: LinkedinIcon },
 ];
 
-const LEGAL_LINKS = ['terms', 'publicAgreements', 'privacy'] as const;
+const LEGAL_LINKS = [
+  { key: 'terms', href: '/terms' },
+  { key: 'publicAgreements', href: '/public-agreements' },
+  { key: 'privacy', href: '/privacy' },
+] as const;
 
 const IBAN = 'UA363052990000026007050555233';
+const EMAIL = 'waytohealthfoundation@gmail.com';
+const PHONE_DISPLAY = '+380 63 748 2530';
+const PHONE_TEL = '+380637482530';
+const MAPS_URL =
+  'https://www.google.com/maps/search/?api=1&query=' +
+  encodeURIComponent('Slobozhanske village Heroiv Ukrainy 27C Ukraine');
 
 /* ── Component ───────────────────────────────────────────────── */
 
@@ -121,7 +131,7 @@ export default async function Footer() {
               <div className="space-y-3">
                 {/* 邮箱卡片 */}
                 <a
-                  href="mailto:waytohealthfoundation@gmail.com"
+                  href={`mailto:${EMAIL}`}
                   className="group flex items-center gap-4 rounded-xl bg-white/[0.04] border border-white/[0.08]
                              px-4 py-4 hover:bg-white/[0.07] hover:border-white/[0.14] transition-all duration-300
                              sm:gap-5 sm:rounded-2xl sm:px-6 sm:py-5"
@@ -136,7 +146,7 @@ export default async function Footer() {
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium tracking-widest text-white/40 uppercase mb-1">{t('email')}</p>
                     <p className="text-base sm:text-lg text-white truncate group-hover:text-white/90 transition-colors">
-                      waytohealthfoundation@gmail.com
+                      {EMAIL}
                     </p>
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0
@@ -145,7 +155,7 @@ export default async function Footer() {
 
                 {/* 电话卡片 */}
                 <a
-                  href="tel:+380441234567"
+                  href={`tel:${PHONE_TEL}`}
                   className="group flex items-center gap-4 rounded-xl bg-white/[0.04] border border-white/[0.08]
                              px-4 py-4 hover:bg-white/[0.07] hover:border-white/[0.14] transition-all duration-300
                              sm:gap-5 sm:rounded-2xl sm:px-6 sm:py-5"
@@ -158,7 +168,31 @@ export default async function Footer() {
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium tracking-widest text-white/40 uppercase mb-1">{t('hotline')}</p>
                     <p className="text-base sm:text-lg text-white font-[family-name:var(--font-data)] tracking-wide group-hover:text-white/90 transition-colors">
-                      +38 044 123 4567
+                      {PHONE_DISPLAY}
+                    </p>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0
+                                           group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all duration-200" />
+                </a>
+
+                {/* 地址卡片 — 点击跳转 Google Maps */}
+                <a
+                  href={MAPS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-4 rounded-xl bg-white/[0.04] border border-white/[0.08]
+                             px-4 py-4 hover:bg-white/[0.07] hover:border-white/[0.14] transition-all duration-300
+                             sm:gap-5 sm:rounded-2xl sm:px-6 sm:py-5"
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg gradient-brand flex items-center justify-center
+                                  shadow-lg shadow-ukraine-blue-500/20 group-hover:shadow-ukraine-blue-500/30 transition-shadow
+                                  sm:w-12 sm:h-12 sm:rounded-xl">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium tracking-widest text-white/40 uppercase mb-1">{t('addressLabel')}</p>
+                    <p className="text-base sm:text-lg text-white leading-snug group-hover:text-white/90 transition-colors">
+                      {t('address')}
                     </p>
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0
@@ -168,13 +202,14 @@ export default async function Footer() {
 
               {/* 法律文档链接 — 带竖线分隔的精致样式 */}
               <nav className="flex flex-wrap items-center gap-0.5 pt-2 sm:gap-1">
-                {LEGAL_LINKS.map((key, i) => (
+                {LEGAL_LINKS.map(({ key, href }, i) => (
                   <span key={key} className="flex items-center">
-                    <span
-                      className="text-sm text-white/45 px-3 py-1.5"
+                    <Link
+                      href={href}
+                      className="text-sm text-white/45 px-3 py-1.5 hover:text-white/80 transition-colors"
                     >
                       {t(key)}
-                    </span>
+                    </Link>
                     {i < LEGAL_LINKS.length - 1 && (
                       <span className="text-white/15 select-none">·</span>
                     )}
@@ -216,13 +251,15 @@ export default async function Footer() {
                 </div>
               </div>
 
-              {/* 捐赠按钮 */}
+              {/* 捐赠按钮 — 使用品牌渐变，与导航栏 / 项目卡片 Donate 按钮统一 */}
               <Link
                 href="/donate"
-                className="w-full flex items-center justify-between gap-3
-                           bg-ukraine-gold-500 text-ukraine-blue-900 rounded-xl px-6 py-4
-                           hover:bg-ukraine-gold-400 active:scale-[0.98]
-                           transition-all duration-200 font-semibold group"
+                className="group gradient-brand flex w-full items-center justify-between gap-3
+                           rounded-xl px-6 py-4 font-semibold text-white
+                           shadow-[0_2px_12px_rgba(0,108,178,0.35)]
+                           transition-all duration-300
+                           hover:shadow-[0_6px_24px_rgba(0,108,178,0.55)]
+                           hover:brightness-[1.08] active:scale-[0.98]"
               >
                 <span className="text-lg">{t('donate')}</span>
                 <ArrowUpRight className="w-5 h-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

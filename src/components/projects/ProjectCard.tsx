@@ -71,7 +71,7 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
         }}
       >
         {/* 封面图 */}
-        <div className="relative aspect-[3/2] w-full overflow-hidden">
+        <div className="relative aspect-square w-full overflow-hidden">
           <Image
             src={cover}
             alt={title}
@@ -122,14 +122,14 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
               </div>
             )}
 
-            {/* Donate 按钮 */}
+            {/* Donate 按钮 — 使用品牌渐变 + 蓝色发光阴影，与导航栏 Donate 按钮统一 */}
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 window.location.href = `/${locale}/donate?project=${id}`;
               }}
-              className={`flex w-full items-center justify-center font-semibold transition-all duration-300 cursor-pointer bg-ukraine-blue-500 text-white hover:bg-ukraine-blue-400 hover:shadow-[0_4px_20px_rgba(0,108,178,0.25)] active:scale-[0.98] ${compact ? 'gap-1.5 rounded-lg py-2 text-xs' : 'mt-4 gap-2.5 rounded-xl py-3 text-sm'}`}
+              className={`gradient-brand flex w-full items-center justify-center font-semibold text-white shadow-[0_2px_12px_rgba(0,108,178,0.25)] transition-all duration-300 hover:shadow-[0_6px_24px_rgba(0,108,178,0.45)] hover:brightness-[1.08] active:scale-[0.98] cursor-pointer ${compact ? 'gap-1.5 rounded-lg py-2 text-xs' : 'mt-4 gap-2.5 rounded-xl py-3 text-sm'}`}
             >
               <Heart className={compact ? 'h-3 w-3' : 'h-4 w-4'} strokeWidth={2.5} />
               {t('donateButton')}

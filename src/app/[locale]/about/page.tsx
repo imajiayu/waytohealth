@@ -382,34 +382,38 @@ export default async function AboutPage() {
           <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-2">
             {Array.from({ length: ACHIEVEMENT_COUNT }, (_, i) => {
               const hasImage = tAbout(`achievements.items.${i}.image`) !== '';
-              const listCountMap: Record<number, number> = { 0: 8 };
-              const listCount = listCountMap[i] ?? 0;
+              // 用 t.raw 直接读 list 数组（不存在时统一回退到空数组）
+              let list: string[] = [];
+              try {
+                const raw = tAbout.raw(`achievements.items.${i}.list`);
+                if (Array.isArray(raw)) list = raw as string[];
+              } catch {
+                // list 字段不存在，保持空
+              }
 
               return (
                 <FadeInSection key={i} delay={i * 100}>
-                  <div className="group h-full overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/30 sm:rounded-2xl">
-                    <div className="flex flex-col sm:flex-row sm:items-stretch">
-                      {/* 图片/占位 */}
+                  <div className="group h-full overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/30 sm:h-[480px] sm:rounded-2xl">
+                    <div className="flex h-full flex-col sm:flex-row">
+                      {/* 图片/占位 — contain 保证全图可见 */}
                       {hasImage ? (
-                        <div className="relative h-48 overflow-hidden sm:h-auto sm:w-2/5 sm:min-h-[280px]">
+                        <div className="relative h-48 w-full shrink-0 overflow-hidden bg-gradient-to-br from-ukraine-blue-50/60 to-ukraine-blue-100/30 sm:h-full sm:w-2/5">
                           <Image
                             src={tAbout(`achievements.items.${i}.image`)}
                             alt={tAbout(`achievements.items.${i}.title`)}
                             fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
                             sizes="(max-width: 768px) 100vw, 40vw"
                           />
-                          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-l from-white/60 to-transparent sm:block" />
-                          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white/60 to-transparent sm:hidden" />
                         </div>
                       ) : (
-                        <div className={`relative flex h-48 items-center justify-center bg-gradient-to-br sm:h-auto sm:w-2/5 sm:min-h-[280px] ${ACHIEVEMENT_GRADIENTS[i]}`}>
+                        <div className={`relative flex h-48 w-full shrink-0 items-center justify-center bg-gradient-to-br sm:h-full sm:w-2/5 ${ACHIEVEMENT_GRADIENTS[i]}`}>
                           <div className="opacity-25">{ACHIEVEMENT_ICONS[i]}</div>
                         </div>
                       )}
 
-                      {/* 文字 */}
-                      <div className="flex flex-1 flex-col justify-center px-4 py-5 sm:px-7 sm:py-7">
+                      {/* 文字（超出可滚动） */}
+                      <div className="hide-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-5 sm:px-7 sm:py-7">
                         <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800 sm:text-xl">
                           {tAbout(`achievements.items.${i}.title`)}
                         </h3>
@@ -418,12 +422,12 @@ export default async function AboutPage() {
                             {paragraph}
                           </p>
                         ))}
-                        {listCount > 0 && (
+                        {list.length > 0 && (
                           <ul className="mt-3 grid grid-cols-1 gap-1 sm:mt-4 sm:grid-cols-2 sm:gap-1.5">
-                            {Array.from({ length: listCount }, (_, li) => (
+                            {list.map((listItem, li) => (
                               <li key={li} className="flex items-start gap-2 text-xs text-gray-600 sm:text-sm">
                                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ukraine-blue-300" />
-                                {tAbout(`achievements.items.${i}.list.${li}`)}
+                                {listItem}
                               </li>
                             ))}
                           </ul>

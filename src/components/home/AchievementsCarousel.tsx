@@ -75,11 +75,17 @@ export default function AchievementsCarousel() {
 
   const items = Array.from({ length: ITEM_COUNT }, (_, i) => {
     const hasImage = t(`items.${i}.image`) !== '';
+    // 先用 t.has 检查 list 字段是否存在，避免触发 MISSING_MESSAGE 警告
+    let list: string[] = [];
+    if (t.has(`items.${i}.list`)) {
+      const raw = t.raw(`items.${i}.list`);
+      if (Array.isArray(raw)) list = raw as string[];
+    }
     return {
       title: t(`items.${i}.title`),
       text: t(`items.${i}.text`),
       image: hasImage ? t(`items.${i}.image`) : '',
-      listCount: i === 0 ? 8 : 0,
+      list,
     };
   });
 
@@ -118,7 +124,7 @@ export default function AchievementsCarousel() {
         </div>
       </div>
 
-      {/* 横向滚动容器 */}
+      {/* 横向滚动容器 — 默认 align-items: stretch 让所有卡片自动对齐到最高那张的高度 */}
       <div
         ref={scrollRef}
         className="hide-scrollbar -mx-4 mt-6 flex gap-4 overflow-x-auto px-4 sm:-mx-6 sm:mt-8 sm:gap-6 sm:px-6 lg:-mx-8 lg:gap-8 lg:px-8 snap-x snap-mandatory"
@@ -130,13 +136,13 @@ export default function AchievementsCarousel() {
           return (
             <div
               key={i}
-              className="group w-[85vw] max-w-[780px] shrink-0 snap-start overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/30 sm:w-[70vw] sm:rounded-2xl"
+              className="group flex w-[85vw] max-w-[820px] shrink-0 snap-start overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/30 sm:w-[72vw] sm:rounded-2xl"
             >
-              {/* 左右两栏 — 移动端堆叠，sm 以上并排 */}
-              <div className="flex flex-col sm:flex-row sm:items-stretch">
-                {/* 左侧：图片 */}
+              {/* 左右两栏 — 移动端堆叠，sm 以上并排；外层 carousel stretch + 内层 h-full 链路让所有卡片同高 */}
+              <div className="flex h-full w-full flex-col sm:flex-row">
+                {/* 左侧：图片（sm:h-full 显式吃满内层高度，object-cover 填满分配区域无空隙） */}
                 {hasImage ? (
-                  <div className="relative h-44 overflow-hidden sm:h-auto sm:w-2/5 sm:min-h-[320px]">
+                  <div className="relative h-64 w-full shrink-0 overflow-hidden bg-ukraine-blue-50/40 sm:h-full sm:w-2/5">
                     <Image
                       src={item.image}
                       alt={item.title}
@@ -144,37 +150,33 @@ export default function AchievementsCarousel() {
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       sizes="(max-width: 640px) 85vw, 30vw"
                     />
-                    {/* 右侧渐变遮罩（桌面端融合过渡） */}
-                    <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-l from-white/60 to-transparent sm:block" />
-                    {/* 底部渐变遮罩（移动端） */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white/60 to-transparent sm:hidden" />
                   </div>
                 ) : (
-                  <div className={`relative flex h-44 items-center justify-center bg-gradient-to-br sm:h-auto sm:w-2/5 sm:min-h-[320px] ${placeholder.gradient}`}>
+                  <div className={`relative flex h-56 w-full shrink-0 items-center justify-center bg-gradient-to-br sm:h-full sm:w-2/5 ${placeholder.gradient}`}>
                     <div className="opacity-25">
                       {placeholder.icon}
                     </div>
                   </div>
                 )}
 
-                {/* 右侧：文字内容 */}
-                <div className="flex flex-1 flex-col justify-center px-4 py-4 sm:px-8 sm:py-8">
-                  <h4 className="font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800 sm:text-2xl">
+                {/* 右侧：文字内容 — 自然流式排版，无内部滚动，所有信息一次性展示 */}
+                <div className="flex flex-1 flex-col px-5 py-5 sm:px-8 sm:py-7">
+                  <h4 className="font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800 sm:text-[1.4rem] sm:leading-snug">
                     {item.title}
                   </h4>
 
                   {item.text.split('\n\n').map((paragraph, pi) => (
-                    <p key={pi} className="mt-2 text-sm leading-relaxed text-gray-600 sm:mt-3 sm:text-base">
+                    <p key={pi} className="mt-2 text-[0.875rem] leading-relaxed text-gray-600 sm:mt-2.5 sm:text-[0.95rem] sm:leading-[1.65]">
                       {paragraph}
                     </p>
                   ))}
 
-                  {item.listCount > 0 && (
-                    <ul className="mt-3 grid grid-cols-1 gap-1 sm:mt-4 sm:grid-cols-2 sm:gap-1.5">
-                      {Array.from({ length: item.listCount }, (_, li_i) => (
-                        <li key={li_i} className="flex items-start gap-2 text-xs text-gray-600 sm:text-sm">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ukraine-blue-300" />
-                          {t(`items.${i}.list.${li_i}`)}
+                  {item.list.length > 0 && (
+                    <ul className="mt-3 flex flex-col gap-1 sm:mt-3.5 sm:gap-1.5">
+                      {item.list.map((listItem, li_i) => (
+                        <li key={li_i} className="flex items-start gap-2 text-[0.875rem] leading-relaxed text-gray-600 sm:text-[0.95rem] sm:leading-[1.65]">
+                          <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-ukraine-blue-300 sm:mt-[11px]" />
+                          {listItem}
                         </li>
                       ))}
                     </ul>
