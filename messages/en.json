@@ -24,6 +24,14 @@
   "pages": {
     "comingSoon": "Coming Soon"
   },
+  "homeChapters": {
+    "items": {
+      "projects": "Projects",
+      "about": "Foundation",
+      "values": "Values",
+      "achievements": "Achievements"
+    }
+  },
   "projects": {
     "title": "Support active projects",
     "goalOf": "of",

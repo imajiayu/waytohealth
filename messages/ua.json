@@ -24,6 +24,14 @@
   "pages": {
     "comingSoon": "Незабаром"
   },
+  "homeChapters": {
+    "items": {
+      "projects": "Проєкти",
+      "about": "Фонд",
+      "values": "Цінності",
+      "achievements": "Досягнення"
+    }
+  },
   "projects": {
     "title": "Підтримайте активні проєкти",
     "goalOf": "з",

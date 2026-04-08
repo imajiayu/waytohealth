@@ -88,11 +88,12 @@ src/
 │       ├── privacy/             # 隐私政策
 │       └── public-agreements/   # 公共协议（捐赠公开要约）
 ├── components/
-│   ├── about/                   # 关于页组件（FadeInSection）
+│   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentLedger）
 │   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersShowcase, PartnersStrip）
 │   ├── projects/                # 项目组件（ProjectCard）
+│   ├── shared/                  # 跨页面共享组件（ChapterIndex, ChapterMark — 杂志式章节导航）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook

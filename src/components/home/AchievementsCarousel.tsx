@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import ChapterMark from '@/components/shared/ChapterMark';
 
 const ITEM_COUNT = 4;
 
@@ -43,6 +44,7 @@ const PLACEHOLDERS: { gradient: string; icon: React.ReactNode }[] = [
 
 export default function AchievementsCarousel() {
   const t = useTranslations('about.achievements');
+  const tChapters = useTranslations('homeChapters');
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({ left: false, right: true });
 
@@ -90,44 +92,53 @@ export default function AchievementsCarousel() {
   });
 
   return (
-    <div className="mt-10 sm:mt-12">
-      {/* 标题行 + 导航箭头 */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
-            {t('title')}
-          </h3>
-          <div className="mt-2 accent-line" />
+    <div id="achievements" className="mt-14 scroll-mt-16 sm:mt-20">
+      <div className="grid grid-cols-12 gap-6 sm:gap-8">
+        {/* 左侧 ── ChapterMark */}
+        <div className="col-span-12 lg:col-span-3">
+          <ChapterMark number="04" label={tChapters('items.achievements')} />
         </div>
 
-        <div className="flex gap-1.5 sm:gap-2">
-          <button
-            onClick={() => scroll('left')}
-            disabled={!scrollState.left}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
-            aria-label="Scroll left"
-          >
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 4l-4 4 4 4" />
-            </svg>
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            disabled={!scrollState.right}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
-            aria-label="Scroll right"
-          >
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 4l4 4-4 4" />
-            </svg>
-          </button>
+        {/* 右侧 ── 标题 + 导航箭头 */}
+        <div className="col-span-12 lg:col-span-9 lg:pl-4">
+          <div className="flex items-end justify-between">
+            <div>
+              <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
+                {t('title')}
+              </h3>
+              <div className="mt-2 accent-line" />
+            </div>
+
+            <div className="flex gap-1.5 sm:gap-2">
+              <button
+                onClick={() => scroll('left')}
+                disabled={!scrollState.left}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
+                aria-label="Scroll left"
+              >
+                <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 4l-4 4 4 4" />
+                </svg>
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                disabled={!scrollState.right}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
+                aria-label="Scroll right"
+              >
+                <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 4l4 4-4 4" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* 横向滚动容器 — 默认 align-items: stretch 让所有卡片自动对齐到最高那张的高度 */}
       <div
         ref={scrollRef}
-        className="hide-scrollbar -mx-4 mt-2 flex gap-4 overflow-x-auto px-4 sm:-mx-6 sm:mt-3 sm:gap-6 sm:px-6 lg:-mx-8 lg:gap-8 lg:px-8 snap-x snap-mandatory"
+        className="hide-scrollbar -mx-4 mt-6 flex gap-4 overflow-x-auto px-4 sm:-mx-6 sm:mt-8 sm:gap-6 sm:px-6 lg:-mx-8 lg:gap-8 lg:px-8 snap-x snap-mandatory"
       >
         {items.map((item, i) => {
           const placeholder = PLACEHOLDERS[i];

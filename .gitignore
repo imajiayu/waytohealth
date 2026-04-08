@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# 大型视频资源 — 用外部存储 (Vercel Blob / CDN) 托管
+/public/videos/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

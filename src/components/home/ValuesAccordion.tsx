@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import ChapterMark from '@/components/shared/ChapterMark';
 
 const VALUE_KEYS = ['transparency', 'speed', 'result'] as const;
 
@@ -30,16 +31,29 @@ const VALUE_ACCENTS: Record<string, string> = {
 };
 
 export default async function ValuesAccordion() {
-  const t = await getTranslations('about.values');
+  const [t, tChapters] = await Promise.all([
+    getTranslations('about.values'),
+    getTranslations('homeChapters'),
+  ]);
 
   return (
-    <div className="mt-10 sm:mt-12">
-      <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
-        {t('title')}
-      </h3>
-      <div className="mt-2 accent-line" />
+    <div id="values" className="mt-14 scroll-mt-16 sm:mt-20">
+      <div className="grid grid-cols-12 gap-6 sm:gap-8">
+        {/* 左侧 ── ChapterMark */}
+        <div className="col-span-12 lg:col-span-3">
+          <ChapterMark number="03" label={tChapters('items.values')} />
+        </div>
 
-      <div className="mt-2 grid gap-3 sm:mt-3 sm:gap-6 lg:grid-cols-3">
+        {/* 右侧 ── 标题 */}
+        <div className="col-span-12 lg:col-span-9 lg:pl-4">
+          <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
+            {t('title')}
+          </h3>
+          <div className="mt-2 accent-line" />
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-6 lg:grid-cols-3">
         {VALUE_KEYS.map(key => (
           <div
             key={key}

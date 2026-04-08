@@ -32,6 +32,10 @@
   --font-data: 'JetBrains Mono', monospace;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-body);
   color: #1a1a1a;
