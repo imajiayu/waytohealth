@@ -1,26 +1,16 @@
 import { getTranslations } from 'next-intl/server';
 import { getAllProjects } from '@/lib/data';
 import ProjectCard from '@/components/projects/ProjectCard';
-import ChapterIndex, { type ChapterEntry } from '@/components/shared/ChapterIndex';
 
 export default async function ProjectsSection() {
-  const [t, tNav, tChapters, projects] = await Promise.all([
+  const [t, tNav, projects] = await Promise.all([
     getTranslations('projects'),
     getTranslations('navigation'),
-    getTranslations('homeChapters'),
     getAllProjects(),
   ]);
 
   const mainProjects = projects.slice(0, 6);
   const otherProjects = projects.slice(6);
-
-  // 章节导航 ── 仅在第一个 section 的左侧渲染，作为整页的目录
-  const chapters: ChapterEntry[] = [
-    { key: 'projects', number: '01', label: tChapters('items.projects'), href: '#projects' },
-    { key: 'about', number: '02', label: tChapters('items.about'), href: '#about' },
-    { key: 'values', number: '03', label: tChapters('items.values'), href: '#values' },
-    { key: 'achievements', number: '04', label: tChapters('items.achievements'), href: '#achievements' },
-  ];
 
   return (
     <section id="projects" className="section-y relative scroll-mt-16 overflow-x-clip">
@@ -35,29 +25,19 @@ export default async function ProjectsSection() {
       </div>
 
       <div className="container-page relative">
-        <div className="grid grid-cols-12 gap-6 sm:gap-8">
-          {/* 左侧 ── 章节导航（整页目录） */}
-          <aside className="col-span-12 lg:col-span-3 lg:pt-2">
-            <ChapterIndex chapters={chapters} />
-          </aside>
-
-          {/* 右侧 ── 区域头部 + 内容 */}
-          <div className="col-span-12 lg:col-span-9 lg:pl-4">
-            {/* 区域头部 — 编辑式排版 */}
-            <div>
-              <span className="font-[family-name:var(--font-data)] text-xs font-medium uppercase tracking-[0.2em] text-ukraine-blue-400">
-                {tNav('projects')}
-              </span>
-              <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
-                {t('title')}
-              </h2>
-              <div className="mt-3 accent-line" />
-            </div>
-          </div>
+        {/* 区域头部 — 编辑式排版 */}
+        <div>
+          <span className="font-[family-name:var(--font-data)] text-xs font-medium uppercase tracking-[0.2em] text-ukraine-blue-400">
+            {tNav('projects')}
+          </span>
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
+            {t('title')}
+          </h2>
+          <div className="mt-3 accent-line" />
         </div>
 
         {/* 主项目卡片网格 — 大卡片 3 列 */}
-        <div className="mt-6 grid gap-5 sm:mt-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+        <div className="mt-2 grid gap-5 sm:mt-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
           {mainProjects.map((project, i) => (
             <ProjectCard
               key={project.id}

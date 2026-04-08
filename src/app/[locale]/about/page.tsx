@@ -2,8 +2,6 @@ import { type Locale } from '@/i18n/config';
 import VideoStory from '@/components/about/VideoStory';
 import TeamCollage from '@/components/about/TeamCollage';
 import DocumentLedger from '@/components/about/DocumentLedger';
-import ChapterMark from '@/components/shared/ChapterMark';
-import ChapterIndex from '@/components/shared/ChapterIndex';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -173,6 +171,26 @@ const CONTENT: Record<Locale, AboutContent> = {
   },
 };
 
+/** 章节编号 + 标签 — 重复使用的小组件 */
+function ChapterMark({ number, label }: { number: string; label: string }) {
+  return (
+    <div className="flex items-center gap-4">
+      <span className="font-[family-name:var(--font-display)] text-[3.5rem] font-light leading-none text-ukraine-gold-500 sm:text-[4.5rem]">
+        {number}
+      </span>
+      <div className="flex flex-col gap-1">
+        <span className="h-px w-10 bg-ukraine-blue-300" />
+        <span className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.28em] text-ukraine-blue-600 sm:text-xs">
+          Chapter
+        </span>
+        <span className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight text-ukraine-blue-900 sm:text-lg">
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   const typedLocale: Locale = (locale as Locale) ?? 'ua';
@@ -203,15 +221,24 @@ export default async function AboutPage({ params }: Props) {
         <header className="grid grid-cols-12 gap-6 sm:gap-8">
           {/* 左侧章节索引 ── 杂志目录式导航 */}
           <aside className="col-span-12 lg:col-span-3 lg:pt-2">
-            <ChapterIndex
-              chapters={[
+            <nav aria-label="Chapter index" className="space-y-5 border-l-2 border-ukraine-gold-500 pl-5 lg:space-y-6">
+              {[
                 { key: 'origin', number: '01', label: content.chapters.origin, href: '#chapter-origin' },
                 { key: 'impact', number: '02', label: content.chapters.impact, href: '#chapter-impact' },
                 { key: 'evolution', number: '03', label: content.chapters.evolution, href: '#chapter-evolution' },
                 { key: 'voices', number: '04', label: content.chapters.voices, href: '#chapter-voices' },
                 { key: 'ledger', number: '05', label: content.chapters.ledger, href: '#chapter-ledger' },
-              ]}
-            />
+              ].map((chapter) => (
+                <a key={chapter.key} href={chapter.href} className="group flex items-baseline gap-3">
+                  <span className="font-[family-name:var(--font-display)] text-base font-light leading-none text-ukraine-gold-500 sm:text-lg">
+                    {chapter.number}
+                  </span>
+                  <span className="font-[family-name:var(--font-display)] text-sm italic text-ukraine-blue-700 transition-colors group-hover:text-ukraine-blue-900 sm:text-base">
+                    {chapter.label}
+                  </span>
+                </a>
+              ))}
+            </nav>
           </aside>
 
           {/* 标题 + 引言 */}

@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import ChapterMark from '@/components/shared/ChapterMark';
 import ValuesAccordion from './ValuesAccordion';
 import AchievementsCarousel from './AchievementsCarousel';
 
@@ -36,10 +35,9 @@ const STAT_ICONS: Record<string, React.ReactNode> = {
 };
 
 export default async function AboutSection() {
-  const [t, tNav, tChapters] = await Promise.all([
+  const [t, tNav] = await Promise.all([
     getTranslations('about'),
     getTranslations('navigation'),
-    getTranslations('homeChapters'),
   ]);
 
   return (
@@ -61,26 +59,19 @@ export default async function AboutSection() {
       />
 
       <div className="container-page relative">
-        <div className="grid grid-cols-12 gap-6 sm:gap-8">
-          {/* 左侧 ── ChapterMark */}
-          <div className="col-span-12 lg:col-span-3">
-            <ChapterMark number="02" label={tChapters('items.about')} />
-          </div>
-
-          {/* 右侧 ── 区域标签 + 标题 */}
-          <div className="col-span-12 lg:col-span-9 lg:pl-4">
-            <span className="font-[family-name:var(--font-data)] text-xs font-medium uppercase tracking-[0.2em] text-ukraine-blue-400">
-              {tNav('about')}
-            </span>
-            <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
-              {t('title')}
-            </h2>
-            <div className="mt-3 accent-line" />
-          </div>
+        {/* 区域标签 + 标题 */}
+        <div>
+          <span className="font-[family-name:var(--font-data)] text-xs font-medium uppercase tracking-[0.2em] text-ukraine-blue-400">
+            {tNav('about')}
+          </span>
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
+            {t('title')}
+          </h2>
+          <div className="mt-3 accent-line" />
         </div>
 
         {/* 照片 + 数据卡片 + 使命/愿景 — 两列布局 */}
-        <div className="mt-6 grid items-stretch gap-8 sm:mt-8 sm:gap-12 lg:grid-cols-2">
+        <div className="mt-2 grid items-stretch gap-8 sm:mt-3 sm:gap-12 lg:grid-cols-2">
           {/* 左侧：照片（高度撑满右列） */}
           <div className="relative aspect-[4/3] lg:aspect-auto lg:h-full">
             {/* 装饰色块 — 照片后方向左下偏移，呼应左下金光的视觉重心 */}
