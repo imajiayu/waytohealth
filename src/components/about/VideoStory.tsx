@@ -142,6 +142,7 @@ export default function VideoStory({ src, poster, eyebrow, title, meta, runtime 
             poster={poster}
             controls
             playsInline
+            preload="none"
             className="absolute inset-0 h-full w-full bg-black"
           >
             <track kind="captions" />

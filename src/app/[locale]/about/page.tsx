@@ -195,7 +195,11 @@ export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   const typedLocale: Locale = (locale as Locale) ?? 'ua';
   const content = CONTENT[typedLocale] ?? CONTENT.ua;
-  const videoSrc = typedLocale === 'en' ? '/videos/about-en.mp4' : '/videos/about-ua.mp4';
+  // 视频托管在 Vercel Blob ── 所有环境（含 dev）统一从公开 CDN 拉取，
+  // 避免大文件污染 git 仓库与本地工作区
+  const videoSrc = typedLocale === 'en'
+    ? 'https://tuilgvi6ppemprps.public.blob.vercel-storage.com/about-us-videos/about-en.mp4'
+    : 'https://tuilgvi6ppemprps.public.blob.vercel-storage.com/about-us-videos/about-ua.mp4';
 
   return (
     <article className="relative overflow-hidden">
