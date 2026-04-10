@@ -4,36 +4,48 @@
   /* Logo 渐变主色系: #006CB2 → #008DB8 → #00A7BD → #77C3CD → #DCDCDC */
   --color-ukraine-blue-50: #e6f4f8;
   --color-ukraine-blue-100: #b3dfe8;
-  --color-ukraine-blue-200: #77C3CD;
-  --color-ukraine-blue-300: #00A7BD;
-  --color-ukraine-blue-400: #008DB8;
-  --color-ukraine-blue-500: #006CB2;
+  --color-ukraine-blue-200: #77c3cd;
+  --color-ukraine-blue-300: #00a7bd;
+  --color-ukraine-blue-400: #008db8;
+  --color-ukraine-blue-500: #006cb2;
   --color-ukraine-blue-600: #005a94;
   --color-ukraine-blue-700: #004876;
   --color-ukraine-blue-800: #003658;
   --color-ukraine-blue-900: #00243a;
+  --color-ukraine-navy: #0d1b2e;
 
   --color-ukraine-gold-50: #fef8e6;
   --color-ukraine-gold-100: #fceab3;
   --color-ukraine-gold-200: #fadc80;
   --color-ukraine-gold-300: #f8ce4d;
   --color-ukraine-gold-400: #f6c01a;
-  --color-ukraine-gold-500: #F5B800;
+  --color-ukraine-gold-500: #f5b800;
   --color-ukraine-gold-600: #cc9a00;
   --color-ukraine-gold-700: #a37b00;
   --color-ukraine-gold-800: #7a5c00;
   --color-ukraine-gold-900: #523d00;
 
-  --color-life-500: #10B981;
-  --color-warm-500: #E76F51;
+  --color-life-500: #10b981;
+  --color-warm-500: #e76f51;
 
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Source Sans 3', sans-serif;
-  --font-data: 'JetBrains Mono', monospace;
+  /* 字体系统 — 实际字体由 next/font 注入到 <html> 上的同名 CSS 变量,
+   * 这里的定义是 Tailwind 工具类的 fallback。
+   * --font-body / --font-display: Fixel Text (MacPaw 开源,乌克兰主字体)
+   * --font-accent: PT Serif (替代品牌规范中的 Sitka Text,用于装饰性衬线点缀)
+   * --font-data: JetBrains Mono (等宽,用于数字/标签/序号)
+   */
+  --font-body: 'Fixel Text', system-ui, sans-serif;
+  --font-display: 'Fixel Text', system-ui, sans-serif;
+  --font-accent: 'PT Serif', Georgia, serif;
+  --font-data: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 html {
   scroll-behavior: smooth;
+  /* --font-display 别名到 --font-body: 标题和正文都用 Fixel Text,
+   * 由 font-weight 区分层级 (正文 400/500,标题 700/800)
+   */
+  --font-display: var(--font-body);
 }
 
 body {
@@ -130,7 +142,6 @@ body {
 .glow-teal { background: radial-gradient(circle, var(--color-ukraine-blue-300), transparent); }
 .glow-blue { background: radial-gradient(circle, var(--color-ukraine-blue-500), transparent); }
 .glow-blue-soft { background: radial-gradient(circle, var(--color-ukraine-blue-500), transparent 70%); }
-.glow-brand-soft { background: radial-gradient(circle at 30% 30%, var(--color-ukraine-blue-500), var(--color-ukraine-blue-300), transparent 70%); }
 .glow-gold { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent); }
 .glow-gold-soft { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent 70%); }
 
@@ -265,6 +276,18 @@ body {
   animation: hero-scroll-pulse 2.4s ease-in-out 1.5s infinite;
 }
 
+/* 详情页通用入场动画 */
+@keyframes detail-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 项目卡片入场动画 */
 @keyframes projectCardIn {
   from {
@@ -275,4 +298,37 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Excel 预览表格样式 */
+.excel-preview table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-data), monospace;
+  font-size: 12px;
+}
+
+.excel-preview th,
+.excel-preview td {
+  border: 1px solid var(--color-ukraine-blue-100);
+  padding: 4px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.excel-preview th {
+  background-color: var(--color-ukraine-blue-50);
+  font-weight: 600;
+  color: var(--color-ukraine-blue-700);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.excel-preview tr:nth-child(even) {
+  background-color: rgba(230, 244, 248, 0.3);
+}
+
+.excel-preview tr:hover {
+  background-color: rgba(230, 244, 248, 0.6);
 }

@@ -42,8 +42,8 @@ function LinkedinIcon({ className }: { className?: string }) {
 /* ── Constants ───────────────────────────────────────────────── */
 
 const SOCIAL_LINKS = [
-  { name: 'Facebook', href: 'https://www.facebook.com/Waytohealthfoundation', icon: FacebookIcon },
-  { name: 'Instagram', href: 'https://www.instagram.com/way__to_health/', icon: InstagramIcon },
+  { name: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61573630085926&locale=ru_RU', icon: FacebookIcon },
+  { name: 'Instagram', href: 'https://www.instagram.com/way_to_health_foundation?igsh=NndmbjM2bGtibnNl', icon: InstagramIcon },
   { name: 'TikTok', href: 'https://www.tiktok.com/@way_to_health', icon: TikTokIcon },
   { name: 'LinkedIn', href: 'https://www.linkedin.com/company/way-to-health-ua/', icon: LinkedinIcon },
 ];
@@ -56,8 +56,8 @@ const LEGAL_LINKS = [
 
 const IBAN = 'UA363052990000026007050555233';
 const EMAIL = 'waytohealthfoundation@gmail.com';
-const PHONE_DISPLAY = '+380 63 748 2530';
-const PHONE_TEL = '+380637482530';
+const PHONE_DISPLAY = '+380 63 377 20 22';
+const PHONE_TEL = '+380633772022';
 const MAPS_URL =
   'https://www.google.com/maps/search/?api=1&query=' +
   encodeURIComponent('Slobozhanske village Heroiv Ukrainy 27C Ukraine');
@@ -75,7 +75,7 @@ export default async function Footer() {
   return (
     <footer id="footer" className="ambient-canvas px-3 pb-3 sm:px-6 sm:pb-4 lg:px-8">
       {/* 圆角深色卡片 — 与 HeroSection 的圆角矩形风格一致 */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0d1b2e] text-white sm:rounded-3xl">
+      <div className="relative overflow-hidden rounded-2xl bg-ukraine-navy text-white sm:rounded-3xl">
         {/* 装饰性光晕 */}
         <div className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full opacity-15 blur-3xl glow-teal" />
         <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full opacity-10 blur-3xl glow-blue" />
@@ -253,7 +253,7 @@ export default async function Footer() {
 
               {/* 捐赠按钮 — 使用品牌渐变，与导航栏 / 项目卡片 Donate 按钮统一 */}
               <Link
-                href="/donate"
+                href="/projects?id=12"
                 className="group gradient-brand flex w-full items-center justify-between gap-3
                            rounded-xl px-6 py-4 font-semibold text-white
                            shadow-[0_2px_12px_rgba(0,108,178,0.35)]

@@ -1,6 +1,16 @@
-import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import TermsTOC from '@/components/terms/TermsTOC';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+  return {
+    title: t('termsTitle'),
+    description: t('termsDescription'),
+  };
+}
 
 /* 各小节配置 — key 用于翻译访问，items 是子条目数量 */
 const SECTIONS = [

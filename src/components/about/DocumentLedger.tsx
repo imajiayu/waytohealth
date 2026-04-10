@@ -8,11 +8,13 @@ type DocumentItem = {
 
 type Props = {
   documents: DocumentItem[];
-  /** 表头四列文案：编号、文件、格式、操作 */
+  /** 表头文案：编号、文件、格式、大小、操作 */
   labels: {
     id: string;
     file: string;
     type: string;
+    size: string;
+    format: string;
     open: string;
   };
 };
@@ -44,7 +46,7 @@ export default function DocumentLedger({ documents, labels }: Props) {
         <span>{labels.id}</span>
         <span>{labels.file}</span>
         <span>{labels.type}</span>
-        <span className="text-right">Size</span>
+        <span className="text-right">{labels.size}</span>
         <span className="text-right">{labels.open}</span>
       </div>
 
@@ -76,13 +78,13 @@ export default function DocumentLedger({ documents, labels }: Props) {
                   </span>
                   {/* 移动端：在标题下显示元信息 */}
                   <span className="mt-1 block font-[family-name:var(--font-data)] text-[10px] uppercase tracking-[0.2em] text-ukraine-blue-400 md:hidden">
-                    PDF · {size}
+                    {labels.format} · {size}
                   </span>
                 </span>
 
                 {/* 类型 ── 桌面端单独列 */}
                 <span className="hidden font-[family-name:var(--font-data)] text-[11px] font-medium uppercase tracking-[0.22em] text-ukraine-blue-500 md:block">
-                  PDF · A4
+                  {labels.format} · A4
                 </span>
 
                 {/* 大小 */}

@@ -64,7 +64,7 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
       }}
     >
       <Link
-        href={`/projects/${id}`}
+        href={`/projects?id=${id}`}
         className={`group relative flex flex-col overflow-hidden bg-white transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-12px_rgba(0,108,178,0.15)] ${compact ? 'rounded-xl' : 'rounded-2xl'}`}
         style={{
           boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',

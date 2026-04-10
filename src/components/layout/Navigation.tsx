@@ -2,19 +2,18 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, usePathname } from '@/i18n/navigation';
+import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import Image from 'next/image';
 import { triggerRouteChange } from './LoadingBar';
 
 const menuItems = [
-  { key: 'projects', path: '/projects' },
+  { key: 'projects', path: '/projects?id=12' },
   { key: 'about', path: '/about' },
   { key: 'news', path: '/news' },
   { key: 'merch', path: '/merch' },
-  { key: 'partners', path: '/partners' },
   // contacts 在所有页面都直接滚动到 footer
-  { key: 'contacts', path: null as string | null },
+  { key: 'contacts', path: null as string | null, scrollTo: 'footer' },
 ];
 
 export default function Navigation() {
@@ -71,20 +70,28 @@ export default function Navigation() {
     });
   }
 
-  function handleMenuItemClick(path: string | null) {
+  function handleMenuItemClick(item: typeof menuItems[number]) {
     setIsMenuOpen(false);
-    if (!path) {
-      // contacts：滚动到 footer
-      setTimeout(() => {
-        const el = document.getElementById('footer');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 350);
-    } else {
-      // 跳转到对应页面
+
+    if (item.scrollTo) {
+      const scrollToEl = () => {
+        const el = document.getElementById(item.scrollTo!);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      };
+
+      // 如果需要先跳转页面（如 projects 需要先回首页）
+      if (item.path && pathname !== item.path) {
+        triggerRouteChange();
+        router.push(item.path);
+        // 等页面加载后再滚动
+        setTimeout(scrollToEl, 600);
+      } else {
+        // 已在目标页面，等菜单关闭动画后直接滚动
+        setTimeout(scrollToEl, 350);
+      }
+    } else if (item.path) {
       triggerRouteChange();
-      router.push(path);
+      router.push(item.path);
     }
   }
 
@@ -94,13 +101,13 @@ export default function Navigation() {
       <nav className={`sticky top-0 z-50 bg-white/90 backdrop-blur-lg border-b border-gray-100/80
                        transition-transform duration-300 ease-out mt-[2px]
                        ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container-page">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
-            <button
-              onClick={() => { if (pathname !== '/') { triggerRouteChange(); router.push('/'); } }}
-              className="flex-shrink-0 cursor-pointer group"
-              aria-label="Home"
+            <Link
+              href="/"
+              onClick={() => { if (pathname !== '/') triggerRouteChange(); }}
+              className="flex-shrink-0 group"
             >
               <Image
                 src={locale === 'ua' ? '/images/logo-ua.png' : '/images/logo-en.png'}
@@ -110,13 +117,13 @@ export default function Navigation() {
                 className="h-7 sm:h-9 w-auto transition-opacity group-hover:opacity-80"
                 priority
               />
-            </button>
+            </Link>
 
             {/* 右侧控制按钮 */}
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Donate 按钮 */}
               <button
-                onClick={() => handleMenuItemClick('/donate')}
+                onClick={() => handleMenuItemClick({ key: 'donate', path: '/projects?id=12' })}
                 className="gradient-brand flex items-center rounded-xl
                            px-3.5 sm:px-5 py-1.5 sm:py-2 text-[12px] sm:text-[13px]
                            font-bold tracking-wide text-white
@@ -214,7 +221,10 @@ export default function Navigation() {
         <nav className="px-8 pt-6 flex-1">
           <ul>
             {menuItems.map((item, i) => {
-              const isActive = item.path && pathname === item.path;
+              // scrollTo 类型的菜单项不显示 active 状态（它们是滚动锚点，不是独立页面）
+              // projects 用前缀匹配，在任意 /projects/* 页面都高亮
+              const isActive = item.path && !item.scrollTo &&
+                (pathname === item.path || (pathname.startsWith('/projects') && item.key === 'projects'));
               return (
                 <li key={item.key}>
                   {isActive ? (
@@ -231,7 +241,7 @@ export default function Navigation() {
                     </span>
                   ) : (
                     <button
-                      onClick={() => handleMenuItemClick(item.path)}
+                      onClick={() => handleMenuItemClick(item)}
                       className={`w-full text-left py-[14px] text-[20px]
                                  font-[family-name:var(--font-display)] font-medium tracking-wide
                                  text-ukraine-blue-800 hover:text-ukraine-gold-500

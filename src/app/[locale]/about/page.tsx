@@ -1,4 +1,5 @@
-import { type Locale } from '@/i18n/config';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import VideoStory from '@/components/about/VideoStory';
 import TeamCollage from '@/components/about/TeamCollage';
 import DocumentLedger from '@/components/about/DocumentLedger';
@@ -6,6 +7,15 @@ import DocumentLedger from '@/components/about/DocumentLedger';
 type Props = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+  return {
+    title: t('aboutTitle'),
+    description: t('aboutDescription'),
+  };
+}
 
 type TeamMember = {
   name: string;
@@ -18,161 +28,8 @@ type DocumentItem = {
   href: string;
 };
 
-type MetaItem = {
-  label: string;
-  value: string;
-};
-
-type AboutContent = {
-  // 标题区
-  eyebrow: string;
-  title: string;
-  titleAccent: string;
-
-  // 首屏元数据 ── 期间 / 地点 / 范围
-  meta: {
-    period: MetaItem;
-    location: MetaItem;
-    scope: MetaItem;
-  };
-
-  // 章节标签
-  chapters: {
-    origin: string;
-    impact: string;
-    evolution: string;
-    voices: string;
-    ledger: string;
-  };
-
-  // 内容
-  paragraphs: string[];
-  impact: string;
-  impactBig: string;
-  impactSmall: string;
-  followUp: string;
-
-  // 视频
-  videoEyebrow: string;
-  videoTitle: string;
-  videoMeta: string;
-  videoRuntime: string;
-
-  // 团队
-  teamTitle: string;
-  teamSubtitle: string;
-  team: TeamMember[];
-
-  // 文档
-  transparencyTitle: string;
-  transparencySubtitle: string;
-  documents: DocumentItem[];
-  ledgerLabels: { id: string; file: string; type: string; open: string };
-};
-
-const CONTENT: Record<Locale, AboutContent> = {
-  ua: {
-    eyebrow: 'Про благодійну організацію',
-    title: 'Шлях, який',
-    titleAccent: 'змінює життя',
-    meta: {
-      period: { label: 'Період', value: '2022 — сьогодні' },
-      location: { label: 'Місце', value: 'смт. Слобожанське, Дніпропетровська область, Україна' },
-      scope: { label: 'Сфера', value: 'Реабілітація, гуманітарна допомога, психологічна підтримка' },
-    },
-    chapters: {
-      origin: 'Початок',
-      impact: 'Вплив',
-      evolution: 'Розвиток',
-      voices: 'Команда',
-      ledger: 'Звітність',
-    },
-    paragraphs: [
-      'Благодійний фонд «Шлях до здоров\'я» був заснований у вересні 2022 року Микитою Жаліним та Олексієм Дубовиком у відповідь на зростаючу потребу в якісній реабілітації в Україні.',
-      'Фонд залучає фінансову та ресурсну підтримку для забезпечення безкоштовної реабілітації пацієнтів, а також розвитку медичних програм. Команда активно працює з міжнародними партнерами, реалізує фандрейзингові ініціативи та забезпечує центр необхідним обладнанням і ресурсами для надання допомоги.',
-    ],
-    impact: 'З моменту створення фонд профінансував реабілітацію понад 500 пацієнтів із важкими травмами та пораненнями, допомагаючи їм повернутися до повноцінного життя.',
-    impactBig: '500+',
-    impactSmall: 'пацієнтів повернулись до повноцінного життя',
-    followUp: 'Водночас із розвитком фонду розширювалися і напрями допомоги. Окрім підтримки реабілітації постраждалих від війни, БО «БФ "Шлях до здоров\'я"» також реалізує проєкти з психологічної підтримки, впровадження інноваційних методів відновлення, надання щоденної допомоги населенню, а також закупівлі обладнання та спеціалізованого транспорту.',
-    videoEyebrow: 'Розмова зі співзасновником',
-    videoTitle: 'Чому ми робимо те, що робимо',
-    videoMeta: 'З Олексієм Дубовиком · спів­засновник',
-    videoRuntime: 'Документальне відео',
-    teamTitle: 'Команда',
-    teamSubtitle: 'Люди, які щодня перетворюють підтримку на конкретні дії',
-    team: [
-      { name: 'Олександр Хорев', role: 'комунікаційний менеджер', image: '/images/team/oleksandr-khorev.jpg' },
-      { name: 'Анастасія Сидоркіна', role: 'керівниця проєктів', image: '/images/team/anastasiia-sydorkina.jpg' },
-      { name: 'Олексій Дубовик', role: 'співзасновник', image: '/images/team/oleksii-dubovyk.jpg' },
-      { name: 'Олександр Федонюк', role: 'керівник фонду', image: '/images/team/oleksandr-fedoniuk.jpg' },
-      { name: 'Єгор Воробйов', role: 'фандрейзер, грантрайтер', image: '/images/team/yehor-vorobiov.jpg' },
-      { name: 'Софія Тарнавська', role: 'СММ менеджерка', image: '/images/team/sofiia-tarnavska.jpg' },
-    ],
-    transparencyTitle: 'Прозорість',
-    transparencySubtitle: 'Повний реєстр документів — від статуту до річних фінансових звітів',
-    documents: [
-      { title: 'Статут', href: '/documents/about/statute.pdf' },
-      { title: 'Витяг з реєстру неприбуткових організацій', href: '/documents/about/nonprofit-register-extract.pdf' },
-      { title: 'Витяг ЄДРПОУ', href: '/documents/about/edr-extract.pdf' },
-      { title: 'Річний звіт 2025', href: '/documents/about/annual-report-2025.pdf' },
-      { title: 'Фінансовий звіт 2025', href: '/documents/about/financial-report-2025.pdf' },
-    ],
-    ledgerLabels: { id: '№', file: 'Документ', type: 'Тип', open: 'Відкрити' },
-  },
-  en: {
-    eyebrow: 'About the charitable organization',
-    title: 'A path that',
-    titleAccent: 'changes lives',
-    meta: {
-      period: { label: 'Period', value: '2022 — present' },
-      location: { label: 'Location', value: 'Slobozhanske, Dnipropetrovsk Oblast, Ukraine' },
-      scope: { label: 'Scope', value: 'Rehabilitation, humanitarian aid, psychological support' },
-    },
-    chapters: {
-      origin: 'Origin',
-      impact: 'Impact',
-      evolution: 'Evolution',
-      voices: 'Team',
-      ledger: 'Reporting',
-    },
-    paragraphs: [
-      'The "Way to Health" Charity Foundation was established in September 2022 by Mykyta Zhalin and Oleksii Dubovyk in response to the growing need for quality rehabilitation in Ukraine.',
-      'The foundation attracts financial and in-kind support to provide free rehabilitation for patients and to develop medical programs. The team actively works with international partners, runs fundraising initiatives, and equips the center with the resources needed to deliver care.',
-    ],
-    impact: 'Since its launch, the foundation has financed rehabilitation for more than 500 patients with severe injuries and trauma, helping them return to a full life.',
-    impactBig: '500+',
-    impactSmall: 'patients returned to a full life',
-    followUp: 'As the foundation grew, so did its areas of support. In addition to rehabilitation for people affected by war, the organization also runs psychological support projects, introduces innovative recovery methods, provides day-to-day assistance for civilians, and procures equipment and specialized transport.',
-    videoEyebrow: 'A conversation with the co-founder',
-    videoTitle: 'Why we do what we do',
-    videoMeta: 'With Oleksii Dubovyk · co-founder',
-    videoRuntime: 'Documentary',
-    teamTitle: 'Team',
-    teamSubtitle: 'The people who turn support into action, every single day',
-    team: [
-      { name: 'Oleksandr Khorev', role: 'communications manager', image: '/images/team/oleksandr-khorev.jpg' },
-      { name: 'Anastasiia Sydorkina', role: 'project lead', image: '/images/team/anastasiia-sydorkina.jpg' },
-      { name: 'Oleksii Dubovyk', role: 'co-founder', image: '/images/team/oleksii-dubovyk.jpg' },
-      { name: 'Oleksandr Fedoniuk', role: 'foundation director', image: '/images/team/oleksandr-fedoniuk.jpg' },
-      { name: 'Yehor Vorobiov', role: 'fundraiser, grant writer', image: '/images/team/yehor-vorobiov.jpg' },
-      { name: 'Sofiia Tarnavska', role: 'SMM manager', image: '/images/team/sofiia-tarnavska.jpg' },
-    ],
-    transparencyTitle: 'Transparency',
-    transparencySubtitle: 'A full registry of documents — from the statute to annual financial reports',
-    documents: [
-      { title: 'Statute', href: '/documents/about/statute.pdf' },
-      { title: 'Extract from the Register of Non-Profit Organizations', href: '/documents/about/nonprofit-register-extract.pdf' },
-      { title: 'EDRPOU Extract', href: '/documents/about/edr-extract.pdf' },
-      { title: 'Annual Report 2025', href: '/documents/about/annual-report-2025.pdf' },
-      { title: 'Financial Report 2025', href: '/documents/about/financial-report-2025.pdf' },
-    ],
-    ledgerLabels: { id: '№', file: 'Document', type: 'Type', open: 'Open' },
-  },
-};
-
 /** 章节编号 + 标签 — 重复使用的小组件 */
-function ChapterMark({ number, label }: { number: string; label: string }) {
+function ChapterMark({ number, label, chapterLabel }: { number: string; label: string; chapterLabel: string }) {
   return (
     <div className="flex items-center gap-4">
       <span className="font-[family-name:var(--font-display)] text-[3.5rem] font-light leading-none text-ukraine-gold-500 sm:text-[4.5rem]">
@@ -181,7 +38,7 @@ function ChapterMark({ number, label }: { number: string; label: string }) {
       <div className="flex flex-col gap-1">
         <span className="h-px w-10 bg-ukraine-blue-300" />
         <span className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.28em] text-ukraine-blue-600 sm:text-xs">
-          Chapter
+          {chapterLabel}
         </span>
         <span className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight text-ukraine-blue-900 sm:text-lg">
           {label}
@@ -193,13 +50,18 @@ function ChapterMark({ number, label }: { number: string; label: string }) {
 
 export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
-  const typedLocale: Locale = (locale as Locale) ?? 'ua';
-  const content = CONTENT[typedLocale] ?? CONTENT.ua;
+  const t = await getTranslations('aboutPage');
+
   // 视频托管在 Vercel Blob ── 所有环境（含 dev）统一从公开 CDN 拉取，
   // 避免大文件污染 git 仓库与本地工作区
-  const videoSrc = typedLocale === 'en'
+  const videoSrc = locale === 'en'
     ? 'https://tuilgvi6ppemprps.public.blob.vercel-storage.com/about-us-videos/about-en.mp4'
     : 'https://tuilgvi6ppemprps.public.blob.vercel-storage.com/about-us-videos/about-ua.mp4';
+
+  // 从翻译中获取结构化数据
+  const team = Array.from({ length: 6 }, (_, i) => t.raw(`team.${i}`)) as TeamMember[];
+  const documents = Array.from({ length: 5 }, (_, i) => t.raw(`documents.${i}`)) as DocumentItem[];
+  const ledgerLabels = t.raw('ledgerLabels') as { id: string; file: string; type: string; size: string; format: string; open: string };
 
   return (
     <article className="relative overflow-hidden">
@@ -226,19 +88,13 @@ export default async function AboutPage({ params }: Props) {
           {/* 左侧章节索引 ── 杂志目录式导航 */}
           <aside className="col-span-12 lg:col-span-3 lg:pt-2">
             <nav aria-label="Chapter index" className="space-y-5 border-l-2 border-ukraine-gold-500 pl-5 lg:space-y-6">
-              {[
-                { key: 'origin', number: '01', label: content.chapters.origin, href: '#chapter-origin' },
-                { key: 'impact', number: '02', label: content.chapters.impact, href: '#chapter-impact' },
-                { key: 'evolution', number: '03', label: content.chapters.evolution, href: '#chapter-evolution' },
-                { key: 'voices', number: '04', label: content.chapters.voices, href: '#chapter-voices' },
-                { key: 'ledger', number: '05', label: content.chapters.ledger, href: '#chapter-ledger' },
-              ].map((chapter) => (
-                <a key={chapter.key} href={chapter.href} className="group flex items-baseline gap-3">
+              {(['origin', 'impact', 'evolution', 'voices', 'ledger'] as const).map((key, i) => (
+                <a key={key} href={`#chapter-${key}`} className="group flex items-baseline gap-3">
                   <span className="font-[family-name:var(--font-display)] text-base font-light leading-none text-ukraine-gold-500 sm:text-lg">
-                    {chapter.number}
+                    {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="font-[family-name:var(--font-display)] text-sm italic text-ukraine-blue-700 transition-colors group-hover:text-ukraine-blue-900 sm:text-base">
-                    {chapter.label}
+                    {t(`chapters.${key}`)}
                   </span>
                 </a>
               ))}
@@ -250,34 +106,31 @@ export default async function AboutPage({ params }: Props) {
             <div className="flex items-center gap-3">
               <span className="h-px w-12 bg-ukraine-gold-500" />
               <span className="font-[family-name:var(--font-data)] text-[11px] font-semibold uppercase tracking-[0.28em] text-ukraine-gold-700 sm:text-xs">
-                {content.eyebrow}
+                {t('eyebrow')}
               </span>
             </div>
 
             <h1 className="mt-4 font-[family-name:var(--font-display)] text-[2.5rem] font-medium leading-[0.95] tracking-[-0.02em] text-ukraine-blue-900 sm:mt-6 sm:text-[4rem] lg:text-[5.5rem]">
-              {content.title}
+              {t('title')}
               <br />
-              <span className="italic text-ukraine-blue-500">{content.titleAccent}.</span>
+              <span className="text-ukraine-blue-500">{t('titleAccent')}.</span>
             </h1>
 
             {/* 杂志元数据 strip ── 期间 / 地点 / 范围 */}
             <dl className="mt-6 grid grid-cols-1 gap-y-4 border-y border-ukraine-blue-200/60 py-4 sm:mt-8 sm:grid-cols-3 sm:gap-x-8 sm:py-5">
-              {(['period', 'location', 'scope'] as const).map((key, i) => {
-                const item = content.meta[key];
-                return (
-                  <div
-                    key={key}
-                    className={i > 0 ? 'sm:border-l sm:border-ukraine-blue-200/60 sm:pl-8' : ''}
-                  >
-                    <dt className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.28em] text-ukraine-blue-500">
-                      {item.label}
-                    </dt>
-                    <dd className="mt-2 font-[family-name:var(--font-display)] text-[15px] font-medium leading-snug tracking-tight text-ukraine-blue-900 sm:text-base">
-                      {item.value}
-                    </dd>
-                  </div>
-                );
-              })}
+              {(['period', 'location', 'scope'] as const).map((key, i) => (
+                <div
+                  key={key}
+                  className={i > 0 ? 'sm:border-l sm:border-ukraine-blue-200/60 sm:pl-8' : ''}
+                >
+                  <dt className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.28em] text-ukraine-blue-500">
+                    {t(`meta.${key}.label`)}
+                  </dt>
+                  <dd className="mt-2 font-[family-name:var(--font-display)] text-[15px] font-medium leading-snug tracking-tight text-ukraine-blue-900 sm:text-base">
+                    {t(`meta.${key}.value`)}
+                  </dd>
+                </div>
+              ))}
             </dl>
 
           </div>
@@ -288,7 +141,7 @@ export default async function AboutPage({ params }: Props) {
             ════════════════════════════════════════════ */}
         <section id="chapter-origin" className="mt-14 grid scroll-mt-24 grid-cols-12 gap-6 sm:mt-20 sm:gap-8">
           <div className="col-span-12 lg:col-span-3">
-            <ChapterMark number="01" label={content.chapters.origin} />
+            <ChapterMark number="01" label={t('chapters.origin')} chapterLabel={t('chapterLabel')} />
           </div>
 
           <div className="col-span-12 lg:col-span-9 lg:pl-4">
@@ -298,14 +151,14 @@ export default async function AboutPage({ params }: Props) {
                 className="float-left mt-1 mr-3 font-[family-name:var(--font-display)] text-[5.5rem] font-medium leading-[0.78] text-ukraine-gold-500 sm:mr-4 sm:text-[7rem]"
                 aria-hidden="true"
               >
-                {content.paragraphs[0]?.charAt(0)}
+                {t('paragraphs.0').charAt(0)}
               </span>
-              {content.paragraphs[0]?.slice(1)}
+              {t('paragraphs.0').slice(1)}
             </p>
 
             {/* 第二段 ── 缩进偏移 */}
             <p className="mt-6 max-w-3xl text-lg leading-[1.7] text-ukraine-blue-800/85 sm:ml-16 sm:mt-8 sm:text-[1.15rem]">
-              {content.paragraphs[1]}
+              {t('paragraphs.1')}
             </p>
           </div>
         </section>
@@ -316,7 +169,7 @@ export default async function AboutPage({ params }: Props) {
         <section id="chapter-impact" className="mt-4 scroll-mt-24 sm:mt-6">
           <div className="relative z-10 grid grid-cols-12 gap-6 sm:gap-8">
             <div className="col-span-12 lg:col-span-3">
-              <ChapterMark number="02" label={content.chapters.impact} />
+              <ChapterMark number="02" label={t('chapters.impact')} chapterLabel={t('chapterLabel')} />
             </div>
           </div>
 
@@ -327,11 +180,12 @@ export default async function AboutPage({ params }: Props) {
               aria-hidden="true"
               className="pointer-events-none select-none text-center font-[family-name:var(--font-display)] text-[11rem] font-semibold leading-[0.78] tracking-[-0.04em] sm:text-[18rem] lg:text-[24rem]"
               style={{
+                // ukraine-gold-500 的半透明描边，Tailwind 无法直接设置 WebkitTextStroke
                 WebkitTextStroke: '1.5px rgba(245, 184, 0, 0.55)',
                 color: 'transparent',
               }}
             >
-              {content.impactBig}
+              {t('impactBig')}
             </div>
 
             {/* 数字下方的引文 */}
@@ -340,11 +194,11 @@ export default async function AboutPage({ params }: Props) {
               <div className="col-span-12 lg:col-span-9 lg:pl-4">
                 <div className="border-l-2 border-ukraine-gold-500 pl-6 sm:pl-8">
                   <p className="font-[family-name:var(--font-display)] text-2xl font-medium leading-[1.35] tracking-tight text-ukraine-blue-900 sm:text-[1.85rem] lg:text-[2.1rem]">
-                    {content.impact}
+                    {t('impact')}
                   </p>
                   <div className="mt-3 flex items-center gap-3">
                     <span className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.28em] text-ukraine-blue-500 sm:text-xs">
-                      {content.impactSmall}
+                      {t('impactSmall')}
                     </span>
                   </div>
                 </div>
@@ -361,18 +215,22 @@ export default async function AboutPage({ params }: Props) {
                   className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.32em] text-ukraine-blue-500"
                   style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                 >
-                  Watch · Listen · Witness
+                  {t('watchListenWitness')}
                 </div>
               </div>
             </div>
             <div className="col-span-12 lg:col-span-10">
               <VideoStory
-                key={typedLocale}
+                key={locale}
                 src={videoSrc}
-                eyebrow={content.videoEyebrow}
-                title={content.videoTitle}
-                meta={content.videoMeta}
-                runtime={content.videoRuntime}
+                eyebrow={t('video.eyebrow')}
+                title={t('video.title')}
+                meta={t('video.meta')}
+                runtime={t('video.runtime')}
+                rec={t('video.rec')}
+                genre={t('video.genre')}
+                quality={t('video.quality')}
+                pressPlay={t('video.pressPlay')}
               />
             </div>
           </div>
@@ -383,12 +241,12 @@ export default async function AboutPage({ params }: Props) {
             ════════════════════════════════════════════ */}
         <section id="chapter-evolution" className="mt-14 grid scroll-mt-24 grid-cols-12 gap-6 sm:mt-20 sm:gap-8">
           <div className="col-span-12 lg:col-span-3">
-            <ChapterMark number="03" label={content.chapters.evolution} />
+            <ChapterMark number="03" label={t('chapters.evolution')} chapterLabel={t('chapterLabel')} />
           </div>
 
           <div className="col-span-12 lg:col-span-9 lg:pl-4">
             <p className="text-lg leading-[1.75] text-ukraine-blue-800/85 sm:text-xl sm:leading-[1.7]">
-              {content.followUp}
+              {t('followUp')}
             </p>
 
             {/* 装饰：分章符 */}
@@ -406,20 +264,20 @@ export default async function AboutPage({ params }: Props) {
         <section id="chapter-voices" className="mt-14 scroll-mt-24 sm:mt-20">
           <div className="grid grid-cols-12 gap-6 sm:gap-8">
             <div className="col-span-12 lg:col-span-3">
-              <ChapterMark number="04" label={content.chapters.voices} />
+              <ChapterMark number="04" label={t('chapters.voices')} chapterLabel={t('chapterLabel')} />
             </div>
             <div className="col-span-12 lg:col-span-9 lg:pl-4">
               <h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight text-ukraine-blue-900 sm:text-4xl lg:text-5xl">
-                {content.teamTitle}
+                {t('teamTitle')}
               </h2>
               <p className="mt-3 max-w-xl text-base leading-relaxed text-ukraine-blue-700/80 sm:text-lg">
-                {content.teamSubtitle}
+                {t('teamSubtitle')}
               </p>
             </div>
           </div>
 
           <div className="mt-8 sm:mt-10">
-            <TeamCollage members={content.team} />
+            <TeamCollage members={team} noPortraitLabel={t('noPortrait')} />
           </div>
         </section>
 
@@ -429,14 +287,14 @@ export default async function AboutPage({ params }: Props) {
         <section id="chapter-ledger" className="mt-14 scroll-mt-24 sm:mt-20">
           <div className="grid grid-cols-12 gap-6 sm:gap-8">
             <div className="col-span-12 lg:col-span-3">
-              <ChapterMark number="05" label={content.chapters.ledger} />
+              <ChapterMark number="05" label={t('chapters.ledger')} chapterLabel={t('chapterLabel')} />
             </div>
             <div className="col-span-12 lg:col-span-9 lg:pl-4">
               <h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight text-ukraine-blue-900 sm:text-4xl lg:text-5xl">
-                {content.transparencyTitle}
+                {t('transparencyTitle')}
               </h2>
               <p className="mt-3 max-w-xl text-base leading-relaxed text-ukraine-blue-700/80 sm:text-lg">
-                {content.transparencySubtitle}
+                {t('transparencySubtitle')}
               </p>
             </div>
           </div>
@@ -446,21 +304,23 @@ export default async function AboutPage({ params }: Props) {
               {/* 装饰印章 */}
               <div className="hidden lg:block">
                 <div className="relative inline-flex h-32 w-32 items-center justify-center rounded-full border border-ukraine-gold-500/40">
-                  <div className="absolute inset-2 rounded-full border border-ukraine-gold-500/30" style={{ borderStyle: 'dashed' }} />
+                  <div className="absolute inset-2 rounded-full border border-dashed border-ukraine-gold-500/30" />
                   <div className="text-center">
                     <div className="font-[family-name:var(--font-data)] text-[9px] font-bold uppercase tracking-[0.22em] text-ukraine-gold-700">
-                      Verified
+                      {t('verified')}
                     </div>
-                    <div className="mt-1 font-[family-name:var(--font-display)] text-2xl font-medium leading-none text-ukraine-blue-800">2025</div>
+                    <div className="mt-1 font-[family-name:var(--font-display)] text-2xl font-medium leading-none text-ukraine-blue-800">
+                      {t('verifiedYear')}
+                    </div>
                     <div className="mt-1 font-[family-name:var(--font-data)] text-[8px] uppercase tracking-[0.2em] text-ukraine-gold-600">
-                      Open files
+                      {t('openFiles')}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className="col-span-12 lg:col-span-9">
-              <DocumentLedger documents={content.documents} labels={content.ledgerLabels} />
+              <DocumentLedger documents={documents} labels={ledgerLabels} />
             </div>
           </div>
         </section>

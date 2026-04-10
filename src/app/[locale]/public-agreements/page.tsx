@@ -1,6 +1,16 @@
-import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import TermsTOC from '@/components/terms/TermsTOC';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+  return {
+    title: t('publicAgreementsTitle'),
+    description: t('publicAgreementsDescription'),
+  };
+}
 
 /* 区块类型 — item 是带编号的条目，subhead 是小节内的子标题 (如 4.1 / 4.2) */
 type Block =

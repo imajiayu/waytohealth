@@ -15,6 +15,14 @@ type Props = {
   meta: string;
   /** 时长展示 */
   runtime: string;
+  /** 左上角录制标记 */
+  rec: string;
+  /** 右上角类型标签 */
+  genre: string;
+  /** 右上角画质标签 */
+  quality: string;
+  /** 底部播放提示 */
+  pressPlay: string;
 };
 
 /**
@@ -26,7 +34,7 @@ type Props = {
  * 注意：locale 切换时，父组件应通过 key={locale} 强制重新挂载，
  *      避免在内部 effect 中重置 state（违反 react-hooks/set-state-in-effect）
  */
-export default function VideoStory({ src, poster, eyebrow, title, meta, runtime }: Props) {
+export default function VideoStory({ src, poster, eyebrow, title, meta, runtime, rec, genre, quality, pressPlay }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -59,7 +67,7 @@ export default function VideoStory({ src, poster, eyebrow, title, meta, runtime 
       </div>
 
       {/* 主播放容器 ── 16:9 电影感深色框 */}
-      <div className="relative aspect-video overflow-hidden rounded-[6px] bg-[#0d1b2e] shadow-[0_30px_70px_-20px_rgba(0,55,90,0.45)] ring-1 ring-ukraine-blue-900/10 sm:rounded-[10px]">
+      <div className="relative aspect-video overflow-hidden rounded-[6px] bg-ukraine-navy shadow-[0_30px_70px_-20px_rgba(0,55,90,0.45)] ring-1 ring-ukraine-blue-900/10 sm:rounded-[10px]">
         {/* 外侧细描金边 ── 电影海报式 */}
         <div className="pointer-events-none absolute inset-0 z-20 rounded-[6px] ring-1 ring-inset ring-ukraine-gold-500/20 sm:rounded-[10px]" />
 
@@ -83,17 +91,17 @@ export default function VideoStory({ src, poster, eyebrow, title, meta, runtime 
             <div className="absolute left-5 top-5 flex items-center gap-2 sm:left-7 sm:top-7">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warm-500" />
               <span className="font-[family-name:var(--font-data)] text-[9px] font-bold uppercase tracking-[0.25em] text-white/70 sm:text-[10px]">
-                REC · 2025
+                {rec}
               </span>
             </div>
 
             {/* 右上角元信息 */}
             <div className="absolute right-5 top-5 text-right sm:right-7 sm:top-7">
               <div className="font-[family-name:var(--font-data)] text-[9px] font-medium uppercase tracking-[0.22em] text-white/50 sm:text-[10px]">
-                Documentary
+                {genre}
               </div>
               <div className="font-[family-name:var(--font-data)] text-[9px] font-medium uppercase tracking-[0.22em] text-white/50 sm:text-[10px]">
-                1080p · stereo
+                {quality}
               </div>
             </div>
 
@@ -101,8 +109,7 @@ export default function VideoStory({ src, poster, eyebrow, title, meta, runtime 
             <div className="relative flex h-20 w-20 items-center justify-center sm:h-24 sm:w-24">
               {/* 旋转描边圆环 */}
               <span
-                className="absolute inset-0 rounded-full border border-ukraine-gold-500/50 transition-all duration-700 ease-out group-hover:rotate-180 group-hover:border-ukraine-gold-500"
-                style={{ borderStyle: 'dashed' }}
+                className="absolute inset-0 rounded-full border border-dashed border-ukraine-gold-500/50 transition-all duration-700 ease-out group-hover:rotate-180 group-hover:border-ukraine-gold-500"
               />
               {/* 内圆 */}
               <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-ukraine-gold-500 text-ukraine-blue-900 shadow-[0_10px_30px_rgba(245,184,0,0.45)] transition-transform duration-300 group-hover:scale-110 sm:h-16 sm:w-16">
@@ -130,7 +137,7 @@ export default function VideoStory({ src, poster, eyebrow, title, meta, runtime 
               </div>
               <div className="flex items-end justify-between font-[family-name:var(--font-data)] text-[10px] uppercase tracking-[0.2em] text-white/60 sm:text-xs">
                 <span>{meta}</span>
-                <span className="hidden sm:inline">PRESS PLAY ▸</span>
+                <span className="hidden sm:inline">{pressPlay}</span>
               </div>
             </div>
           </button>
@@ -145,7 +152,7 @@ export default function VideoStory({ src, poster, eyebrow, title, meta, runtime 
             preload="none"
             className="absolute inset-0 h-full w-full bg-black"
           >
-            <track kind="captions" />
+            {/* TODO: 字幕文件就绪后补全 <track src="..." srclang="ua" label="Українська" /> */}
           </video>
         )}
       </div>

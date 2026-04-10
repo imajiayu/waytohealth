@@ -10,5 +10,172 @@
   "goal_amount": 3000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["rehabilitation", "veterans"]
+  "tags": ["rehabilitation", "veterans"],
+  "detail": {
+    "subtitle": {
+      "ua": "Відновлення захисників та захисниць після травм",
+      "en": "Restoring defenders after injuries"
+    },
+    "body": [
+      {
+        "ua": "Це найперший проєкт, який наш фонд підтримує від початку свого заснування. Ініційований дружнім медичним центром, цей проєкт відгукнувся нам з самого початку.",
+        "en": "This is the very first project our foundation has supported since its establishment. Initiated by our partnered medical center, this project resonated with us from the very beginning."
+      },
+      {
+        "ua": "Адже погодьтесь, важливо підтримувати тих, хто захищає нас. Хтось донатить, хтось допомагає із забезпеченням, а хтось відновлює, коли надії майже немає.",
+        "en": "After all, you'll agree — it's important to support those who defend us. Some donate, some help with supplies, and some restore hope when it seems nearly lost."
+      }
+    ],
+    "storiesHeader": {
+      "ua": "Історії відновлення за підтримки БО «БФ «Шлях до Здоров'я»",
+      "en": "Recovery stories supported by Way to Health Charity Foundation"
+    },
+    "stories": [
+      {
+        "name": "Михайло Козлов",
+        "role": { "ua": "Ветеран", "en": "Veteran" },
+        "photoBefore": "kozlov-before.png",
+        "photoAfter": "kozlov-after.png",
+        "background": {
+          "ua": "Михайло проходив службу в 67-й бригаді батальйону «Вовки Да Вінчі». Про реабілітаційний центр «Шлях до Здоров'я» дізнався з брошури у ТЦК по місцю проживання. Переглянув сайт — і вже наступного дня прийшов на консультацію.",
+          "en": "Mykhailo served in the 67th Brigade, \"Da Vinci Wolves\" Battalion. He learned about the \"Way to Health\" rehabilitation center from a brochure at his local territorial recruitment center. After reviewing the website, he came for a consultation the very next day."
+        },
+        "injury": [
+          {
+            "ua": "Михайло отримав поранення на Харківському напрямку. Він перебував у бліндажі, вийшов з поста спостереження і за 10–15 хвилин туди прилетів 120-міліметровий снаряд.",
+            "en": "Mykhailo was wounded on the Kharkiv front. He was in a bunker, left an observation post, and within 10–15 minutes a 120mm shell struck that position."
+          },
+          {
+            "ua": "Йому надали першу допомогу, і вже за годину після евакуації Михайло опинився в Куп'янській лікарні.",
+            "en": "He received first aid and within an hour of evacuation was at the Kupiansk hospital."
+          },
+          {
+            "ua": "Його ноги були у металевих штифтах цілий рік і зовсім не рухалися.",
+            "en": "His legs were held together by metal pins for an entire year and couldn't move at all."
+          }
+        ],
+        "recovery": {
+          "intro": {
+            "ua": "Після консультації мультидисциплінарної команди, був визначений план реабілітації:",
+            "en": "After consultation with a multidisciplinary team, a rehabilitation plan was established:"
+          },
+          "items": [
+            { "ua": "фізична терапія", "en": "physical therapy" },
+            { "ua": "мануальна терапія", "en": "manual therapy" },
+            { "ua": "масажі", "en": "therapeutic massage" }
+          ]
+        },
+        "results": [
+          {
+            "ua": "Після перших 4 сесій Михайло почав рухати стопою, яка до цього рік не рухалась.",
+            "en": "After just 4 sessions, Mykhailo began moving his foot — which hadn't moved for an entire year."
+          },
+          {
+            "ua": "Через 1.5 роки реабілітації Михайло танцював на своєму дні народження.",
+            "en": "After 1.5 years of rehabilitation, Mykhailo was dancing at his birthday celebration."
+          }
+        ]
+      },
+      {
+        "name": "Станіслав Чапюк",
+        "role": { "ua": "Ветеран", "en": "Veteran" },
+        "photoBefore": "stanislav-before.jpg",
+        "photoAfter": "stanislav-after.jpg",
+        "background": {
+          "ua": "До повномасштабного вторгнення Станіслав працював монтером в інтернет-провайдері — спокійна, звична робота, дім, родина, буденні плани. У 2024 році він отримав повістку, пройшов навчання і став зв'язківцем у 92-й окремій штурмовій бригаді.",
+          "en": "Before the full-scale invasion, Stanislav worked as an installer at an internet provider — a quiet, familiar job, home, family, everyday plans. In 2024, he received a draft notice, completed training, and became a communications specialist in the 92nd Separate Assault Brigade."
+        },
+        "injury": [
+          {
+            "ua": "8 травня 2025 року їхня група була на виході. Раптом поряд вибухнула ворожий FPV-дрон. Станіслав отримав тяжке поранення ноги.",
+            "en": "On May 8, 2025, their group was on an exit route. Suddenly, an enemy FPV drone exploded nearby. Stanislav suffered a severe leg wound."
+          },
+          {
+            "ua": "Перша медична допомога, евакуація — і вже за дві години він був у лікарні в Харкові. Медики зробили все можливе, але врятувати ногу не вдалося і її довелося ампутувати вище коліна.",
+            "en": "First aid, evacuation — and within two hours he was at a hospital in Kharkiv. Medics did everything possible, but the leg could not be saved and had to be amputated above the knee."
+          },
+          {
+            "ua": "Після Харкова Станіслав проходив долікування у Львові, потім у Дніпрі.",
+            "en": "After Kharkiv, Stanislav underwent further treatment in Lviv, then in Dnipro."
+          },
+          {
+            "ua": "Про можливість безкоштовної реабілітації дізнався від друзів — і ще тоді, лежачи в харківській лікарні, вирішив, що звернеться до нас.",
+            "en": "He learned about free rehabilitation from friends — and even then, lying in the Kharkiv hospital, he decided he would come to us."
+          }
+        ],
+        "recovery": {
+          "intro": {
+            "ua": "Зараз Станіслав щодня працює над собою. Фізична реабілітація спрямована на те, щоб його тіло адаптувалося до нових умов: зміцнення м'язів, баланс, правильна хода на протезі. Крок за кроком він повертає собі впевненість і рухливість.",
+            "en": "Now Stanislav works on himself every day. Physical rehabilitation is aimed at helping his body adapt to new conditions: muscle strengthening, balance, proper walking with a prosthesis. Step by step, he is regaining confidence and mobility."
+          },
+          "items": []
+        },
+        "results": [
+          {
+            "ua": "Станіслав вже впевненіше стоїть на протезі, вчиться ходити рівно і стабільно, збільшує витривалість. Тренування стають складнішими, а він — сильнішим.",
+            "en": "Stanislav already stands more confidently on his prosthesis, is learning to walk evenly and steadily, and is building endurance. The training sessions become more challenging, and he becomes stronger."
+          }
+        ]
+      },
+      {
+        "name": "Богдан Савченко",
+        "role": { "ua": "Ветеран", "en": "Veteran" },
+        "photoBefore": "bohdan-before.jpg",
+        "photoAfter": "bohdan-after.jpg",
+        "background": {
+          "ua": "Колишній військовослужбовець. Свою службу розпочав у 2022 році, а з 2023-го приєднався до підрозділу НГУ «Хартія». Після важкого поранення був списаний та отримав статус інваліда війни ІІ групи.",
+          "en": "Former military servicemember. He began his service in 2022 and in 2023 joined the National Guard unit \"Khartia.\" After a severe injury, he was discharged and received Group II war disability status."
+        },
+        "injury": [
+          {
+            "ua": "У серпні 2024 року, на Харківському напрямку, під час масованого артобстрілу Богдан зазнав тяжкого поранення. Основний удар припав на голову: йому провели дві трепанації. Майже три доби він провів у комі, а потім почав складний шлях відновлення — заново вчився ходити, говорити, виконувати найпростіші рухи.",
+            "en": "In August 2024, on the Kharkiv front, during a massive artillery bombardment, Bohdan suffered a severe wound. The main impact was to his head: he underwent two craniotomies. He spent nearly three days in a coma, then began the difficult path of recovery — relearning how to walk, speak, and perform the simplest movements."
+          },
+          {
+            "ua": "Про центр «Шлях до Здоров'я» дізнався від своєї громади.",
+            "en": "He learned about the \"Way to Health\" center from his community."
+          }
+        ],
+        "recovery": {
+          "intro": {
+            "ua": "У центрі для нього сформували комплексну програму, до якої увійшли:",
+            "en": "At the center, a comprehensive program was designed for him, which included:"
+          },
+          "items": [
+            { "ua": "електростимуляція м'язів обличчя", "en": "facial muscle electrostimulation" },
+            { "ua": "масаж обличчя", "en": "facial massage" },
+            { "ua": "фізіотерапія", "en": "physiotherapy" }
+          ],
+          "outro": {
+            "ua": "Комплексний підхід дав змогу запустити позитивну динаміку — настільки відчутну, що вона стала додатковою мотивацією продовжувати реабілітацію. Богдан уже планує повертатися до нас для подальшого відновлення й ще кращих результатів.",
+            "en": "The comprehensive approach triggered positive progress — so noticeable that it became additional motivation to continue rehabilitation. Bohdan is already planning to return for further recovery and even better results."
+          }
+        },
+        "results": [
+          {
+            "ua": "За прогнозами лікарів, на цей момент Богдан мав би залишатися частково паралізованим. Після пересадки нерва на обличчі фахівці не очікували помітних покращень протягом перших двох років.",
+            "en": "According to doctors' prognoses, Bohdan should still be partially paralyzed at this point. After the facial nerve transplant, specialists did not expect noticeable improvements within the first two years."
+          },
+          {
+            "ua": "Втім, ще не минув і рік після операції, а Богдан вже відчуває значні зміни на краще.",
+            "en": "However, less than a year after surgery, Bohdan is already experiencing significant improvements."
+          },
+          {
+            "ua": "Раніше він проходив реабілітацію в інших закладах майже півроку — без суттєвих результатів. Робота зі спеціалістами «Шляху до Здоров'я» дала не лише реальні покращення, а й повернула віру в можливість відновлення та силу рухатися далі.",
+            "en": "Previously, he underwent rehabilitation at other facilities for nearly six months — without significant results. Working with the \"Way to Health\" specialists brought not only real improvements but also restored his belief in the possibility of recovery and the strength to keep going."
+          }
+        ]
+      }
+    ],
+    "documents": [
+      {
+        "label": {
+          "ua": "Скани оплачених послуг для конкретних пацієнтів",
+          "en": "Scans of paid services for specific patients"
+        },
+        "url": "#"
+      }
+    ],
+    "gallery": []
+  }
 }

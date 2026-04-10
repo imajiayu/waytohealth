@@ -1,8 +1,17 @@
-import { useTranslations } from 'next-intl';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
-export default function DonatePage() {
-  const t = useTranslations('navigation');
-  const tPages = useTranslations('pages');
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata');
+  return {
+    title: t('donateTitle'),
+    description: t('donateDescription'),
+  };
+}
+
+export default async function DonatePage() {
+  const t = await getTranslations('navigation');
+  const tPages = await getTranslations('pages');
 
   return (
     <div className="container-page py-24">

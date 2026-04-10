@@ -1,8 +1,18 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import HeroSection from '@/components/home/HeroSection';
 import ProjectsSection from '@/components/home/ProjectsSection';
 import AboutSection from '@/components/home/AboutSection';
 import SectionDivider from '@/components/home/SectionDivider';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata');
+  return {
+    title: t('homeTitle'),
+    description: t('homeDescription'),
+  };
+}
 
 export default async function HomePage() {
   return (
@@ -11,7 +21,7 @@ export default async function HomePage() {
       <HeroSection />
 
       {/* 项目展示 — 有异步数据获取，用 Suspense 实现流式传输 */}
-      <Suspense>
+      <Suspense fallback={<div className="section-y" />}>
         <ProjectsSection />
       </Suspense>
 
@@ -19,7 +29,7 @@ export default async function HomePage() {
       <SectionDivider />
 
       {/* 关于我们 — 有异步数据获取（翻译），用 Suspense 实现流式传输 */}
-      <Suspense>
+      <Suspense fallback={<div className="section-y" />}>
         <AboutSection />
       </Suspense>
     </>

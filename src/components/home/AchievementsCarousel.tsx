@@ -105,7 +105,7 @@ export default function AchievementsCarousel() {
             onClick={() => scroll('left')}
             disabled={!scrollState.left}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
-            aria-label="Scroll left"
+            aria-label={t('scrollLeft')}
           >
             <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M10 4l-4 4 4 4" />
@@ -115,7 +115,7 @@ export default function AchievementsCarousel() {
             onClick={() => scroll('right')}
             disabled={!scrollState.right}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
-            aria-label="Scroll right"
+            aria-label={t('scrollRight')}
           >
             <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 4l4 4-4 4" />
@@ -127,7 +127,7 @@ export default function AchievementsCarousel() {
       {/* 横向滚动容器 — 默认 align-items: stretch 让所有卡片自动对齐到最高那张的高度 */}
       <div
         ref={scrollRef}
-        className="hide-scrollbar -mx-4 mt-2 flex gap-4 overflow-x-auto px-4 sm:-mx-6 sm:mt-3 sm:gap-6 sm:px-6 lg:-mx-8 lg:gap-8 lg:px-8 snap-x snap-mandatory"
+        className="hide-scrollbar mt-2 flex gap-4 overflow-x-auto sm:mt-3 sm:gap-6 lg:gap-8 snap-x snap-mandatory"
       >
         {items.map((item, i) => {
           const placeholder = PLACEHOLDERS[i];

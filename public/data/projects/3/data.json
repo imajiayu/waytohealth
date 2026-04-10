@@ -10,5 +10,26 @@
   "goal_amount": 1000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["recovery", "social"]
+  "tags": ["recovery", "social"],
+  "detail": {
+    "subtitle": {
+      "ua": "Геймінг терапія для психологічного відновлення ветеранів",
+      "en": "Gaming therapy for the psychological recovery of veterans"
+    },
+    "body": [
+      {
+        "ua": "Військові та ветерани є однією з найбільш вразливих груп до погіршення психологічного стану в умовах повномасштабного вторгнення. Досвід, який вони проходять, захищаючи нас і нашу державу, часто проявляється у вигляді ПТСР, тривожних розладів, апатії та інших наслідків психологічної травми.",
+        "en": "Military personnel and veterans are among the most vulnerable groups to psychological deterioration in the context of the full-scale invasion. The experiences they endure while defending us and our country often manifest as PTSD, anxiety disorders, apathy, and other consequences of psychological trauma."
+      },
+      {
+        "ua": "На жаль, традиційна психологічна допомога не завжди є ефективною: багато людей не хочуть виглядати вразливими або ще не готові до глибокої роботи зі своїм станом. Водночас існують альтернативні підходи, які можуть допомогти м'яко та поступово, без додаткового тиску чи стигматизації.",
+        "en": "Unfortunately, traditional psychological help is not always effective: many people don't want to appear vulnerable or are not yet ready for deep work with their condition. At the same time, alternative approaches exist that can help gently and gradually, without additional pressure or stigmatization."
+      },
+      {
+        "ua": "Один із таких підходів — геймінг терапія. Позитивний вплив гри на психологічний стан підтверджений міжнародними дослідженнями. Та в контексті впливу геймінгу на стан тих, хто повертається з фронту до цивільного життя, користь виявляється не лише в полегшенні симптомів важких психологічних станів, а також в покращенні соціалізації та реінтеграції у суспільне життя.",
+        "en": "One such approach is gaming therapy. The positive impact of gaming on psychological well-being is confirmed by international research. In the context of helping those returning from the front to civilian life, the benefits extend beyond alleviating symptoms of severe psychological conditions — they also improve socialization and reintegration into community life."
+      }
+    ],
+    "gallery": []
+  }
 }

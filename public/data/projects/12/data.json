@@ -7,8 +7,51 @@
     "ua": "Проєкт стаціонарного відділення для розширення доступу до якісної реабілітації.",
     "en": "An inpatient department project to expand access to quality rehabilitation."
   },
-  "goal_amount": 10000000,
+  "goal_amount": 6000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["rehabilitation", "infrastructure"]
+  "tags": ["rehabilitation", "infrastructure"],
+  "detail": {
+    "subtitle": {
+      "ua": "Відкриття стаціонарного відділення реабілітаційного центру",
+      "en": "Opening an inpatient department at the rehabilitation center"
+    },
+    "body": [
+      {
+        "ua": "Цей проєкт ‒ мрія нашого дружнього медичного центру «Шлях до Здоров'я». Починаючи з 2022 року, медичний центр відновив більш ніж 1800 пацієнтів — військових, ветеранів та цивільних, які постраждали від війни.",
+        "en": "This project is the dream of our partnered medical center \"Way to Health.\" Since 2022, the center has rehabilitated more than 1,800 patients — military personnel, veterans, and civilians affected by the war."
+      },
+      {
+        "ua": "Ми не будемо розхвалювати наших друзів і казати про те, які вони круті спеціалісти ‒ про це говорять відгуки їхніх пацієнтів та факт того, що на реабілітацію до них повертаються знову і знову.",
+        "en": "We won't boast about our friends or talk about what great specialists they are — their patients' testimonials and the fact that people return to them for rehabilitation again and again speak for themselves."
+      },
+      {
+        "ua": "Та знаючи рівень їхнього професіоналізму і розуміючи зростаючу потребу у фізичній та психологічній реабілітації, яка залишиться з нами на роки вперед, ми хочемо підтримати проєкт відкриття стаціонарного відділення.",
+        "en": "But knowing their level of professionalism and understanding the growing need for physical and psychological rehabilitation that will remain with us for years to come, we want to support the project of opening an inpatient department."
+      },
+      {
+        "ua": "Щоб не бути суб'єктивними, ось декілька причин, чому цей проєкт важливий. Відкриття стаціонарного відділення реабілітаційного центру дозволить:",
+        "en": "To be objective, here are several reasons why this project matters. Opening an inpatient department at the rehabilitation center will:"
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "покращити якість реабілітаційних послуг, бо всі необхідні процедури будуть проводитись в одному місці",
+        "en": "improve the quality of rehabilitation services, as all necessary procedures will be performed in one place"
+      },
+      {
+        "ua": "збільшити кількість людей, яким можна допомогти, приймаючи пацієнтів з інших населених пунктів та областей",
+        "en": "increase the number of people who can be helped by accepting patients from other cities and regions"
+      },
+      {
+        "ua": "створити комфортні умови для пацієнтів, які потребують постійного нагляду та підтримки під час реабілітації",
+        "en": "create comfortable conditions for patients who need constant supervision and support during rehabilitation"
+      }
+    ],
+    "documents": [
+      { "label": { "ua": "Кошторис", "en": "Budget Estimate" }, "url": "/data/projects/12/budget.xlsx" },
+      { "label": { "ua": "Проєкт (креслення)", "en": "Project Blueprints" }, "url": "/data/projects/12/blueprint.pdf" }
+    ],
+    "gallery": []
+  }
 }

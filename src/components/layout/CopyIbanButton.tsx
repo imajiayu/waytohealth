@@ -12,9 +12,12 @@ export default function CopyIbanButton({ iban, ariaLabel }: CopyIbanButtonProps)
   const [copied, setCopied] = useState(false);
 
   const copyIban = useCallback(() => {
-    navigator.clipboard.writeText(iban);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(iban).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      /* 剪贴板 API 不可用（如 HTTP 或浏览器限制） */
+    });
   }, [iban]);
 
   return (

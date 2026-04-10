@@ -1,7 +1,23 @@
 {
   "metadata": {
     "title": "Way to Health",
-    "description": "Rehabilitation center for war victims in Ukraine"
+    "description": "Rehabilitation center for war victims in Ukraine",
+    "aboutTitle": "About Us — Way to Health",
+    "aboutDescription": "Learn about the Way to Health Charitable Foundation — our mission, team, and impact in rehabilitating war victims in Ukraine.",
+    "termsTitle": "Terms & Conditions — Way to Health",
+    "termsDescription": "Terms and conditions for using the Way to Health Charitable Foundation website.",
+    "privacyTitle": "Privacy Policy — Way to Health",
+    "privacyDescription": "How the Way to Health Charitable Foundation collects, uses, and protects your personal data.",
+    "publicAgreementsTitle": "Public Agreement — Way to Health",
+    "publicAgreementsDescription": "Public offer agreement on making charitable contributions to the Way to Health Charitable Foundation.",
+    "homeTitle": "Way to Health — Rehabilitation for War Victims",
+    "homeDescription": "The Way to Health Charitable Foundation restores strength and hope to those affected by war in Ukraine.",
+    "newsTitle": "News — Way to Health",
+    "newsDescription": "Latest news and updates from the Way to Health Charitable Foundation.",
+    "donateTitle": "Donate — Way to Health",
+    "donateDescription": "Support the rehabilitation of war victims in Ukraine with your donation.",
+    "merchTitle": "Merch — Way to Health",
+    "merchDescription": "Support the Way to Health Foundation by purchasing branded merchandise."
   },
   "hero": {
     "title": "WAY TO HEALTH",
@@ -18,7 +34,7 @@
     "about": "About Us",
     "news": "News",
     "merch": "Merch",
-    "partners": "Partners",
+    "partners": "Become a Partner",
     "contacts": "Contacts"
   },
   "pages": {
@@ -30,7 +46,8 @@
     "raised": "Raised",
     "donateButton": "Donate",
     "moreDetails": "More details",
-    "otherProjectsTitle": "Other projects"
+    "otherProjectsTitle": "Other projects",
+    "current": "Current"
   },
   "partners": {
     "label": "Together with us",
@@ -101,6 +118,8 @@
     },
     "achievements": {
       "title": "Our Achievements",
+      "scrollLeft": "Scroll left",
+      "scrollRight": "Scroll right",
       "items": [
         {
           "title": "Recovery Support",
@@ -141,65 +160,65 @@
     "cta": "Learn more"
   },
   "aboutPage": {
-    "hero": {
-      "eyebrow": "About the Foundation",
-      "title": "A path that changes lives",
-      "intro": "Way to Health Charity Foundation has been working since 2021 to support those affected by war in Ukraine. We provide rehabilitation, humanitarian assistance, and hope to hundreds of people who need support during the most difficult times."
+    "eyebrow": "About the charitable organization",
+    "title": "A path that",
+    "titleAccent": "changes lives",
+    "chapterLabel": "Chapter",
+    "meta": {
+      "period": { "label": "Period", "value": "Operating since September 2022 to the present day" },
+      "location": { "label": "Location", "value": "Slobozhanske, Dnipropetrovsk Oblast, Ukraine" },
+      "scope": { "label": "Scope", "value": "Rehabilitation, humanitarian aid, psychological support" }
     },
-    "story": {
-      "title": "Our Story",
-      "intro": "The foundation was born from the conviction that every person affected by war deserves quality medical care and support on the path to recovery.",
-      "items": {
-        "0": {
-          "year": "2021",
-          "title": "Foundation Established",
-          "text": "Way to Health Charity Foundation was officially registered with the goal of providing rehabilitation assistance to those affected by military conflict."
-        },
-        "1": {
-          "year": "2022",
-          "title": "Response to Full-Scale Invasion",
-          "text": "After the start of the full-scale invasion, the foundation rapidly scaled its activities: organizing evacuations, purchasing ambulances, and launching rehabilitation programs for the wounded."
-        },
-        "2": {
-          "year": "2023",
-          "title": "Scaling and Partnerships",
-          "text": "Establishing international partnerships, launching joint projects with foreign donors, and significantly expanding the number of patients receiving rehabilitation support."
-        },
-        "3": {
-          "year": "2024",
-          "title": "Sustainable Development",
-          "text": "Strengthening the ecosystem between the foundation and the Way to Health medical center, implementing new rehabilitation methods and long-term support programs."
-        }
-      }
+    "chapters": {
+      "origin": "Origin",
+      "impact": "Impact",
+      "evolution": "Evolution",
+      "voices": "Team",
+      "ledger": "Reporting"
     },
-    "howWeWork": {
-      "title": "How We Work",
-      "intro": "The charity foundation operates as a unified ecosystem with the Way to Health medical center, enabling immediate help for those in need.",
-      "steps": {
-        "0": {
-          "title": "Patient Applies",
-          "text": "A person affected by war contacts the medical center for rehabilitation assistance."
-        },
-        "1": {
-          "title": "Immediate Treatment",
-          "text": "The patient begins rehabilitation immediately — the medical center does not wait for funding confirmation."
-        },
-        "2": {
-          "title": "Foundation Support",
-          "text": "The charity foundation attracts donor and partner support to cover treatment costs."
-        },
-        "3": {
-          "title": "Full Recovery",
-          "text": "The patient receives comprehensive care and support throughout the entire recovery journey."
-        }
-      }
+    "paragraphs": {
+      "0": "The \"Way to Health\" Charity Foundation was established in September 2022 by Mykyta Zhalin and Oleksii Dubovyk in response to the growing need for quality rehabilitation in Ukraine.",
+      "1": "The foundation attracts financial and in-kind support to provide free rehabilitation for patients and to develop medical programs. The team actively works with international partners, runs fundraising initiatives, and equips the center with the resources needed to deliver care."
     },
-    "cta": {
-      "title": "Join Our Mission",
-      "text": "Every contribution — whether a donation or partnership — brings us closer to our goal: helping as many people as possible regain their health and live fully again.",
-      "donateButton": "Support the Foundation",
-      "partnerButton": "Become a Partner"
-    }
+    "impact": "Since its launch, the foundation has financed rehabilitation for more than 500 patients with severe injuries and trauma, helping them return to a full life.",
+    "impactBig": "500+",
+    "impactSmall": "patients returned to a full life",
+    "followUp": "As the foundation grew, so did its areas of support. In addition to rehabilitation for people affected by war, the organization also runs psychological support projects, introduces innovative recovery methods, provides day-to-day assistance for civilians, and procures equipment and specialized transport.",
+    "video": {
+      "eyebrow": "A conversation with the co-founder",
+      "title": "Why we do what we do",
+      "meta": "With Oleksii Dubovyk · co-founder",
+      "runtime": "Documentary",
+      "rec": "REC · 2025",
+      "genre": "Documentary",
+      "quality": "1080p · stereo",
+      "pressPlay": "PRESS PLAY ▸"
+    },
+    "watchListenWitness": "Watch · Listen · Witness",
+    "teamTitle": "Team",
+    "teamSubtitle": "The people who turn support into action, every single day",
+    "team": {
+      "0": { "name": "Oleksandr Khorev", "role": "communications manager", "image": "/images/team/oleksandr-khorev.jpg" },
+      "1": { "name": "Anastasiia Sydorkina", "role": "project lead", "image": "/images/team/anastasiia-sydorkina.jpg" },
+      "2": { "name": "Oleksii Dubovyk", "role": "co-founder", "image": "/images/team/oleksii-dubovyk.jpg" },
+      "3": { "name": "Oleksandr Fedoniuk", "role": "foundation director", "image": "/images/team/oleksandr-fedoniuk.jpg" },
+      "4": { "name": "Yehor Vorobiov", "role": "fundraiser, grant writer", "image": "/images/team/yehor-vorobiov.jpg" },
+      "5": { "name": "Sofiia Tarnavska", "role": "SMM manager", "image": "/images/team/sofiia-tarnavska.jpg" }
+    },
+    "transparencyTitle": "Transparency",
+    "transparencySubtitle": "A full registry of documents — from the statute to annual financial reports",
+    "documents": {
+      "0": { "title": "Statute", "href": "/documents/about/statute.pdf" },
+      "1": { "title": "Extract from the Register of Non-Profit Organizations", "href": "/documents/about/nonprofit-register-extract.pdf" },
+      "2": { "title": "EDRPOU Extract", "href": "/documents/about/edr-extract.pdf" },
+      "3": { "title": "Annual Report 2025", "href": "/documents/about/annual-report-2025.pdf" },
+      "4": { "title": "Financial Report 2025", "href": "/documents/about/financial-report-2025.pdf" }
+    },
+    "ledgerLabels": { "id": "№", "file": "Document", "type": "Type", "size": "Size", "format": "PDF", "open": "Open" },
+    "noPortrait": "No portrait",
+    "verified": "Verified",
+    "openFiles": "Open files",
+    "verifiedYear": "2025"
   },
   "termsPage": {
     "hero": {
@@ -251,11 +270,11 @@
       "title": "Contact Information",
       "intro": "If you have any questions regarding these Terms, please reach out to us through any of the channels below.",
       "emailLabel": "Email",
-      "email": "Waytohealthfoundation@gmail.com",
+      "email": "waytohealthfoundation@gmail.com",
       "addressLabel": "Address",
       "address": "Slobozhanske village, street Heroiv Ukrainy 27C",
       "phoneLabel": "Phone",
-      "phone": "+380 63 748 2530"
+      "phone": "+380 63 377 20 22"
     }
   },
   "privacyPage": {
@@ -319,11 +338,11 @@
       "title": "Contact Information",
       "intro": "If you have any questions regarding this Privacy Policy, please reach out to us through any of the channels below.",
       "emailLabel": "Email",
-      "email": "Waytohealthfoundation@gmail.com",
+      "email": "waytohealthfoundation@gmail.com",
       "addressLabel": "Address",
       "address": "Slobozhanske village, street Heroiv Ukrainy 27C",
       "phoneLabel": "Phone",
-      "phone": "+380 63 748 2530"
+      "phone": "+380 63 377 20 22"
     }
   },
   "publicAgreementPage": {
@@ -338,7 +357,7 @@
     "tocLabel": "Document contents",
     "preamble": {
       "p1": "This agreement is an official and public proposal for making donations for charitable purposes (hereinafter – the \"Offer\") and is addressed to an indefinite number of individuals (hereinafter – the \"Donor\"), who are visitors of the official website https://www.waytohealthua.org/ (hereinafter – the \"Website\") and wish to make a charitable donation under the terms of this public offer (hereinafter – the \"Charitable Donation Agreement\"). The Offer and the Donor together are referred to as the \"Parties,\" and each individually – the \"Party.\"",
-      "p2": "The text of the Offer is an official proposal of the charitable organization \"WAY TO HEALTH\" CHARITABLE FOUNDATION, represented by the Head of the Foundation, Mykyta Zhalnin, acting on the basis of the Charter, to enter into a charitable contribution agreement (hereinafter – the \"Agreement\"), the essence of which is outlined below."
+      "p2": "The text of the Offer is an official proposal of the charitable organization \"WAY TO HEALTH\" CHARITABLE FOUNDATION, represented by the Head of the Foundation, Oleksandr Dovzhenko, acting on the basis of Protocol No. 2 of the General Assembly, to enter into a charitable contribution agreement (hereinafter – the \"Agreement\"), the essence of which is outlined below."
     },
     "sections": {
       "definitions": {
@@ -453,8 +472,31 @@
       "addressLabel": "Address",
       "address": "27C Teplychna St., Slobozhanske, Dnipro district, Dnipropetrovsk region, 52005, Ukraine",
       "phoneLabel": "Phone",
-      "phone": "+380 63 748 2530"
+      "phone": "+380 63 377 20 22"
     }
+  },
+  "projectDetail": {
+    "backToProjects": "Projects",
+    "raisedLabel": "Raised",
+    "goalLabel": "Goal",
+    "selectAmount": "Select amount",
+    "customAmount": "Custom amount",
+    "donateButton": "Support this project",
+    "donateCta": "Every contribution brings us closer to the goal",
+    "detailsTitle": "Details",
+    "injuryTitle": "Injury Story",
+    "recoveryTitle": "Recovery Path",
+    "resultsTitle": "Results",
+    "galleryTitle": "Gallery",
+    "imagePlaceholder": "Photo coming soon",
+    "documentsTitle": "Project Documents",
+    "loadError": "Failed to load file",
+    "expand": "Full screen",
+    "collapse": "Exit full screen",
+    "download": "Download",
+    "close": "Close",
+    "before": "Before",
+    "after": "After"
   },
   "footer": {
     "terms": "Terms & Conditions",

@@ -60,9 +60,9 @@ npm run start    # 启动生产服务器
 | CTA | Ukraine Gold (#F5B800) |
 | 成功 | #10B981 (绿) |
 | 警告 | #E76F51 (橙) |
-| 标题字体 | Fraunces (衬线) |
-| 正文字体 | Source Sans 3 (无衬线) |
-| 数据字体 | JetBrains Mono (等宽) |
+| 主字体 | **Fixel Text** (无衬线，MacPaw 开源乌克兰字体，自托管在 `public/fonts/fixel/`) — 同时承担正文 (`--font-body`) 和标题 (`--font-display`)，靠权重区分 (400/500/600/700/800) |
+| 辅助衬线字体 | **PT Serif** (Google Fonts，替代品牌规范中的 Sitka Text) — 用于装饰性标题点缀 (`--font-accent`)，不用于大段正文 |
+| 数据字体 | **JetBrains Mono** (等宽，`--font-data`) — 用于数字、标签、序号 |
 | 图标 | Lucide React |
 | 工具 | clsx + tailwind-merge → `cn()` |
 
@@ -79,7 +79,7 @@ src/
 │       ├── layout.tsx           # locale layout（字体、NextIntlClientProvider）
 │       ├── page.tsx             # 首页
 │       ├── about/               # 关于我们
-│       ├── projects/            # 项目展示
+│       ├── projects/            # 项目详情（/projects?id=N）
 │       ├── donate/              # 捐赠页
 │       ├── merch/               # 周边商品
 │       ├── news/                # 新闻动态
@@ -92,7 +92,7 @@ src/
 │   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersShowcase, PartnersStrip）
-│   ├── projects/                # 项目组件（ProjectCard）
+│   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, DocumentViewer, PatientStories）
 │   ├── shared/                  # 跨页面共享组件（ChapterIndex, ChapterMark — 杂志式章节导航）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
@@ -149,7 +149,7 @@ const t = useTranslations('namespace')
   - `gradient-brand` — 品牌主渐变（按钮等）
   - `gradient-brand-line` — 横向渐变（分隔线、LoadingBar）
   - `gradient-brand-progress` — 进度条渐变
-  - `glow-teal` / `glow-blue` / `glow-blue-soft` / `glow-brand-soft` / `glow-gold` / `glow-gold-soft` — 装饰光晕背景
+  - `glow-teal` / `glow-blue` / `glow-blue-soft` / `glow-gold` / `glow-gold-soft` — 装饰光晕背景
 - **页面内容容器**统一使用 `container-page` 类（max-w-7xl + 响应式内边距），不要手写 `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
 - **区域标题装饰线**统一使用 `accent-line` 类
 - **隐藏滚动条**统一使用 `hide-scrollbar` 类，不要写 `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`

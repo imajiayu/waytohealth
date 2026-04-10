@@ -8,6 +8,8 @@ type TeamMember = {
 
 type Props = {
   members: TeamMember[];
+  /** 无照片成员的占位标签 */
+  noPortraitLabel: string;
 };
 
 /**
@@ -16,7 +18,7 @@ type Props = {
  * - 照片严格保持原始 2:3 比例（3648×5472），不裁剪
  * - 引言卡片用更矮的比例制造视觉错落
  */
-export default function TeamCollage({ members }: Props) {
+export default function TeamCollage({ members, noPortraitLabel }: Props) {
   return (
     <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 lg:gap-7">
       {members.map((member) => {
@@ -61,7 +63,7 @@ export default function TeamCollage({ members }: Props) {
                       <path d="M9 9c-3 0-5 2-5 5s2 5 5 5h1l-2 6h6l3-9V9H9zm14 0c-3 0-5 2-5 5s2 5 5 5h1l-2 6h6l3-9V9h-8z" />
                     </svg>
                     <span className="font-[family-name:var(--font-data)] text-[9px] font-medium uppercase tracking-[0.22em] text-ukraine-blue-400">
-                      No portrait
+                      {noPortraitLabel}
                     </span>
                   </div>
 
