@@ -35,11 +35,12 @@ export default function LoadingBar() {
     return () => window.removeEventListener('routeChangeStart', handler);
   }, [startLoading]);
 
-  // pathname 变化 = 导航完成
+  // pathname 变化 = 导航完成 → 停止进度条并滚动到顶部
   useEffect(() => {
     if (loading) {
       stopLoading();
     }
+    window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
