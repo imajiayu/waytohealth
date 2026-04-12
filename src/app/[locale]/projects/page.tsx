@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Check } from 'lucide-react';
 import DonationSidebar from '@/components/projects/DonationSidebar';
+import MobileDonationSheet from '@/components/projects/MobileDonationSheet';
 import DocumentViewer from '@/components/projects/DocumentViewer';
 import PatientStories from '@/components/projects/PatientStories';
 import ProjectStrip from '@/components/projects/ProjectStrip';
@@ -183,11 +184,6 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
               <DocumentViewer documents={detail.documents} />
             )}
 
-            {/* ── 移动端捐赠区（lg 以下显示） ── */}
-            <div className="mt-10 lg:hidden">
-              <DonationSidebar {...sidebarProps} />
-            </div>
-
             {/* ── 故事区 ── */}
             {detail?.stories && detail.stories.length > 0 && (
               <PatientStories
@@ -228,6 +224,11 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
             </div>
           </aside>
         </div>
+      </div>
+
+      {/* ── 移动端捐赠浮窗（lg 以下显示） ── */}
+      <div className="lg:hidden">
+        <MobileDonationSheet {...sidebarProps} />
       </div>
     </article>
   );

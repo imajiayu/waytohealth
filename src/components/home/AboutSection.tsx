@@ -73,15 +73,16 @@ export default async function AboutSection() {
         {/* 照片 + 数据卡片 + 使命/愿景 — 两列布局 */}
         <div className="mt-2 grid items-stretch gap-8 sm:mt-3 sm:gap-12 lg:grid-cols-2">
           {/* 左侧：照片（高度撑满右列） */}
-          <div className="relative aspect-[4/3] lg:aspect-auto lg:h-full">
+          <div className="relative">
             {/* 装饰色块 — 照片后方向左下偏移，呼应左下金光的视觉重心 */}
             <div className="absolute -bottom-4 -left-4 h-full w-full rounded-2xl gradient-brand opacity-10" />
-            <div className="relative h-full overflow-hidden rounded-2xl">
+            <div className="relative overflow-hidden rounded-2xl">
               <Image
                 src="/images/about-team.jpg"
                 alt={t('title')}
-                fill
-                className="object-cover"
+                width={1200}
+                height={900}
+                className="h-auto w-full"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
               {/* 底部渐变遮罩 — 增加层次感 */}
@@ -90,27 +91,27 @@ export default async function AboutSection() {
           </div>
 
           {/* 右侧：2x2 数据卡片 + 使命 + 愿景 */}
-          <div className="flex flex-col gap-8 sm:gap-10">
+          <div className="flex flex-col gap-5 sm:gap-6">
             {/* 2x2 统计数据网格 */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               {STAT_KEYS.map((key, i) => (
                 <div
                   key={key}
-                  className="group relative rounded-xl border border-ukraine-blue-100/60 bg-white p-4 transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-lg hover:shadow-ukraine-blue-100/40 sm:rounded-2xl sm:p-6"
+                  className="group relative rounded-xl border border-ukraine-blue-100/60 bg-white p-3 transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-lg hover:shadow-ukraine-blue-100/40 sm:rounded-2xl sm:p-4"
                   style={{ animationDelay: `${i * 120}ms` }}
                 >
-                  <div className="mb-2 text-ukraine-blue-300 transition-colors duration-300 group-hover:text-ukraine-blue-500 sm:mb-3">
+                  <div className="mb-1.5 text-ukraine-blue-300 transition-colors duration-300 group-hover:text-ukraine-blue-500 sm:mb-2">
                     {STAT_ICONS[key]}
                   </div>
                   <div className="font-[family-name:var(--font-data)] text-2xl font-bold tracking-tight text-ukraine-blue-700 sm:text-3xl lg:text-[2rem]">
                     {t(`stats.${key}.value`)}
                   </div>
                   {key === 'funds' && (
-                    <span className="mt-1 block font-[family-name:var(--font-data)] text-xs font-medium text-ukraine-blue-400">
+                    <span className="mt-0.5 block font-[family-name:var(--font-data)] text-xs font-medium text-ukraine-blue-400">
                       {t('stats.funds.unit')}
                     </span>
                   )}
-                  <p className="mt-2 text-sm leading-snug text-gray-500">
+                  <p className="mt-1 text-sm leading-snug text-gray-500">
                     {t(`stats.${key}.label`)}
                   </p>
                   <div className="absolute bottom-0 left-4 right-4 h-[2px] origin-left scale-x-0 rounded-full transition-transform duration-500 group-hover:scale-x-100 gradient-brand-line" />
@@ -119,21 +120,21 @@ export default async function AboutSection() {
             </div>
 
             {/* 使命 */}
-            <div className="relative pl-6 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:rounded-full before:bg-gradient-to-b before:from-ukraine-blue-400 before:to-ukraine-blue-200">
-              <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
+            <div className="relative pl-5 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:rounded-full before:bg-gradient-to-b before:from-ukraine-blue-400 before:to-ukraine-blue-200">
+              <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800 sm:text-xl">
                 {t('mission.title')}
               </h3>
-              <p className="mt-3 text-base leading-relaxed text-gray-600 sm:text-lg">
+              <p className="mt-2 text-sm leading-relaxed text-gray-600 sm:text-base">
                 {t('mission.text')}
               </p>
             </div>
 
             {/* 愿景 */}
-            <div className="relative pl-6 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:rounded-full before:bg-gradient-to-b before:from-ukraine-gold-400 before:to-ukraine-gold-200">
-              <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
+            <div className="relative pl-5 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:rounded-full before:bg-gradient-to-b before:from-ukraine-gold-400 before:to-ukraine-gold-200">
+              <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800 sm:text-xl">
                 {t('vision.title')}
               </h3>
-              <p className="mt-3 text-base leading-relaxed text-gray-600 sm:text-lg">
+              <p className="mt-2 text-sm leading-relaxed text-gray-600 sm:text-base">
                 {t('vision.text')}
               </p>
             </div>

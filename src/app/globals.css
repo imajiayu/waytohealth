@@ -133,6 +133,9 @@ body {
 .glow-gold { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent); }
 .glow-gold-soft { background: radial-gradient(circle, var(--color-ukraine-gold-500), transparent 70%); }
 
+/* ── 品牌投影工具类 ── */
+.shadow-brand-cta { box-shadow: 0 2px 12px color-mix(in srgb, var(--color-ukraine-blue-500) 35%, transparent); }
+
 /* ── 全局环境光底层 — 「光与水」呼吸渐变 ── */
 /* 用于 main 容器,营造 Hero 之后到 Footer 之前的连续天光氛围 */
 .ambient-canvas {

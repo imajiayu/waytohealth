@@ -90,13 +90,15 @@ src/
 │       └── public-agreements/   # 公共协议（捐赠公开要约）
 ├── components/
 │   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentLedger）
+│   ├── common/                  # 通用 UI 组件（BottomSheet）
 │   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
-│   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, DocumentViewer, PatientStories）
+│   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, MobileDonationSheet, DocumentViewer, PatientStories）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook
+│   ├── useBodyScrollLock.ts     # 锁定页面滚动（Modal、BottomSheet 等场景）
 │   └── useInViewOnce.ts         # 滚动入场检测（共享 IntersectionObserver）
 ├── data/
 │   ├── partners.json            # 合作伙伴原始数据
@@ -153,6 +155,7 @@ const t = useTranslations('namespace')
   - `gradient-brand` — 品牌主渐变（按钮等）
   - `gradient-brand-line` — 横向渐变（分隔线、LoadingBar）
   - `gradient-brand-progress` — 进度条渐变
+  - `shadow-brand-cta` — 品牌色投影（CTA 按钮等）
   - `glow-teal` / `glow-blue` / `glow-blue-soft` / `glow-gold` / `glow-gold-soft` — 装饰光晕背景
 - **页面内容容器**统一使用 `container-page` 类（max-w-7xl + 响应式内边距），不要手写 `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
 - **区域标题装饰线**统一使用 `accent-line` 类
