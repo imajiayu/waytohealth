@@ -41,7 +41,7 @@ export default async function AboutSection() {
   ]);
 
   return (
-    <section id="about" className="section-y relative scroll-mt-16 overflow-hidden">
+    <section id="about" className="section-y relative scroll-mt-16 overflow-x-clip">
       {/* 背景装饰 — 右下主光晕(品牌青绿,主光源) */}
       <div className="aura-teal-md pointer-events-none absolute -right-40 -bottom-40 h-[600px] w-[600px] rounded-full opacity-90 blur-3xl" />
       {/* 背景装饰 — 左下温暖金光(与 ProjectsSection 左下蓝光形成对位) */}

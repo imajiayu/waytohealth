@@ -17,8 +17,7 @@
   {
     "id": "dcc",
     "logo": "/images/partners/dcc.png",
-    "url": "https://dc-charity.foundation",
-    "darkBg": true
+    "url": "https://dc-charity.foundation"
   },
   {
     "id": "medux",
@@ -38,8 +37,7 @@
   {
     "id": "golfstream",
     "logo": "/images/partners/golfstream.png",
-    "url": "https://golfstrimfish.com",
-    "darkBg": true
+    "url": "https://golfstrimfish.com"
   },
   {
     "id": "vataga",
@@ -47,8 +45,7 @@
   },
   {
     "id": "hto-yakshcho-ne-my",
-    "logo": "/images/partners/hto-yakshcho-ne-my.png",
-    "darkBg": true
+    "logo": "/images/partners/hto-yakshcho-ne-my.png"
   },
   {
     "id": "sunflower-scotland",

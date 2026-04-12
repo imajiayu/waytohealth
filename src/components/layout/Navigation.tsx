@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import Image from 'next/image';
@@ -26,6 +27,7 @@ export default function Navigation() {
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
   const isMenuOpenRef = useRef(false);
+  const searchParams = useSearchParams();
   const otherLocale = locale === 'ua' ? 'en' : 'ua';
 
   // 同步 ref 以供 scroll handler 读取（不能在渲染期间直接赋值）
@@ -65,8 +67,10 @@ export default function Navigation() {
 
   function handleLocaleSwitch() {
     triggerRouteChange();
+    const search = searchParams.toString();
+    const href = search ? `${pathname}?${search}` : pathname;
     startTransition(() => {
-      router.replace(pathname, { locale: otherLocale });
+      router.replace(href, { locale: otherLocale });
     });
   }
 

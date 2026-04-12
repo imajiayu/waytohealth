@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -66,11 +67,13 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={`${fixelText.variable} ${ptSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)] ambient-canvas">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LoadingBar />
-          <Navigation />
-          <main className="ambient-canvas flex-1">{children}</main>
+          <Suspense>
+            <Navigation />
+          </Suspense>
+          <main className="flex-1">{children}</main>
           <Footer />
         </NextIntlClientProvider>
       </body>

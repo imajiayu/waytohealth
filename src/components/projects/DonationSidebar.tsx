@@ -1,9 +1,10 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { Heart, ArrowUpRight } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import { useInViewOnce } from '@/hooks/useInViewOnce';
 import { useState } from 'react';
+import { createCheckoutSession } from '@/app/actions/donate';
 
 interface DonationSidebarProps {
   goalAmount: number | null;
@@ -24,12 +25,14 @@ export default function DonationSidebar({
   projectId,
 }: DonationSidebarProps) {
   const t = useTranslations('projectDetail');
-  const locale = useLocale();
   const { ref, isVisible } = useInViewOnce<HTMLDivElement>();
 
+  const locale = useLocale();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(500);
   const [customAmount, setCustomAmount] = useState('');
   const [isCustom, setIsCustom] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const progress = goalAmount
     ? Math.min((raisedAmount / goalAmount) * 100, 100)
@@ -54,12 +57,22 @@ export default function DonationSidebar({
     setSelectedAmount(null);
   };
 
-  const handleDonate = () => {
-    const amount = currentAmount > 0 ? currentAmount : undefined;
-    const params = new URLSearchParams();
-    params.set('project', String(projectId));
-    if (amount) params.set('amount', String(amount));
-    window.location.href = `/${locale}/donate?${params.toString()}`;
+  const handleDonate = async () => {
+    if (currentAmount <= 0 || isLoading) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      const result = await createCheckoutSession(projectId, Math.floor(currentAmount), locale);
+      if ('url' in result) {
+        window.location.href = result.url;
+      } else {
+        setError(t('donationError'));
+      }
+    } catch {
+      setError(t('donationError'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -165,17 +178,31 @@ export default function DonationSidebar({
           </div>
         </div>
 
+        {/* ── 错误提示 ── */}
+        {error && (
+          <p className="mt-3 text-center text-sm text-red-500">{error}</p>
+        )}
+
         {/* ── Donate 按钮 ── */}
         <button
           onClick={handleDonate}
-          disabled={currentAmount <= 0}
-          className="gradient-brand mt-5 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl py-3.5 font-semibold text-white shadow-[0_2px_12px_rgba(0,108,178,0.25)] transition-all duration-300 hover:shadow-[0_6px_24px_rgba(0,108,178,0.45)] hover:brightness-[1.08] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-[0_2px_12px_rgba(0,108,178,0.25)] disabled:hover:brightness-100"
+          disabled={currentAmount <= 0 || isLoading}
+          className={`gradient-brand mt-5 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl py-3.5 font-semibold text-white transition-opacity ${
+            currentAmount <= 0 || isLoading
+              ? 'opacity-50 cursor-not-allowed'
+              : 'hover:opacity-90'
+          }`}
         >
-          <Heart className="h-4 w-4" strokeWidth={2.5} />
-          {currentAmount > 0
-            ? `${t('donateButton')} · ${formatCurrency(currentAmount)}`
-            : t('donateButton')}
-          <ArrowUpRight className="h-3.5 w-3.5 opacity-60" />
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />
+          ) : (
+            <Heart className="h-4 w-4" strokeWidth={2.5} />
+          )}
+          {isLoading
+            ? t('processing')
+            : currentAmount > 0
+              ? `${t('donateButton')} · ${formatCurrency(currentAmount)}`
+              : t('donateButton')}
         </button>
       </div>
     </div>

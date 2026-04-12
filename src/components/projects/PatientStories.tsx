@@ -90,98 +90,95 @@ export default function PatientStories({
       {/* ── 故事详情面板 ── */}
       <div
         key={activeIndex}
-        className="mt-4 overflow-hidden rounded-2xl border border-ukraine-blue-100/40 bg-white/80 shadow-[0_2px_16px_rgba(0,108,178,0.05)] backdrop-blur-sm sm:mt-5"
+        className="mt-3 overflow-hidden rounded-xl border border-ukraine-blue-100/40 bg-white/80 shadow-[0_2px_12px_rgba(0,108,178,0.05)] backdrop-blur-sm sm:mt-4"
         style={{
           animation:
             'detail-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         }}
       >
-        {/* 上半区：对比照 + 人物简介 */}
-        <div className="lg:flex">
-          {/* Before / After 对比照 */}
-          {hasComparison && (
-            <div className="relative grid grid-cols-2 lg:w-[42%] lg:shrink-0">
-              {/* Before */}
-              <div className="relative aspect-[3/4] overflow-hidden sm:aspect-[4/5]">
-                <Image
-                  src={`${photoBase}/${story.photoBefore}`}
-                  alt={`${story.name} — ${t('before')}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 50vw, 22vw"
-                />
-                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/50 to-transparent" />
-                <span className="absolute bottom-2 left-3 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-widest text-white/90">
-                  {t('before')}
-                </span>
-              </div>
-              {/* 中线 */}
-              <div className="absolute inset-y-0 left-1/2 z-10 w-0.5 -translate-x-1/2 bg-white" />
-              {/* After */}
-              <div className="relative aspect-[3/4] overflow-hidden sm:aspect-[4/5]">
-                <Image
-                  src={`${photoBase}/${story.photoAfter}`}
-                  alt={`${story.name} — ${t('after')}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 50vw, 22vw"
-                />
-                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/50 to-transparent" />
-                <span className="absolute bottom-2 right-3 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-widest text-white/90">
-                  {t('after')}
-                </span>
-              </div>
+        {/* 对比照横幅 */}
+        {hasComparison && (
+          <div className="relative grid grid-cols-2">
+            {/* Before */}
+            <div className="relative aspect-[3/2] overflow-hidden">
+              <Image
+                src={`${photoBase}/${story.photoBefore}`}
+                alt={`${story.name} — ${t('before')}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 50vw, 35vw"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/50 to-transparent" />
+              <span className="absolute bottom-1.5 left-2.5 font-[family-name:var(--font-data)] text-[9px] font-semibold uppercase tracking-widest text-white/90">
+                {t('before')}
+              </span>
             </div>
-          )}
-
-          {/* 人物信息 + 背景 */}
-          <div className="flex-1 px-5 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="flex items-start gap-3">
-              {/* 无对比照时显示头像 */}
-              {!hasComparison && (
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-ukraine-blue-50 to-ukraine-blue-100/60 sm:h-16 sm:w-16">
-                  {story.photo ? (
-                    <Image
-                      src={`${photoBase}/${story.photo}`}
-                      alt={story.name}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
-                  ) : (
-                    <User className="h-7 w-7 text-ukraine-blue-300" />
-                  )}
-                </div>
-              )}
-              <div>
-                <h3 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-ukraine-blue-900 sm:text-2xl">
-                  {story.name}
-                </h3>
-                <span className="mt-1 inline-block rounded-full bg-ukraine-blue-50 px-3 py-0.5 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.15em] text-ukraine-blue-500">
-                  {story.role[locale]}
-                </span>
-              </div>
+            {/* 中线 */}
+            <div className="absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-white/80" />
+            {/* After */}
+            <div className="relative aspect-[3/2] overflow-hidden">
+              <Image
+                src={`${photoBase}/${story.photoAfter}`}
+                alt={`${story.name} — ${t('after')}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 50vw, 35vw"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/50 to-transparent" />
+              <span className="absolute bottom-1.5 right-2.5 font-[family-name:var(--font-data)] text-[9px] font-semibold uppercase tracking-widest text-white/90">
+                {t('after')}
+              </span>
             </div>
-            <p className="mt-4 text-[0.95rem] leading-relaxed text-ukraine-blue-800/85">
-              {story.background[locale]}
-            </p>
           </div>
+        )}
+
+        {/* 人物信息 + 背景 */}
+        <div className="px-4 py-3 sm:px-5 sm:py-4 lg:px-6">
+          <div className="flex items-start gap-3">
+            {/* 无对比照时显示头像 */}
+            {!hasComparison && (
+              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-ukraine-blue-50 to-ukraine-blue-100/60 sm:h-16 sm:w-16">
+                {story.photo ? (
+                  <Image
+                    src={`${photoBase}/${story.photo}`}
+                    alt={story.name}
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
+                ) : (
+                  <User className="h-7 w-7 text-ukraine-blue-300" />
+                )}
+              </div>
+            )}
+            <div>
+              <h3 className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-ukraine-blue-900 sm:text-xl">
+                {story.name}
+              </h3>
+              <span className="mt-0.5 inline-block rounded-full bg-ukraine-blue-50 px-2.5 py-px font-[family-name:var(--font-data)] text-[9px] font-semibold uppercase tracking-[0.15em] text-ukraine-blue-500">
+                {story.role[locale]}
+              </span>
+            </div>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-ukraine-blue-800/85">
+            {story.background[locale]}
+          </p>
         </div>
 
         {/* 下半区：故事章节 */}
-        <div className="border-t border-ukraine-blue-50 px-5 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <div className="space-y-6 sm:space-y-8">
+        <div className="border-t border-ukraine-blue-50 px-4 py-4 sm:px-5 sm:py-5 lg:px-6">
+          <div className="space-y-4 sm:space-y-5">
             {/* 受伤经历 */}
             {story.injury.length > 0 && (
               <div>
                 <h4 className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-gold-600">
                   {t('injuryTitle')}
                 </h4>
-                <div className="mt-2.5 space-y-2.5">
+                <div className="mt-2 space-y-2">
                   {story.injury.map((p, i) => (
                     <p
                       key={i}
-                      className="text-[0.95rem] leading-relaxed text-ukraine-blue-800/80"
+                      className="text-sm leading-relaxed text-ukraine-blue-800/80"
                     >
                       {p[locale]}
                     </p>
@@ -198,16 +195,16 @@ export default function PatientStories({
                 </h4>
                 <div className="mt-2.5">
                   {story.recovery.intro && (
-                    <p className="text-[0.95rem] leading-relaxed text-ukraine-blue-800/80">
+                    <p className="text-sm leading-relaxed text-ukraine-blue-800/80">
                       {story.recovery.intro[locale]}
                     </p>
                   )}
                   {story.recovery.items.length > 0 && (
-                    <ul className="mt-2 space-y-1.5">
+                    <ul className="mt-1.5 space-y-1">
                       {story.recovery.items.map((item, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2.5 text-[0.95rem] leading-relaxed text-ukraine-blue-800/80"
+                          className="flex items-start gap-2.5 text-sm leading-relaxed text-ukraine-blue-800/80"
                         >
                           <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ukraine-blue-300" />
                           {item[locale]}
@@ -216,7 +213,7 @@ export default function PatientStories({
                     </ul>
                   )}
                   {story.recovery.outro && (
-                    <p className="mt-2.5 text-[0.95rem] leading-relaxed text-ukraine-blue-800/80">
+                    <p className="mt-2 text-sm leading-relaxed text-ukraine-blue-800/80">
                       {story.recovery.outro[locale]}
                     </p>
                   )}
@@ -230,11 +227,11 @@ export default function PatientStories({
                 <h4 className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-gold-600">
                   {t('resultsTitle')}
                 </h4>
-                <div className="mt-2.5 space-y-2.5">
+                <div className="mt-2 space-y-2">
                   {story.results.map((p, i) => (
                     <p
                       key={i}
-                      className="text-[0.95rem] leading-relaxed text-ukraine-blue-800/80"
+                      className="text-sm leading-relaxed text-ukraine-blue-800/80"
                     >
                       {p[locale]}
                     </p>
@@ -246,8 +243,8 @@ export default function PatientStories({
 
           {/* 引用 */}
           {story.quote && (
-            <blockquote className="mt-8 border-l-2 border-ukraine-gold-500 pl-5">
-              <p className="font-[family-name:var(--font-accent)] text-lg italic leading-relaxed text-ukraine-blue-800">
+            <blockquote className="mt-5 border-l-2 border-ukraine-gold-500 pl-4">
+              <p className="font-[family-name:var(--font-accent)] text-base italic leading-relaxed text-ukraine-blue-800">
                 &ldquo;{story.quote[locale]}&rdquo;
               </p>
             </blockquote>

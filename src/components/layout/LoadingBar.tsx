@@ -99,7 +99,9 @@ export default function LoadingBar() {
   );
 }
 
-/** 在任意位置调用以触发 loading bar */
+/** 在任意位置调用以触发 loading bar 并立即滚动到顶部
+ *  导航开始就滚（不等页面渲染完），避免出现从旧位置跳顶的闪烁 */
 export function triggerRouteChange() {
+  window.scrollTo(0, 0);
   window.dispatchEvent(new Event('routeChangeStart'));
 }

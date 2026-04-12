@@ -482,6 +482,8 @@
     "selectAmount": "Оберіть суму",
     "customAmount": "Інша сума",
     "donateButton": "Підтримати проєкт",
+    "processing": "Обробка...",
+    "donationError": "Помилка, спробуйте ще раз",
     "donateCta": "Кожен внесок наближає нас до мети",
     "detailsTitle": "Деталі",
     "injuryTitle": "Історія поранення",
@@ -514,5 +516,15 @@
     "legalEntity": "БО «Благодійний фонд «Шлях до здоров'я»» (код ЄДРПОУ 44947699)",
     "copyright": "© {year} Way to Health Charity Foundation. Всі права захищені.",
     "language": "Українською"
+  },
+  "donationSuccess": {
+    "title": "Дякуємо за вашу підтримку!",
+    "subtitle": "Вашу пожертву успішно оброблено",
+    "amount": "Сума",
+    "project": "Проєкт",
+    "backToProject": "Повернутися до проєкту",
+    "backToHome": "На головну",
+    "genericTitle": "Дякуємо!",
+    "genericSubtitle": "Ваш внесок допоможе змінити життя на краще"
   }
 }

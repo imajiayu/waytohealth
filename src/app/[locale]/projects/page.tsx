@@ -1,4 +1,5 @@
 import { getProject, getProjectCover, getAllProjects } from '@/lib/data';
+import { getRaisedAmount } from '@/lib/donations';
 import { type Locale } from '@/i18n/config';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -63,10 +64,13 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const title = project.title[typedLocale];
   const detail = project.detail;
 
+  // 从 Stripe 获取实时已筹金额
+  const raisedAmount = await getRaisedAmount(Number(id));
+
   // 捐赠栏的 props — 复用于桌面和移动端
   const sidebarProps = {
     goalAmount: project.goal_amount,
-    raisedAmount: project.raised_amount,
+    raisedAmount,
     projectId: Number(id),
   };
 
@@ -82,49 +86,47 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
           <ProjectStrip projects={stripProjects} currentId={Number(id)} />
         </div>
 
-        {/* ── 封面图（全宽） ── */}
-        <div className="relative mt-6 aspect-[4/3] overflow-hidden rounded-2xl sm:aspect-[2/1] sm:rounded-3xl lg:aspect-[2.4/1]">
-          <Image
-            src={cover}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 1280px) 100vw, 1280px"
-            priority
-          />
-          {/* 底部渐变遮罩 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-        </div>
-
         {/* ════════════════════════════════════════════
             两栏布局：左内容 + 右 sticky 捐赠栏
+            （从项目画廊之后立即开始，提升信息密度）
             ════════════════════════════════════════════ */}
-        <div className="mt-8 lg:flex lg:gap-10 sm:mt-10">
+        <div className="mt-6 lg:flex lg:gap-10 sm:mt-8">
           {/* ── 左栏：内容区 ── */}
           <div className="min-w-0 lg:flex-1">
-            {/* 标签 */}
-            <div className="flex flex-wrap gap-2">
-              {project.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-ukraine-blue-50 px-3 py-1 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-blue-500"
-                >
-                  {tag}
-                </span>
-              ))}
+            {/* ── 移动端项目信息（lg 以下显示） ── */}
+            <div className="lg:hidden">
+              <div className="flex flex-wrap gap-2">
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-ukraine-blue-50 px-3 py-1 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-blue-500"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <h1 className="mt-4 font-[family-name:var(--font-display)] text-[2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ukraine-blue-900 sm:text-[2.5rem]">
+                {title}
+              </h1>
+              {detail && (
+                <p className="mt-3 font-[family-name:var(--font-display)] text-lg font-medium leading-snug text-ukraine-blue-700/80 sm:text-xl">
+                  {detail.subtitle[typedLocale]}
+                </p>
+              )}
             </div>
 
-            {/* 标题 */}
-            <h1 className="mt-5 font-[family-name:var(--font-display)] text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-ukraine-blue-900 sm:text-[3rem] lg:text-[3.75rem]">
-              {title}
-            </h1>
-
-            {/* 副标题 */}
-            {detail && (
-              <p className="mt-4 max-w-2xl font-[family-name:var(--font-display)] text-xl font-medium leading-snug text-ukraine-blue-700/80 sm:text-2xl">
-                {detail.subtitle[typedLocale]}
-              </p>
-            )}
+            {/* ── 封面图 — 占满左栏宽度 ── */}
+            <div className="relative mt-5 aspect-[3/2] overflow-hidden rounded-2xl lg:mt-0">
+              <Image
+                src={cover}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 56vw"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
+            </div>
 
             {/* ── 正文段落 ── */}
             {detail && (
@@ -197,10 +199,32 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
             )}
           </div>
 
-          {/* ── 右栏：桌面端 sticky 捐赠栏 ── */}
-          <aside className="hidden shrink-0 lg:block lg:w-[360px] xl:w-[400px]">
+          {/* ── 右栏：桌面端项目信息 + sticky 捐赠栏 ── */}
+          <aside className="hidden shrink-0 lg:flex lg:w-[360px] lg:flex-col xl:w-[400px]">
             <div className="sticky top-24">
-              <DonationSidebar {...sidebarProps} />
+              {/* 桌面端项目信息 */}
+              <div className="flex flex-wrap gap-2">
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-ukraine-blue-50 px-3 py-1 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-blue-500"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-4 font-[family-name:var(--font-display)] text-[1.75rem] font-bold leading-[1.08] tracking-[-0.02em] text-ukraine-blue-900 xl:text-[2rem]">
+                {title}
+              </p>
+              {detail && (
+                <p className="mt-2.5 font-[family-name:var(--font-display)] text-base font-medium leading-snug text-ukraine-blue-700/80 xl:text-lg">
+                  {detail.subtitle[typedLocale]}
+                </p>
+              )}
+
+              <div className="mt-6">
+                <DonationSidebar {...sidebarProps} />
+              </div>
             </div>
           </aside>
         </div>

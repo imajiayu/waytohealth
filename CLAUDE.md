@@ -42,12 +42,13 @@ npm run start    # 启动生产服务器
 | 国际化 | next-intl | 支持 ua (乌克兰语) + en (英语) |
 | 部署 | Vercel | 与 NGO_web 一致 |
 
+| 支付 | Stripe | 法币支付（UAH，Checkout Sessions） |
+
 ### 计划集成（尚未安装）
 
 | 类型 | 技术 | 说明 |
 |------|------|------|
 | 后端 | Supabase (PostgreSQL + Auth) | 独立实例 |
-| 支付 | Stripe | 法币支付（信用卡、Apple Pay、Google Pay） |
 | 邮件 | Resend | 捐赠通知、订阅邮件 |
 | 监控 | Sentry | 错误追踪 |
 | 分析 | Vercel Analytics | 流量分析 |
@@ -80,7 +81,7 @@ src/
 │       ├── page.tsx             # 首页
 │       ├── about/               # 关于我们
 │       ├── projects/            # 项目详情（/projects?id=N）
-│       ├── donate/              # 捐赠页
+│       ├── donation-success/    # 捐赠成功页（Stripe 回调）
 │       ├── merch/               # 周边商品
 │       ├── news/                # 新闻动态
 │       ├── partners/            # 合作伙伴
@@ -91,9 +92,8 @@ src/
 │   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentLedger）
 │   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
-│   ├── partners/                # 合作伙伴组件（PartnersShowcase, PartnersStrip）
+│   ├── partners/                # 合作伙伴组件（PartnersStrip）
 │   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, DocumentViewer, PatientStories）
-│   ├── shared/                  # 跨页面共享组件（ChapterIndex, ChapterMark — 杂志式章节导航）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook
@@ -106,8 +106,12 @@ src/
 │   ├── config.ts                # 语言配置（locales, defaultLocale）
 │   ├── request.ts               # next-intl 请求配置
 │   └── routing.ts               # next-intl 路由配置
+├── app/actions/
+│   └── donate.ts                # Stripe Checkout server action
 ├── lib/
-│   └── utils.ts                 # cn() 工具函数
+│   ├── utils.ts                 # cn() 工具函数
+│   ├── stripe.ts                # Stripe 客户端单例
+│   └── donations.ts             # 已筹金额查询（带缓存）
 └── middleware.ts                # i18n 路由中间件
 messages/
 ├── ua.json                      # 乌克兰语翻译
@@ -160,7 +164,7 @@ const t = useTranslations('namespace')
 - **Locale 类型**：使用 `import { type Locale } from '@/i18n/config'`，禁止硬编码 `as 'ua' | 'en'`
 - 保持 `strict: true`，避免 `any`
 - **JSON 数据文件**必须有对应的 `.ts` 文件提供类型定义和类型化导出（如 `partners.json` → `partners.ts`），组件中导入类型化版本而非直接导入 JSON
-- **禁止 `as` 类型断言绕过类型检查**（如 `partner as { darkBg: boolean }`），应通过接口定义正确的类型
+- **禁止 `as` 类型断言绕过类型检查**，应通过接口定义正确的类型
 
 ### 路由链接
 

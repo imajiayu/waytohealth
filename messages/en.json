@@ -482,6 +482,8 @@
     "selectAmount": "Select amount",
     "customAmount": "Custom amount",
     "donateButton": "Support this project",
+    "processing": "Processing...",
+    "donationError": "Error, please try again",
     "donateCta": "Every contribution brings us closer to the goal",
     "detailsTitle": "Details",
     "injuryTitle": "Injury Story",
@@ -514,5 +516,15 @@
     "legalEntity": "CO \"Way to Health Charity Foundation\" (EDRPOU Code 44947699)",
     "copyright": "© {year} Way to Health Charity Foundation. All rights reserved.",
     "language": "English"
+  },
+  "donationSuccess": {
+    "title": "Thank you for your support!",
+    "subtitle": "Your donation has been successfully processed",
+    "amount": "Amount",
+    "project": "Project",
+    "backToProject": "Back to project",
+    "backToHome": "Back to home",
+    "genericTitle": "Thank you!",
+    "genericSubtitle": "Your contribution will help change lives for the better"
   }
 }

@@ -1,13 +1,22 @@
 import { getTranslations } from 'next-intl/server';
 import { getAllProjects } from '@/lib/data';
+import { getRaisedAmount } from '@/lib/donations';
 import ProjectCard from '@/components/projects/ProjectCard';
 
 export default async function ProjectsSection() {
-  const [t, tNav, projects] = await Promise.all([
+  const [t, tNav, rawProjects] = await Promise.all([
     getTranslations('projects'),
     getTranslations('navigation'),
     getAllProjects(),
   ]);
+
+  // 并行查询每个项目的实时已筹金额
+  const projects = await Promise.all(
+    rawProjects.map(async (p) => ({
+      ...p,
+      raised_amount: await getRaisedAmount(p.id),
+    }))
+  );
 
   const mainProjects = projects.slice(0, 6);
   const otherProjects = projects.slice(6);

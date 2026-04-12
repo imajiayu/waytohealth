@@ -4,7 +4,6 @@ export interface Partner {
   logo: string;
   /** 官网链接；省略时渲染为非可点击的 logo（暂未公开/无独立官网） */
   url?: string;
-  darkBg?: boolean;
 }
 
 // 导入并附加类型

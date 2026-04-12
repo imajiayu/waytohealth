@@ -213,7 +213,7 @@ export default async function PublicAgreementsPage() {
       </section>
 
       {/* ═══════════ 2. BODY: 目录 + 正文 ═══════════ */}
-      <section className="relative py-10 sm:py-14 lg:py-16">
+      <section className="relative overflow-hidden py-10 sm:py-14 lg:py-16">
         {/* 装饰光晕 */}
         <div className="pointer-events-none absolute -left-40 top-40 h-96 w-96 rounded-full opacity-[0.04] glow-blue-soft" />
         <div className="pointer-events-none absolute -right-40 bottom-40 h-96 w-96 rounded-full opacity-[0.04] glow-gold-soft" />
@@ -371,15 +371,6 @@ export default async function PublicAgreementsPage() {
                     </a>
                   </div>
                 </article>
-              </div>
-
-              {/* 文档收尾装饰 — 章节符号 § */}
-              <div className="mt-10 flex items-center justify-center gap-5 sm:mt-12">
-                <span className="h-px w-16 bg-gradient-to-r from-transparent to-ukraine-blue-200" />
-                <span className="font-[family-name:var(--font-display)] text-3xl text-ukraine-blue-300">
-                  §
-                </span>
-                <span className="h-px w-16 bg-gradient-to-l from-transparent to-ukraine-blue-200" />
               </div>
             </div>
           </div>

@@ -111,6 +111,46 @@ export default function ProjectStrip({ projects, currentId }: ProjectStripProps)
     el.scrollTo({ left: targetScroll, behavior: 'smooth' });
   };
 
+  // 拖拽 thumb 滚动
+  const handleThumbDrag = useCallback(
+    (startEvent: React.MouseEvent | React.TouchEvent) => {
+      startEvent.preventDefault();
+      startEvent.stopPropagation();
+      const el = scrollRef.current;
+      const track = trackRef.current;
+      if (!el || !track) return;
+
+      const trackWidth = track.getBoundingClientRect().width;
+      const startX =
+        'touches' in startEvent
+          ? startEvent.touches[0].clientX
+          : startEvent.clientX;
+      const startScrollLeft = el.scrollLeft;
+
+      const onMove = (e: MouseEvent | TouchEvent) => {
+        const clientX =
+          'touches' in e ? e.touches[0].clientX : e.clientX;
+        const dx = clientX - startX;
+        // thumb 移动量 → 内容滚动量（映射到可滚动范围）
+        el.scrollLeft =
+          startScrollLeft + (dx / trackWidth) * (el.scrollWidth - el.clientWidth);
+      };
+
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onUp);
+      };
+
+      document.addEventListener('mousemove', onMove, { passive: true });
+      document.addEventListener('mouseup', onUp);
+      document.addEventListener('touchmove', onMove, { passive: true });
+      document.addEventListener('touchend', onUp);
+    },
+    [],
+  );
+
   return (
     <div>
       <div
@@ -199,10 +239,12 @@ export default function ProjectStrip({ projects, currentId }: ProjectStripProps)
         <div
           ref={trackRef}
           onClick={handleTrackClick}
-          className="mt-3 h-1 w-full cursor-pointer rounded-full bg-ukraine-blue-100"
+          className="mt-3 hidden h-2 w-full cursor-pointer rounded-full bg-ukraine-blue-100 transition-[height] duration-150 lg:block"
         >
           <div
-            className="gradient-brand-line h-full rounded-full transition-[left] duration-100 ease-out"
+            onMouseDown={handleThumbDrag}
+            onTouchStart={handleThumbDrag}
+            className="gradient-brand-line h-full cursor-grab rounded-full active:cursor-grabbing"
             style={{
               width: `${thumbRatio * 100}%`,
               marginLeft: `${thumbLeft}%`,
