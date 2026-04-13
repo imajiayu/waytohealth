@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import fs from 'node:fs';
+import path from 'node:path';
 import { getTranslations } from 'next-intl/server';
 import VideoStory from '@/components/about/VideoStory';
 import TeamCollage from '@/components/about/TeamCollage';
-import DocumentLedger from '@/components/about/DocumentLedger';
+import DocumentAccordion from '@/components/about/DocumentAccordion';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -28,26 +30,6 @@ type DocumentItem = {
   href: string;
 };
 
-/** 章节编号 + 标签 — 重复使用的小组件 */
-function ChapterMark({ number, label, chapterLabel }: { number: string; label: string; chapterLabel: string }) {
-  return (
-    <div className="flex items-center gap-4">
-      <span className="font-[family-name:var(--font-display)] text-[3.5rem] font-light leading-none text-ukraine-gold-500 sm:text-[4.5rem]">
-        {number}
-      </span>
-      <div className="flex flex-col gap-1">
-        <span className="h-px w-10 bg-ukraine-blue-300" />
-        <span className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.28em] text-ukraine-blue-600 sm:text-xs">
-          {chapterLabel}
-        </span>
-        <span className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight text-ukraine-blue-900 sm:text-lg">
-          {label}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations('aboutPage');
@@ -60,8 +42,17 @@ export default async function AboutPage({ params }: Props) {
 
   // 从翻译中获取结构化数据
   const team = Array.from({ length: 6 }, (_, i) => t.raw(`team.${i}`)) as TeamMember[];
-  const documents = Array.from({ length: 5 }, (_, i) => t.raw(`documents.${i}`)) as DocumentItem[];
-  const ledgerLabels = t.raw('ledgerLabels') as { id: string; file: string; type: string; size: string; format: string; open: string };
+  const rawDocs = Array.from({ length: 6 }, (_, i) => t.raw(`documents.${i}`)) as DocumentItem[];
+  const documents = rawDocs.map(d => {
+    let size = '—';
+    try {
+      const filepath = path.join(process.cwd(), 'public', d.href.replace(/^\//, ''));
+      const kb = fs.statSync(filepath).size / 1024;
+      size = kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${Math.round(kb)} KB`;
+    } catch { /* 文件不存在 */ }
+    return { title: d.title, href: d.href, size };
+  });
+  const viewerLabels = t.raw('viewerLabels') as { title: string; expand: string; collapse: string; download: string; close: string };
 
   return (
     <article className="relative overflow-hidden">
@@ -84,25 +75,7 @@ export default async function AboutPage({ params }: Props) {
         {/* ════════════════════════════════════════════
             MASTHEAD ── 杂志开篇
             ════════════════════════════════════════════ */}
-        <header className="grid grid-cols-12 gap-6 sm:gap-8">
-          {/* 左侧章节索引 ── 杂志目录式导航 */}
-          <aside className="col-span-12 lg:col-span-3 lg:pt-2">
-            <nav aria-label="Chapter index" className="space-y-5 border-l-2 border-ukraine-gold-500 pl-5 lg:space-y-6">
-              {(['origin', 'impact', 'evolution', 'voices', 'ledger'] as const).map((key, i) => (
-                <a key={key} href={`#chapter-${key}`} className="group flex items-baseline gap-3">
-                  <span className="font-[family-name:var(--font-display)] text-base font-light leading-none text-ukraine-gold-500 sm:text-lg">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="font-[family-name:var(--font-display)] text-sm italic text-ukraine-blue-700 transition-colors group-hover:text-ukraine-blue-900 sm:text-base">
-                    {t(`chapters.${key}`)}
-                  </span>
-                </a>
-              ))}
-            </nav>
-          </aside>
-
-          {/* 标题 + 引言 */}
-          <div className="col-span-12 lg:col-span-9">
+        <header>
             <div className="flex items-center gap-3">
               <span className="h-px w-12 bg-ukraine-gold-500" />
               <span className="font-[family-name:var(--font-data)] text-[11px] font-semibold uppercase tracking-[0.28em] text-ukraine-gold-700 sm:text-xs">
@@ -133,18 +106,12 @@ export default async function AboutPage({ params }: Props) {
               ))}
             </dl>
 
-          </div>
         </header>
 
         {/* ════════════════════════════════════════════
             CHAPTER 01 ── ORIGIN
             ════════════════════════════════════════════ */}
-        <section id="chapter-origin" className="mt-14 grid scroll-mt-24 grid-cols-12 gap-6 sm:mt-20 sm:gap-8">
-          <div className="col-span-12 lg:col-span-3">
-            <ChapterMark number="01" label={t('chapters.origin')} chapterLabel={t('chapterLabel')} />
-          </div>
-
-          <div className="col-span-12 lg:col-span-9 lg:pl-4">
+        <section className="mt-14 sm:mt-20">
             {/* 大首字母 + 第一段 */}
             <p className="font-[family-name:var(--font-display)] text-2xl leading-[1.45] tracking-tight text-ukraine-blue-900 sm:text-[1.75rem] sm:leading-[1.4]">
               <span
@@ -160,21 +127,14 @@ export default async function AboutPage({ params }: Props) {
             <p className="mt-6 max-w-3xl text-lg leading-[1.7] text-ukraine-blue-800/85 sm:ml-16 sm:mt-8 sm:text-[1.15rem]">
               {t('paragraphs.1')}
             </p>
-          </div>
         </section>
 
         {/* ════════════════════════════════════════════
-            CHAPTER 02 ── IMPACT (大数字 + 视频)
+            IMPACT (大数字 + 视频)
             ════════════════════════════════════════════ */}
-        <section id="chapter-impact" className="mt-4 scroll-mt-24 sm:mt-6">
-          <div className="relative z-10 grid grid-cols-12 gap-6 sm:gap-8">
-            <div className="col-span-12 lg:col-span-3">
-              <ChapterMark number="02" label={t('chapters.impact')} chapterLabel={t('chapterLabel')} />
-            </div>
-          </div>
-
-          {/* 大数字浮雕区 ── 负 margin 让 500+ 与上方区域重叠 */}
-          <div className="relative -mt-20 sm:-mt-36 lg:-mt-48">
+        <section className="mt-4 sm:mt-6">
+          {/* 大数字浮雕区 */}
+          <div className="relative">
             {/* 巨大描边数字背景 */}
             <div
               aria-hidden="true"
@@ -189,9 +149,7 @@ export default async function AboutPage({ params }: Props) {
             </div>
 
             {/* 数字下方的引文 */}
-            <div className="relative -mt-8 grid grid-cols-12 gap-6 sm:-mt-16 sm:gap-8 lg:-mt-24">
-              <div className="col-span-12 lg:col-span-3" />
-              <div className="col-span-12 lg:col-span-9 lg:pl-4">
+            <div className="relative -mt-8 sm:-mt-16 lg:-mt-24">
                 <div className="border-l-2 border-ukraine-gold-500 pl-6 sm:pl-8">
                   <p className="font-[family-name:var(--font-display)] text-2xl font-medium leading-[1.35] tracking-tight text-ukraine-blue-900 sm:text-[1.85rem] lg:text-[2.1rem]">
                     {t('impact')}
@@ -202,7 +160,6 @@ export default async function AboutPage({ params }: Props) {
                     </span>
                   </div>
                 </div>
-              </div>
             </div>
           </div>
 
@@ -237,44 +194,25 @@ export default async function AboutPage({ params }: Props) {
         </section>
 
         {/* ════════════════════════════════════════════
-            CHAPTER 03 ── EVOLUTION
+            EVOLUTION
             ════════════════════════════════════════════ */}
-        <section id="chapter-evolution" className="mt-14 grid scroll-mt-24 grid-cols-12 gap-6 sm:mt-20 sm:gap-8">
-          <div className="col-span-12 lg:col-span-3">
-            <ChapterMark number="03" label={t('chapters.evolution')} chapterLabel={t('chapterLabel')} />
-          </div>
-
-          <div className="col-span-12 lg:col-span-9 lg:pl-4">
+        <section className="mt-14 sm:mt-20">
             <p className="text-lg leading-[1.75] text-ukraine-blue-800/85 sm:text-xl sm:leading-[1.7]">
               {t('followUp')}
             </p>
 
-            {/* 装饰：分章符 */}
-            <div className="mt-6 flex items-center gap-3 sm:mt-8">
-              <span className="h-px flex-1 bg-gradient-to-r from-ukraine-blue-200 via-ukraine-gold-300 to-transparent" />
-              <span className="font-[family-name:var(--font-display)] text-2xl text-ukraine-gold-500">§</span>
-              <span className="h-px flex-1 bg-gradient-to-l from-ukraine-blue-200 via-ukraine-gold-300 to-transparent" />
-            </div>
-          </div>
         </section>
 
         {/* ════════════════════════════════════════════
-            CHAPTER 04 ── VOICES (Team)
+            VOICES (Team)
             ════════════════════════════════════════════ */}
-        <section id="chapter-voices" className="mt-14 scroll-mt-24 sm:mt-20">
-          <div className="grid grid-cols-12 gap-6 sm:gap-8">
-            <div className="col-span-12 lg:col-span-3">
-              <ChapterMark number="04" label={t('chapters.voices')} chapterLabel={t('chapterLabel')} />
-            </div>
-            <div className="col-span-12 lg:col-span-9 lg:pl-4">
+        <section className="mt-14 sm:mt-20">
               <h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight text-ukraine-blue-900 sm:text-4xl lg:text-5xl">
                 {t('teamTitle')}
               </h2>
               <p className="mt-3 max-w-xl text-base leading-relaxed text-ukraine-blue-700/80 sm:text-lg">
                 {t('teamSubtitle')}
               </p>
-            </div>
-          </div>
 
           <div className="mt-8 sm:mt-10">
             <TeamCollage members={team} noPortraitLabel={t('noPortrait')} />
@@ -282,47 +220,10 @@ export default async function AboutPage({ params }: Props) {
         </section>
 
         {/* ════════════════════════════════════════════
-            CHAPTER 05 ── LEDGER (Documents)
+            DOCUMENTS
             ════════════════════════════════════════════ */}
-        <section id="chapter-ledger" className="mt-14 scroll-mt-24 sm:mt-20">
-          <div className="grid grid-cols-12 gap-6 sm:gap-8">
-            <div className="col-span-12 lg:col-span-3">
-              <ChapterMark number="05" label={t('chapters.ledger')} chapterLabel={t('chapterLabel')} />
-            </div>
-            <div className="col-span-12 lg:col-span-9 lg:pl-4">
-              <h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight text-ukraine-blue-900 sm:text-4xl lg:text-5xl">
-                {t('transparencyTitle')}
-              </h2>
-              <p className="mt-3 max-w-xl text-base leading-relaxed text-ukraine-blue-700/80 sm:text-lg">
-                {t('transparencySubtitle')}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-12 gap-6 sm:mt-8 sm:gap-8">
-            <div className="col-span-12 lg:col-span-3 lg:pt-2">
-              {/* 装饰印章 */}
-              <div className="hidden lg:block">
-                <div className="relative inline-flex h-32 w-32 items-center justify-center rounded-full border border-ukraine-gold-500/40">
-                  <div className="absolute inset-2 rounded-full border border-dashed border-ukraine-gold-500/30" />
-                  <div className="text-center">
-                    <div className="font-[family-name:var(--font-data)] text-[9px] font-bold uppercase tracking-[0.22em] text-ukraine-gold-700">
-                      {t('verified')}
-                    </div>
-                    <div className="mt-1 font-[family-name:var(--font-display)] text-2xl font-medium leading-none text-ukraine-blue-800">
-                      {t('verifiedYear')}
-                    </div>
-                    <div className="mt-1 font-[family-name:var(--font-data)] text-[8px] uppercase tracking-[0.2em] text-ukraine-gold-600">
-                      {t('openFiles')}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-span-12 lg:col-span-9">
-              <DocumentLedger documents={documents} labels={ledgerLabels} />
-            </div>
-          </div>
+        <section className="mt-14 sm:mt-20">
+          <DocumentAccordion documents={documents} labels={viewerLabels} />
         </section>
       </div>
     </article>

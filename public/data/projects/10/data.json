@@ -1,14 +1,14 @@
 {
   "title": {
-    "ua": "Поруч",
-    "en": "By Your Side"
+    "ua": "Доступний рух",
+    "en": "Accessible Mobility"
   },
   "description": {
-    "ua": "Забезпечуємо базову підтримку в перші години після обстрілів.",
-    "en": "We provide basic support in the first hours after shelling."
+    "ua": "Забезпечуємо перевезення пацієнтів до місць лікування.",
+    "en": "We provide patient transportation to treatment facilities."
   },
   "goal_amount": 500000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["emergency-aid", "humanitarian"]
+  "tags": ["transport", "accessibility"]
 }

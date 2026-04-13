@@ -1,14 +1,17 @@
-import { getProject, getProjectCover, getAllProjects } from '@/lib/data';
+import { getProject, getAllProjects } from '@/lib/data';
 import { getRaisedAmount } from '@/lib/donations';
 import { type Locale } from '@/i18n/config';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import { Check } from 'lucide-react';
+import Image from 'next/image';
 import DonationSidebar from '@/components/projects/DonationSidebar';
 import MobileDonationSheet from '@/components/projects/MobileDonationSheet';
-import DocumentViewer from '@/components/projects/DocumentViewer';
+import DocumentViewer from '@/components/common/DocumentViewer';
+import { getTranslations } from 'next-intl/server';
 import PatientStories from '@/components/projects/PatientStories';
 import ProjectStrip from '@/components/projects/ProjectStrip';
+import RecoveryJourney from '@/components/projects/RecoveryJourney';
+import ProjectGallery from '@/components/projects/ProjectGallery';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -20,16 +23,18 @@ export async function generateMetadata({ params, searchParams }: Props) {
   const { id } = await searchParams;
   const typedLocale: Locale = (locale as Locale) ?? 'ua';
 
-  if (!id) return { title: 'Projects' };
-
   try {
-    const project = await getProject(Number(id));
+    const allProjects = await getAllProjects();
+    const projectId = id ? Number(id) : allProjects[0]?.id;
+    if (!projectId) return { title: 'Projects' };
+
+    const project = await getProject(projectId);
     return {
       title: project.title[typedLocale],
       description: project.description[typedLocale],
     };
   } catch {
-    return { title: 'Project Not Found' };
+    return { title: 'Projects' };
   }
 }
 
@@ -38,16 +43,18 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const { id } = await searchParams;
   const typedLocale: Locale = (locale as Locale) ?? 'ua';
 
-  if (!id) notFound();
+  const allProjects = await getAllProjects();
+
+  // 无 id 参数时自动选择第一个项目
+  const projectId = id ? Number(id) : allProjects[0]?.id;
+  if (!projectId) notFound();
 
   let project;
   try {
-    project = await getProject(Number(id));
+    project = await getProject(projectId);
   } catch {
     notFound();
   }
-
-  const allProjects = await getAllProjects();
   const stripProjects = allProjects.map((p) => ({
     id: p.id,
     data: {
@@ -61,18 +68,28 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
     cover: p.cover,
   }));
 
-  const cover = getProjectCover(Number(id));
   const title = project.title[typedLocale];
   const detail = project.detail;
 
   // 从 Stripe 获取实时已筹金额
-  const raisedAmount = await getRaisedAmount(Number(id));
+  const raisedAmount = await getRaisedAmount(projectId);
+
+  // 文档查看器通用标签
+  const t = await getTranslations('projectDetail');
+  const docViewerLabels = {
+    title: t('documentsTitle'),
+    expand: t('expand'),
+    collapse: t('collapse'),
+    download: t('download'),
+    close: t('close'),
+    loadError: t('loadError'),
+  };
 
   // 捐赠栏的 props — 复用于桌面和移动端
   const sidebarProps = {
     goalAmount: project.goal_amount,
     raisedAmount,
-    projectId: Number(id),
+    projectId,
   };
 
   return (
@@ -84,18 +101,17 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       <div className="container-page relative pt-6 pb-16 sm:pt-8 sm:pb-20 lg:pt-10 lg:pb-24">
         {/* ── 项目横向切换画廊 ── */}
         <div>
-          <ProjectStrip projects={stripProjects} currentId={Number(id)} />
+          <ProjectStrip projects={stripProjects} currentId={projectId} />
         </div>
 
         {/* ════════════════════════════════════════════
             两栏布局：左内容 + 右 sticky 捐赠栏
-            （从项目画廊之后立即开始，提升信息密度）
             ════════════════════════════════════════════ */}
         <div className="mt-6 lg:flex lg:gap-10 sm:mt-8">
           {/* ── 左栏：内容区 ── */}
           <div className="min-w-0 lg:flex-1">
-            {/* ── 移动端项目信息（lg 以下显示） ── */}
-            <div className="lg:hidden">
+            {/* ── 项目信息（标签 + 标题 + 副标题） ── */}
+            <div>
               <div className="flex flex-wrap gap-2">
                 {project.tags.map((tag) => (
                   <span
@@ -106,7 +122,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
                   </span>
                 ))}
               </div>
-              <h1 className="mt-4 font-[family-name:var(--font-display)] text-[2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ukraine-blue-900 sm:text-[2.5rem]">
+              <h1 className="mt-4 font-[family-name:var(--font-display)] text-[2rem] font-bold leading-[1.08] tracking-[-0.02em] text-ukraine-blue-900 sm:text-[2.5rem] lg:text-[2.75rem]">
                 {title}
               </h1>
               {detail && (
@@ -114,19 +130,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
                   {detail.subtitle[typedLocale]}
                 </p>
               )}
-            </div>
-
-            {/* ── 封面图 — 占满左栏宽度 ── */}
-            <div className="relative mt-5 aspect-[3/2] overflow-hidden rounded-2xl lg:mt-0">
-              <Image
-                src={cover}
-                alt={title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 56vw"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
+              {/* 标题下方装饰分隔线 */}
+              <div className="mt-6 h-px w-full bg-ukraine-blue-100/60 sm:mt-8" />
             </div>
 
             {/* ── 正文段落 ── */}
@@ -179,9 +184,87 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
               </section>
             )}
 
+            {/* ── 内容配图（自然比例，不裁剪） ── */}
+            {(() => {
+              const images = detail?.contentImages;
+              if (!images || images.length === 0) return null;
+              const splitAt = Math.ceil(images.length / 2);
+              return (
+                <section className="mt-10 sm:mt-12">
+                  {images.length <= 3 ? (
+                    /* 单行：≤3 张图 */
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      {images.map((img, i) => (
+                        <div
+                          key={i}
+                          className={`overflow-hidden rounded-xl ${i === 0 ? 'flex-[1.4]' : 'flex-1'}`}
+                        >
+                          <Image
+                            src={`/data/projects/${projectId}/${img}`}
+                            alt={`${title} ${i + 1}`}
+                            width={800}
+                            height={600}
+                            className="h-auto w-full"
+                            sizes={i === 0
+                              ? '(max-width: 640px) 55vw, (max-width: 1024px) 45vw, 340px'
+                              : '(max-width: 640px) 25vw, (max-width: 1024px) 22vw, 180px'}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    /* 双行：4+ 张图 */
+                    <div className="flex flex-col gap-2.5 sm:gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        {images.slice(0, splitAt).map((img, i) => (
+                          <div key={i} className="flex-1 overflow-hidden rounded-xl">
+                            <Image
+                              src={`/data/projects/${projectId}/${img}`}
+                              alt={`${title} ${i + 1}`}
+                              width={800}
+                              height={600}
+                              className="h-auto w-full"
+                              sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        {images.slice(splitAt).map((img, i) => (
+                          <div key={i} className="flex-1 overflow-hidden rounded-xl">
+                            <Image
+                              src={`/data/projects/${projectId}/${img}`}
+                              alt={`${title} ${splitAt + i + 1}`}
+                              width={800}
+                              height={600}
+                              className="h-auto w-full"
+                              sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              );
+            })()}
+
+            {/* ── 康复旅程阶段 ── */}
+            {detail?.stages && detail.stages.length > 0 && (
+              <RecoveryJourney stages={detail.stages} locale={typedLocale} />
+            )}
+
+            {/* ── 图片画廊 ── */}
+            {detail?.gallery && detail.gallery.length > 0 && (
+              <ProjectGallery images={detail.gallery} projectId={projectId} />
+            )}
+
             {/* ── 文档预览区 ── */}
             {detail?.documents && detail.documents.length > 0 && (
-              <DocumentViewer documents={detail.documents} />
+              <DocumentViewer
+                documents={detail.documents.map(d => ({ label: d.label[typedLocale], url: d.url }))}
+                labels={docViewerLabels}
+              />
             )}
 
             {/* ── 故事区 ── */}
@@ -190,37 +273,15 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
                 stories={detail.stories}
                 storiesHeader={detail.storiesHeader}
                 locale={typedLocale}
-                projectId={Number(id)}
+                projectId={projectId}
               />
             )}
           </div>
 
-          {/* ── 右栏：桌面端项目信息 + sticky 捐赠栏 ── */}
+          {/* ── 右栏：sticky 捐赠栏 ── */}
           <aside className="hidden shrink-0 lg:flex lg:w-[360px] lg:flex-col xl:w-[400px]">
             <div className="sticky top-24">
-              {/* 桌面端项目信息 */}
-              <div className="flex flex-wrap gap-2">
-                {project.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-ukraine-blue-50 px-3 py-1 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-blue-500"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-4 font-[family-name:var(--font-display)] text-[1.75rem] font-bold leading-[1.08] tracking-[-0.02em] text-ukraine-blue-900 xl:text-[2rem]">
-                {title}
-              </p>
-              {detail && (
-                <p className="mt-2.5 font-[family-name:var(--font-display)] text-base font-medium leading-snug text-ukraine-blue-700/80 xl:text-lg">
-                  {detail.subtitle[typedLocale]}
-                </p>
-              )}
-
-              <div className="mt-6">
-                <DonationSidebar {...sidebarProps} />
-              </div>
+              <DonationSidebar {...sidebarProps} />
             </div>
           </aside>
         </div>

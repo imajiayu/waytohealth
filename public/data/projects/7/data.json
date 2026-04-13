@@ -1,14 +1,57 @@
 {
   "title": {
-    "ua": "Екіпаж допомоги",
-    "en": "Rescue Crew"
+    "ua": "Відновлення 2.0",
+    "en": "Recovery 2.0"
   },
   "description": {
-    "ua": "Фінансуємо закупівлю карет швидкої допомоги.",
-    "en": "We fund ambulances to bring emergency care to those in need."
+    "ua": "Підтримуємо використання VR-терапії у реабілітації.",
+    "en": "We support the use of VR therapy in rehabilitation."
   },
-  "goal_amount": 1200000,
+  "goal_amount": 500000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["ambulance", "emergency"]
+  "tags": ["vr-therapy", "innovation"],
+  "detail": {
+    "subtitle": {
+      "ua": "Фізична реабілітація у віртуальній реальності",
+      "en": "Physical rehabilitation in virtual reality"
+    },
+    "body": [
+      {
+        "ua": "Цей проєкт поєднує сучасні технології та реабілітацію, щоб зробити процес відновлення ефективнішим і водночас більш залучаючим для пацієнтів. Віртуальна реальність відкриває нові можливості там, де класичні підходи інколи втрачають свою дієвість через втому, біль або втрату мотивації.",
+        "en": "This project combines modern technology and rehabilitation to make the recovery process more effective and engaging for patients. Virtual reality opens new possibilities where traditional approaches sometimes lose their effectiveness due to fatigue, pain, or loss of motivation."
+      },
+      {
+        "ua": "В межах проєкту ВІДНОВЛЕННЯ 2.0 ми фінансуємо фізичну реабілітацію пацієнтів, яким показані заняття у віртуальній реальності.",
+        "en": "Within the RECOVERY 2.0 project, we fund physical rehabilitation for patients who are indicated for virtual reality therapy sessions."
+      },
+      {
+        "ua": "Використання VR технологій дозволяє:",
+        "en": "The use of VR technologies enables:"
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "Ефективно боротися з фантомними болями, особливо після ампутацій кінцівок",
+        "en": "Effectively combat phantom pain, especially after limb amputations"
+      },
+      {
+        "ua": "Відновлювати рухові функції через інтерактивні вправи у безпечному середовищі",
+        "en": "Restore motor functions through interactive exercises in a safe environment"
+      },
+      {
+        "ua": "Покращувати координацію, баланс і силу без надмірного фізичного навантаження",
+        "en": "Improve coordination, balance, and strength without excessive physical strain"
+      },
+      {
+        "ua": "Підвищувати мотивацію до реабілітації завдяки залученню у процес",
+        "en": "Increase rehabilitation motivation through engagement in the process"
+      }
+    ],
+    "contentImages": [
+      "DSC08047.JPG",
+      "IMG_0816.png",
+      "IMG_9296.png"
+    ]
+  }
 }

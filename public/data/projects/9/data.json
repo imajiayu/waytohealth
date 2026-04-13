@@ -1,14 +1,14 @@
 {
   "title": {
-    "ua": "Доступний рух",
-    "en": "Accessible Mobility"
+    "ua": "Дитинство триває",
+    "en": "Childhood Continues"
   },
   "description": {
-    "ua": "Забезпечуємо перевезення пацієнтів до місць лікування.",
-    "en": "We provide patient transportation to treatment facilities."
+    "ua": "Організовуємо відпочинок для дітей військових та ветеранів.",
+    "en": "We organize recreation for children of soldiers and veterans."
   },
-  "goal_amount": 500000,
+  "goal_amount": 1000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["transport", "accessibility"]
+  "tags": ["children", "recreation"]
 }

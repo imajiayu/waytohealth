@@ -212,13 +212,11 @@
       "1": { "title": "Витяг з реєстру неприбуткових організацій", "href": "/documents/about/nonprofit-register-extract.pdf" },
       "2": { "title": "Витяг ЄДРПОУ", "href": "/documents/about/edr-extract.pdf" },
       "3": { "title": "Річний звіт 2025", "href": "/documents/about/annual-report-2025.pdf" },
-      "4": { "title": "Фінансовий звіт 2025", "href": "/documents/about/financial-report-2025.pdf" }
+      "4": { "title": "Фінансовий звіт 2025", "href": "/documents/about/financial-report-2025.pdf" },
+      "5": { "title": "Кодекс поведінки та політика етичних стандартів", "href": "/documents/about/ethical-standards.pdf" }
     },
-    "ledgerLabels": { "id": "№", "file": "Документ", "type": "Тип", "size": "Розмір", "format": "PDF", "open": "Відкрити" },
-    "noPortrait": "Без фото",
-    "verified": "Перевірено",
-    "openFiles": "Відкрити файли",
-    "verifiedYear": "2025"
+    "viewerLabels": { "title": "Прозорість", "expand": "На весь екран", "collapse": "Згорнути", "download": "Завантажити", "close": "Закрити", "loadError": "Не вдалося завантажити файл" },
+    "noPortrait": "Без фото"
   },
   "termsPage": {
     "hero": {
@@ -498,7 +496,8 @@
     "download": "Завантажити",
     "close": "Закрити",
     "before": "До",
-    "after": "Після"
+    "after": "Після",
+    "stagesTitle": "Етапи відновлення"
   },
   "footer": {
     "terms": "Умови та положення",

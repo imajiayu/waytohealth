@@ -212,13 +212,11 @@
       "1": { "title": "Extract from the Register of Non-Profit Organizations", "href": "/documents/about/nonprofit-register-extract.pdf" },
       "2": { "title": "EDRPOU Extract", "href": "/documents/about/edr-extract.pdf" },
       "3": { "title": "Annual Report 2025", "href": "/documents/about/annual-report-2025.pdf" },
-      "4": { "title": "Financial Report 2025", "href": "/documents/about/financial-report-2025.pdf" }
+      "4": { "title": "Financial Report 2025", "href": "/documents/about/financial-report-2025.pdf" },
+      "5": { "title": "Code of Conduct & Policy on Ethical Standards", "href": "/documents/about/ethical-standards.pdf" }
     },
-    "ledgerLabels": { "id": "№", "file": "Document", "type": "Type", "size": "Size", "format": "PDF", "open": "Open" },
-    "noPortrait": "No portrait",
-    "verified": "Verified",
-    "openFiles": "Open files",
-    "verifiedYear": "2025"
+    "viewerLabels": { "title": "Transparency", "expand": "Full screen", "collapse": "Exit full screen", "download": "Download", "close": "Close", "loadError": "Failed to load file" },
+    "noPortrait": "No portrait"
   },
   "termsPage": {
     "hero": {
@@ -498,7 +496,8 @@
     "download": "Download",
     "close": "Close",
     "before": "Before",
-    "after": "After"
+    "after": "After",
+    "stagesTitle": "Recovery Stages"
   },
   "footer": {
     "terms": "Terms & Conditions",

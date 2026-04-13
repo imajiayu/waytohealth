@@ -1,14 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { type Locale } from '@/i18n/config';
-import { type ProjectDocument } from '@/data/projects';
 import { FileSpreadsheet, FileText, X, Download, Maximize2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
+export interface ViewerDocument {
+  label: string;
+  url: string;
+}
+
+interface DocumentViewerLabels {
+  title: string;
+  expand: string;
+  collapse: string;
+  download: string;
+  close: string;
+  loadError: string;
+}
+
 interface DocumentViewerProps {
-  documents: ProjectDocument[];
+  documents: ViewerDocument[];
+  labels: DocumentViewerLabels;
 }
 
 // 从 URL 推断文件类型
@@ -105,10 +117,12 @@ function ExcelPreview({ url, errorMessage }: { url: string; errorMessage: string
   );
 }
 
-export default function DocumentViewer({ documents }: DocumentViewerProps) {
-  const t = useTranslations('projectDetail');
-  const locale = useLocale() as Locale;
-
+/**
+ * 通用文档查看器
+ * - 支持 PDF 内嵌预览和 XLSX 表格渲染
+ * - 带标签切换、全屏、下载功能
+ */
+export default function DocumentViewer({ documents, labels }: DocumentViewerProps) {
   // 默认选中第一个文档
   const [activeDoc, setActiveDoc] = useState<number | null>(0);
   const [expanded, setExpanded] = useState(false);
@@ -136,9 +150,9 @@ export default function DocumentViewer({ documents }: DocumentViewerProps) {
   }
 
   return (
-    <section className="mt-12 max-w-3xl sm:mt-16">
+    <section>
       <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-ukraine-blue-900 sm:text-3xl">
-        {t('documentsTitle')}
+        {labels.title}
       </h2>
 
       {/* 文档选择标签 */}
@@ -158,7 +172,7 @@ export default function DocumentViewer({ documents }: DocumentViewerProps) {
               }`}
             >
               <Icon className="h-4 w-4" />
-              {doc.label[locale]}
+              {doc.label}
             </button>
           );
         })}
@@ -170,7 +184,7 @@ export default function DocumentViewer({ documents }: DocumentViewerProps) {
           {/* 工具栏 */}
           <div className="flex items-center justify-between border-b border-ukraine-blue-100/60 bg-ukraine-blue-50/30 px-4 py-2">
             <span className="font-[family-name:var(--font-data)] text-xs font-medium text-ukraine-blue-500">
-              {currentDoc.label[locale]}
+              {currentDoc.label}
               <span className="ml-2 uppercase text-ukraine-blue-400">
                 .{currentType}
               </span>
@@ -182,8 +196,8 @@ export default function DocumentViewer({ documents }: DocumentViewerProps) {
                   type="button"
                   onClick={() => setExpanded(!expanded)}
                   className="cursor-pointer rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
-                  title={expanded ? t('collapse') : t('expand')}
-                  aria-label={expanded ? t('collapse') : t('expand')}
+                  title={expanded ? labels.collapse : labels.expand}
+                  aria-label={expanded ? labels.collapse : labels.expand}
                 >
                   {expanded ? <X className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 </button>
@@ -193,8 +207,8 @@ export default function DocumentViewer({ documents }: DocumentViewerProps) {
                 href={currentDoc.url}
                 download
                 className="rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
-                title={t('download')}
-                aria-label={t('download')}
+                title={labels.download}
+                aria-label={labels.download}
               >
                 <Download className="h-4 w-4" />
               </a>
@@ -203,8 +217,8 @@ export default function DocumentViewer({ documents }: DocumentViewerProps) {
                 type="button"
                 onClick={() => { setActiveDoc(null); setExpanded(false); }}
                 className="cursor-pointer rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
-                title={t('close')}
-                aria-label={t('close')}
+                title={labels.close}
+                aria-label={labels.close}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -221,10 +235,10 @@ export default function DocumentViewer({ documents }: DocumentViewerProps) {
               <iframe
                 src={currentDoc.url}
                 className="h-full w-full border-0"
-                title={currentDoc.label[locale]}
+                title={currentDoc.label}
               />
             ) : (
-              <ExcelPreview url={currentDoc.url} errorMessage={t('loadError')} />
+              <ExcelPreview url={currentDoc.url} errorMessage={labels.loadError} />
             )}
           </div>
         </div>

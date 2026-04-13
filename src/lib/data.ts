@@ -37,8 +37,3 @@ export async function getAllProjects() {
 
   return projects;
 }
-
-// 获取项目封面图路径
-export function getProjectCover(id: number): string {
-  return `/data/projects/${id}/cover.webp`;
-}

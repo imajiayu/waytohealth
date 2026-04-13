@@ -10,5 +10,82 @@
   "goal_amount": 2000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["prosthetics", "rehabilitation"]
+  "tags": ["prosthetics", "rehabilitation"],
+  "detail": {
+    "subtitle": {
+      "ua": "Повний цикл відновлення після ампутацій",
+      "en": "Full cycle of recovery after amputations"
+    },
+    "body": [
+      {
+        "ua": "«Новий крок» — це про підтримку людей, які втратили кінцівки внаслідок війни та змушені заново вибудовувати своє життя.",
+        "en": "\"New Step\" is about supporting people who lost limbs due to war and are forced to rebuild their lives from scratch."
+      },
+      {
+        "ua": "Разом із партнерським медичним центром \"Шлях до Здоров'я\" ми щодня бачимо, наскільки важливо, щоб цей процес був цілісним. Коли всі етапи — від першої допомоги до протезування й адаптації — поєднані в одну систему, результати відновлення стають значно кращими, а сам шлях — менш виснажливим для пацієнта.",
+        "en": "Together with our partner medical center \"Way to Health,\" we see every day how important it is for this process to be holistic. When all stages — from first aid to prosthetics and adaptation — are integrated into a single system, recovery outcomes improve significantly and the journey becomes less exhausting for the patient."
+      },
+      {
+        "ua": "Під час реалізації проєкту, ми залучаємо партнерські організації, такі як центр протезування Superhumans, щоб забезпечити пацієнтам доступ до сучасного протезування та якісної реабілітації.",
+        "en": "During the project's implementation, we engage partner organizations such as the Superhumans prosthetics center to provide patients with access to modern prosthetics and quality rehabilitation."
+      },
+      {
+        "ua": "Реалізація проєкту дозволить:",
+        "en": "The implementation of this project will:"
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "забезпечити послідовний і безперервний процес реабілітації — від перших етапів лікування до повної адаптації з протезом",
+        "en": "ensure a consistent and uninterrupted rehabilitation process — from initial treatment stages to full adaptation with a prosthesis"
+      },
+      {
+        "ua": "об'єднати роботу лікарів, реабілітологів, протезистів і психологів у межах єдиного підходу",
+        "en": "unite the work of doctors, rehabilitation specialists, prosthetists, and psychologists within a unified approach"
+      },
+      {
+        "ua": "допомогти швидше повернутись до самостійного життя та відчути впевненість у власних силах",
+        "en": "help patients return to independent living faster and regain confidence in their own strength"
+      }
+    ],
+    "stages": [
+      {
+        "title": { "ua": "Підготовка до протезування", "en": "Preparation for Prosthetics" },
+        "description": {
+          "ua": "1-6 тижнів",
+          "en": "1-6 weeks"
+        }
+      },
+      {
+        "title": { "ua": "Примірка тренувального протезу", "en": "Fitting of Training Prosthesis" },
+        "description": {
+          "ua": "1 тиждень",
+          "en": "1 week"
+        }
+      },
+      {
+        "title": { "ua": "Опанування навичок користування тренувальним протезом", "en": "Mastering Training Prosthesis Skills" },
+        "description": {
+          "ua": "1-2 тижні",
+          "en": "1-2 weeks"
+        }
+      },
+      {
+        "title": { "ua": "Примірка постійного протезу", "en": "Fitting of Permanent Prosthesis" },
+        "description": {
+          "ua": "1 тиждень",
+          "en": "1 week"
+        }
+      },
+      {
+        "title": { "ua": "Повна адаптація до користування постійним протезом у повсякденному житті", "en": "Full Adaptation to Permanent Prosthesis in Daily Life" },
+        "description": {
+          "ua": "1-5 тижнів",
+          "en": "1-5 weeks"
+        }
+      }
+    ],
+    "documents": [],
+    "gallery": []
+  }
 }

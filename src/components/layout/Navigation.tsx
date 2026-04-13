@@ -6,10 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import Image from 'next/image';
+import { Mail, Phone } from 'lucide-react';
 import { triggerRouteChange } from './LoadingBar';
+import { SOCIAL_LINKS, CONTACT } from '@/data/social';
 
 const menuItems = [
-  { key: 'projects', path: '/projects?id=12' },
+  { key: 'projects', path: '/projects' },
   { key: 'about', path: '/about' },
   { key: 'news', path: '/news' },
   { key: 'merch', path: '/merch' },
@@ -127,7 +129,7 @@ export default function Navigation() {
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Donate 按钮 */}
               <button
-                onClick={() => handleMenuItemClick({ key: 'donate', path: '/projects?id=12' })}
+                onClick={() => handleMenuItemClick({ key: 'donate', path: '/projects' })}
                 className="gradient-brand flex items-center rounded-xl
                            px-3.5 sm:px-5 py-1.5 sm:py-2 text-[12px] sm:text-[13px]
                            font-bold tracking-wide text-white
@@ -266,16 +268,86 @@ export default function Navigation() {
           </ul>
         </nav>
 
-        {/* 底部 Logo */}
-        <div className="px-8 pb-8">
-          <div className="h-px bg-gradient-to-r from-ukraine-blue-200 via-ukraine-gold-200 to-transparent" />
-          <Image
-            src={locale === 'ua' ? '/images/logo-ua.png' : '/images/logo-en.png'}
-            alt={locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health'}
-            width={locale === 'ua' ? 826 : 539}
-            height={locale === 'ua' ? 165 : 104}
-            className="mt-4 h-6 w-auto"
-          />
+        {/* 底部：品牌签名区 */}
+        <div className="mt-auto">
+          <div className="bg-gradient-to-t from-ukraine-blue-50/50 to-transparent px-8 pt-5 pb-8">
+            {/* 联系信息 — 品牌色调图标徽章 */}
+            <div
+              className={`space-y-2.5 mb-5 transition-[opacity,transform] duration-300
+                         ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
+              style={{ transitionDelay: isMenuOpen ? `${80 + menuItems.length * 50 + 30}ms` : '0ms' }}
+            >
+              <a
+                href={`mailto:${CONTACT.email}`}
+                className="flex items-center gap-3 text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
+              >
+                <span className="w-7 h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
+                                 group-hover:bg-ukraine-blue-100 transition-colors">
+                  <Mail className="w-3.5 h-3.5 text-ukraine-blue-400" />
+                </span>
+                <span className="truncate">{CONTACT.email}</span>
+              </a>
+              <a
+                href={`tel:${CONTACT.phoneTel}`}
+                className="flex items-center gap-3 text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
+              >
+                <span className="w-7 h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
+                                 group-hover:bg-ukraine-blue-100 transition-colors">
+                  <Phone className="w-3.5 h-3.5 text-ukraine-blue-400" />
+                </span>
+                <span className="font-[family-name:var(--font-data)] tracking-wide">{CONTACT.phoneDisplay}</span>
+              </a>
+            </div>
+
+            {/* 社交媒体图标 — 品牌边框 + 填充 hover */}
+            <div
+              className={`flex items-center gap-2.5 mb-6 transition-[opacity,transform] duration-300
+                         ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
+              style={{ transitionDelay: isMenuOpen ? `${80 + menuItems.length * 50 + 80}ms` : '0ms' }}
+            >
+              {SOCIAL_LINKS.map(({ name, href, icon: Icon }) => (
+                <a
+                  key={name}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={name}
+                  className="w-9 h-9 rounded-full border border-ukraine-blue-200/60 flex items-center justify-center
+                             text-ukraine-blue-400 hover:bg-ukraine-blue-500 hover:text-white
+                             hover:border-ukraine-blue-500 hover:shadow-[0_2px_8px_rgba(0,108,178,0.25)]
+                             transition-all duration-200"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
+
+            {/* 装饰性分隔 — 金色菱形 + 品牌渐变线 */}
+            <div
+              className={`flex items-center gap-2 mb-4 transition-[opacity,transform] duration-300
+                         ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
+              style={{ transitionDelay: isMenuOpen ? `${80 + menuItems.length * 50 + 120}ms` : '0ms' }}
+            >
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-ukraine-blue-200/80 to-ukraine-blue-300/50" />
+              <div className="w-1.5 h-1.5 rotate-45 rounded-[1px] bg-ukraine-gold-400/80" />
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent via-ukraine-blue-200/80 to-ukraine-blue-300/50" />
+            </div>
+
+            {/* Logo 签名 */}
+            <div
+              className={`transition-[opacity,transform] duration-300
+                         ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
+              style={{ transitionDelay: isMenuOpen ? `${80 + menuItems.length * 50 + 160}ms` : '0ms' }}
+            >
+              <Image
+                src={locale === 'ua' ? '/images/logo-ua.png' : '/images/logo-en.png'}
+                alt={locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health'}
+                width={locale === 'ua' ? 826 : 539}
+                height={locale === 'ua' ? 165 : 104}
+                className="h-6 w-auto opacity-70"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </>

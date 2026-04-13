@@ -1,14 +1,61 @@
 {
   "title": {
-    "ua": "Відновлення 2.0",
-    "en": "Recovery 2.0"
+    "ua": "Точка опори",
+    "en": "Point of Support"
   },
   "description": {
-    "ua": "Підтримуємо використання VR-терапії у реабілітації.",
-    "en": "We support the use of VR therapy in rehabilitation."
+    "ua": "Забезпечуємо доступ до психологічної підтримки, щоб допомогти повернути відчуття стабільності.",
+    "en": "We provide access to psychological support to help restore a sense of stability."
   },
-  "goal_amount": 500000,
+  "goal_amount": 2000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["vr-therapy", "innovation"]
+  "tags": ["psychology", "support"],
+  "detail": {
+    "subtitle": {
+      "ua": "Психологічна підтримка людей, постраждалих від війни",
+      "en": "Psychological support for people affected by war"
+    },
+    "body": [
+      {
+        "ua": "Цей проєкт створений для людей, чиє життя змінила війна — військових, ветеранів і цивільних, які пережили втрати, травматичний досвід та тривалий стрес.",
+        "en": "This project was created for people whose lives have been changed by war — service members, veterans, and civilians who have experienced loss, traumatic events, and prolonged stress."
+      },
+      {
+        "ua": "Ми не даємо універсальних рішень, але створюємо простір, у якому людина може бути почутою, отримати підтримку та поступово відновлювати свій емоційний стан у власному темпі.",
+        "en": "We don't offer universal solutions, but we create a space where a person can be heard, receive support, and gradually restore their emotional well-being at their own pace."
+      },
+      {
+        "ua": "Проєкт «Точка опори» передбачає комплексний підхід до психологічної підтримки — від індивідуальних консультацій до роботи в групах та довготривалого супроводу.",
+        "en": "The \"Point of Support\" project takes a comprehensive approach to psychological support — from individual consultations to group work and long-term accompaniment."
+      },
+      {
+        "ua": "У межах проєкту:",
+        "en": "Within the project:"
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "надається професійна психологічна допомога людям із тривожними станами, ПТСР та іншими наслідками травматичного досвіду",
+        "en": "professional psychological assistance is provided to people with anxiety disorders, PTSD, and other consequences of traumatic experiences"
+      },
+      {
+        "ua": "проводяться індивідуальні та групові сесії підтримки",
+        "en": "individual and group support sessions are conducted"
+      },
+      {
+        "ua": "створюються безпечні умови для відновлення емоційного балансу",
+        "en": "safe conditions are created for restoring emotional balance"
+      }
+    ],
+    "contentImages": [
+      "DSC_0917.jpg",
+      "DSC_0925.jpg",
+      "DSC_0939.jpg",
+      "DSC_0921.jpg",
+      "DSC_0936.jpg"
+    ],
+    "gallery": ["group-session.jpg"],
+    "documents": []
+  }
 }

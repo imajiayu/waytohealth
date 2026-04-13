@@ -1,5 +1,5 @@
 // 项目 ID 注册表 — 编译时类型检查
-export const PROJECTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12] as const;
+export const PROJECTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
 export type ProjectId = (typeof PROJECTS)[number];
 
 // 双语文本
@@ -16,11 +16,19 @@ export interface ProjectData {
   detail?: ProjectDetail;
 }
 
+// 康复旅程阶段
+export interface ProjectStage {
+  title: LocaleString;
+  description: LocaleString;
+}
+
 // 项目详情页数据
 export interface ProjectDetail {
   subtitle: LocaleString;
   body: LocaleString[];
   benefits?: LocaleString[];
+  contentImages?: string[];     // 与 benefits 并排展示的内容配图（文件名，相对于项目目录）
+  stages?: ProjectStage[];
   storiesHeader?: LocaleString;
   stories?: PatientStory[];
   documents?: ProjectDocument[];

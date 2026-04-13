@@ -89,12 +89,12 @@ src/
 │       ├── privacy/             # 隐私政策
 │       └── public-agreements/   # 公共协议（捐赠公开要约）
 ├── components/
-│   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentLedger）
-│   ├── common/                  # 通用 UI 组件（BottomSheet）
+│   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentAccordion）
+│   ├── common/                  # 通用 UI 组件（BottomSheet, DocumentViewer）
 │   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
-│   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, MobileDonationSheet, DocumentViewer, PatientStories）
+│   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney, ProjectGallery）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook

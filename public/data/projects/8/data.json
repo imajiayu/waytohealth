@@ -1,14 +1,14 @@
 {
   "title": {
-    "ua": "Дитинство триває",
-    "en": "Childhood Continues"
+    "ua": "Екіпаж допомоги",
+    "en": "Rescue Crew"
   },
   "description": {
-    "ua": "Організовуємо відпочинок для дітей військових та ветеранів.",
-    "en": "We organize recreation for children of soldiers and veterans."
+    "ua": "Фінансуємо закупівлю карет швидкої допомоги.",
+    "en": "We fund ambulances to bring emergency care to those in need."
   },
-  "goal_amount": 1000000,
+  "goal_amount": 1200000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["children", "recreation"]
+  "tags": ["ambulance", "emergency"]
 }

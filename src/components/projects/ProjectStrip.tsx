@@ -120,7 +120,9 @@ export default function ProjectStrip({ projects, currentId }: ProjectStripProps)
       const track = trackRef.current;
       if (!el || !track) return;
 
-      const trackWidth = track.getBoundingClientRect().width;
+      const trackRect = track.getBoundingClientRect();
+      const thumbWidth = trackRect.width * (el.clientWidth / el.scrollWidth);
+      const draggableWidth = trackRect.width - thumbWidth;
       const startX =
         'touches' in startEvent
           ? startEvent.touches[0].clientX
@@ -131,9 +133,9 @@ export default function ProjectStrip({ projects, currentId }: ProjectStripProps)
         const clientX =
           'touches' in e ? e.touches[0].clientX : e.clientX;
         const dx = clientX - startX;
-        // thumb 移动量 → 内容滚动量（映射到可滚动范围）
+        // thumb 可移动范围 = 轨道宽度 - thumb 宽度
         el.scrollLeft =
-          startScrollLeft + (dx / trackWidth) * (el.scrollWidth - el.clientWidth);
+          startScrollLeft + (dx / draggableWidth) * (el.scrollWidth - el.clientWidth);
       };
 
       const onUp = () => {

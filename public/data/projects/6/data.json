@@ -10,5 +10,45 @@
   "goal_amount": 2000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["equipment", "technology"]
+  "tags": ["equipment", "technology"],
+  "detail": {
+    "subtitle": {
+      "ua": "Забезпечуємо заклади охорони здоров'я необхідним обладнанням",
+      "en": "Equipping healthcare facilities with essential equipment"
+    },
+    "body": [
+      {
+        "ua": "Цей проєкт спрямований на посилення можливостей медичних закладів, які щодня працюють із пацієнтами, постраждалими від війни. Якість допомоги значною мірою залежить не лише від фахівців, а й від доступу до сучасного обладнання.",
+        "en": "This project is aimed at strengthening the capabilities of medical facilities that work daily with patients affected by the war. The quality of care depends significantly not only on specialists, but also on access to modern equipment."
+      },
+      {
+        "ua": "Ми співпрацюємо з лікарнями та реабілітаційними центрами, щоб оперативно реагувати на їхні потреби та закривати критично важливі запити. Від точності діагностики до ефективності відновлення — кожен етап лікування потребує відповідних ресурсів.",
+        "en": "We work with hospitals and rehabilitation centers to respond promptly to their needs and address critically important requests. From diagnostic accuracy to recovery effectiveness — every stage of treatment requires appropriate resources."
+      },
+      {
+        "ua": "У межах проєкту:",
+        "en": "Within the project:"
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "закуповуємо обладнання відповідно до запитів закладів охорони здоров'я",
+        "en": "we procure equipment according to healthcare facility requests"
+      },
+      {
+        "ua": "підсилюємо спроможність лікарень надавати якісну допомогу",
+        "en": "we strengthen the capacity of hospitals to provide quality care"
+      },
+      {
+        "ua": "сприяємо впровадженню сучасних підходів до лікування та реабілітації",
+        "en": "we promote the implementation of modern approaches to treatment and rehabilitation"
+      },
+      {
+        "ua": "допомагаємо збільшити кількість пацієнтів, які можуть отримати необхідну допомогу вчасно",
+        "en": "we help increase the number of patients who can receive necessary care on time"
+      }
+    ],
+    "documents": [],
+    "gallery": []
+  }
 }
