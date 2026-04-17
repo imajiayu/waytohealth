@@ -10,5 +10,55 @@
   "goal_amount": 1200000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["ambulance", "emergency"]
+  "tags": ["ambulance", "emergency"],
+  "detail": {
+    "subtitle": {
+      "ua": "Передаємо карети швидкої допомоги туди, де вони потрібні найбільше",
+      "en": "Delivering ambulances to where they are needed most"
+    },
+    "body": [
+      {
+        "ua": "У найскладніші часи справжня підтримка приходить від тих, хто не залишається осторонь. Проєкт «Екіпаж допомоги» став можливим завдяки співпраці благодійного фонду «Шлях до здоров'я» з міжнародними партнерами, зокрема зі швейцарською компанією Strategic Edge.",
+        "en": "In the most difficult times, real support comes from those who refuse to stand aside. The «Rescue Crew» project became possible thanks to the cooperation between the Way to Health charity foundation and international partners — most notably the Swiss company Strategic Edge."
+      },
+      {
+        "ua": "З перших днів повномасштабного вторгнення наші партнери активно підтримують діяльність фонду. Разом із ними до України приїжджали швейцарські комбат-парамедики, які не лише висловлюють солідарність, а й працюють у складних умовах, допомагаючи тим, хто цього потребує найбільше.",
+        "en": "From the very first days of the full-scale invasion, our partners have actively supported the foundation. Together with them, Swiss combat paramedics have travelled to Ukraine — not only to express solidarity but also to work in difficult conditions, helping those who need it most."
+      },
+      {
+        "ua": "Важливим кроком у цій співпраці стала передача карети швидкої допомоги для потреб фонду. Офіційна передача відбулася в Посольстві Швейцарії в Україні в Києві та стала символом довіри, партнерства й міжнародної підтримки.",
+        "en": "A key milestone in this partnership was the handover of an ambulance to the foundation. The official ceremony took place at the Embassy of Switzerland in Kyiv and became a symbol of trust, partnership and international support."
+      },
+      {
+        "ua": "Цей крок став початком нового напряму роботи фонду — забезпечення каретами швидкої допомоги медичних та інших установ, які цього потребують.",
+        "en": "This step marked the beginning of a new direction for the foundation — equipping medical and other institutions with ambulances wherever they are needed."
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "Повністю укомплектовані карети швидкої допомоги з обладнанням для екстрених викликів",
+        "en": "Fully equipped ambulances ready for emergency calls"
+      },
+      {
+        "ua": "Передача транспорту медичним закладам у прифронтових і віддалених громадах",
+        "en": "Vehicles transferred to medical facilities in frontline and remote communities"
+      },
+      {
+        "ua": "Міжнародне партнерство зі швейцарською компанією Strategic Edge та комбат-парамедиками",
+        "en": "International partnership with Swiss company Strategic Edge and combat paramedics"
+      },
+      {
+        "ua": "Прозорий процес передачі з підтвердженням на рівні Посольства Швейцарії в Україні",
+        "en": "Transparent handover process confirmed at the Embassy of Switzerland in Ukraine"
+      }
+    ],
+    "contentImages": [
+      "handover-embassy.jpg",
+      "key-handover.jpg"
+    ],
+    "gallery": [
+      "ambulance-team.jpg",
+      "ambulance-deployed.jpg"
+    ]
+  }
 }

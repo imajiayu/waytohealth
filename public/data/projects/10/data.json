@@ -4,11 +4,49 @@
     "en": "Accessible Mobility"
   },
   "description": {
-    "ua": "Забезпечуємо перевезення пацієнтів до місць лікування.",
-    "en": "We provide patient transportation to treatment facilities."
+    "ua": "Забезпечуємо перевезення маломобільних людей до місць відновлення.",
+    "en": "Transport for people with limited mobility to places of recovery."
   },
   "goal_amount": 500000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["transport", "accessibility"]
+  "tags": ["transport", "accessibility"],
+  "detail": {
+    "subtitle": {
+      "ua": "Забезпечуємо перевезення маломобільних людей до місць відновлення",
+      "en": "Transporting people with limited mobility to places of recovery"
+    },
+    "body": [
+      {
+        "ua": "Доступ до реабілітації починається з можливості туди дістатися. У межах проєкту «Доступний рух» фонд організовує перевезення маломобільних людей до медичних закладів, центрів відновлення та реабілітації.",
+        "en": "Access to rehabilitation begins with being able to get there. Through the «Accessible Mobility» project, the foundation arranges transport for people with limited mobility to medical facilities, recovery centres and rehabilitation clinics."
+      },
+      {
+        "ua": "Ми допомагаємо тим, для кого самостійне пересування є складним або неможливим, забезпечуючи безпечний і комфортний транспорт із урахуванням їхніх потреб. Це особливо важливо для людей після травм, поранень або складних захворювань, які потребують регулярного лікування та супроводу.",
+        "en": "We help those for whom moving independently is difficult or impossible, providing safe and comfortable transport adapted to their needs. This is especially vital for people recovering from injuries, wounds or serious illness who require regular treatment and accompaniment."
+      },
+      {
+        "ua": "Проєкт спрямований на те, щоб зробити процес відновлення доступнішим і безперервним, усуваючи один із ключових бар'єрів — логістику.",
+        "en": "The project is designed to make recovery more accessible and uninterrupted by removing one of its key barriers — logistics."
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "Безпечний і комфортний транспорт, адаптований до індивідуальних потреб",
+        "en": "Safe and comfortable transport adapted to individual needs"
+      },
+      {
+        "ua": "Доставка «від дверей до дверей» до клінік, центрів відновлення та реабілітації",
+        "en": "Door-to-door transfers to clinics, recovery and rehabilitation centres"
+      },
+      {
+        "ua": "Супровід для людей після травм, поранень і складних захворювань",
+        "en": "Accompaniment for people recovering from injuries, wounds and serious illness"
+      },
+      {
+        "ua": "Усунення логістичного бар'єра на шляху до регулярного лікування",
+        "en": "Removing the logistical barrier on the path to regular treatment"
+      }
+    ]
+  }
 }

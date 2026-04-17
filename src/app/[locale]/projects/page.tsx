@@ -11,7 +11,6 @@ import { getTranslations } from 'next-intl/server';
 import PatientStories from '@/components/projects/PatientStories';
 import ProjectStrip from '@/components/projects/ProjectStrip';
 import RecoveryJourney from '@/components/projects/RecoveryJourney';
-import ProjectGallery from '@/components/projects/ProjectGallery';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -184,60 +183,60 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
               </section>
             )}
 
-            {/* ── 内容配图（自然比例，不裁剪） ── */}
+            {/* ── 内容配图（统一比例，显示时按 object-cover 裁剪） ── */}
             {(() => {
-              const images = detail?.contentImages;
-              if (!images || images.length === 0) return null;
+              const images = [
+                ...(detail?.contentImages ?? []),
+                ...(detail?.gallery ?? []),
+              ];
+              if (images.length === 0) return null;
               const splitAt = Math.ceil(images.length / 2);
+              // ≤3 张：竖向构图；4+ 张：横向构图
+              const aspectClass = images.length <= 3 ? 'aspect-[3/4]' : 'aspect-[4/3]';
               return (
                 <section className="mt-10 sm:mt-12">
                   {images.length <= 3 ? (
-                    /* 单行：≤3 张图 */
-                    <div className="flex items-center gap-2.5 sm:gap-3">
+                    /* 单行：≤3 张图，等宽竖图 */
+                    <div className="flex items-stretch gap-2.5 sm:gap-3">
                       {images.map((img, i) => (
                         <div
                           key={i}
-                          className={`overflow-hidden rounded-xl ${i === 0 ? 'flex-[1.4]' : 'flex-1'}`}
+                          className={`relative flex-1 overflow-hidden rounded-xl ${aspectClass}`}
                         >
                           <Image
                             src={`/data/projects/${projectId}/${img}`}
                             alt={`${title} ${i + 1}`}
-                            width={800}
-                            height={600}
-                            className="h-auto w-full"
-                            sizes={i === 0
-                              ? '(max-width: 640px) 55vw, (max-width: 1024px) 45vw, 340px'
-                              : '(max-width: 640px) 25vw, (max-width: 1024px) 22vw, 180px'}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
                           />
                         </div>
                       ))}
                     </div>
                   ) : (
-                    /* 双行：4+ 张图 */
+                    /* 双行：4+ 张图，等比横图 */
                     <div className="flex flex-col gap-2.5 sm:gap-3">
-                      <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="flex items-stretch gap-2.5 sm:gap-3">
                         {images.slice(0, splitAt).map((img, i) => (
-                          <div key={i} className="flex-1 overflow-hidden rounded-xl">
+                          <div key={i} className={`relative flex-1 overflow-hidden rounded-xl ${aspectClass}`}>
                             <Image
                               src={`/data/projects/${projectId}/${img}`}
                               alt={`${title} ${i + 1}`}
-                              width={800}
-                              height={600}
-                              className="h-auto w-full"
+                              fill
+                              className="object-cover"
                               sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
                             />
                           </div>
                         ))}
                       </div>
-                      <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="flex items-stretch gap-2.5 sm:gap-3">
                         {images.slice(splitAt).map((img, i) => (
-                          <div key={i} className="flex-1 overflow-hidden rounded-xl">
+                          <div key={i} className={`relative flex-1 overflow-hidden rounded-xl ${aspectClass}`}>
                             <Image
                               src={`/data/projects/${projectId}/${img}`}
                               alt={`${title} ${splitAt + i + 1}`}
-                              width={800}
-                              height={600}
-                              className="h-auto w-full"
+                              fill
+                              className="object-cover"
                               sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
                             />
                           </div>
@@ -252,11 +251,6 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
             {/* ── 康复旅程阶段 ── */}
             {detail?.stages && detail.stages.length > 0 && (
               <RecoveryJourney stages={detail.stages} locale={typedLocale} />
-            )}
-
-            {/* ── 图片画廊 ── */}
-            {detail?.gallery && detail.gallery.length > 0 && (
-              <ProjectGallery images={detail.gallery} projectId={projectId} />
             )}
 
             {/* ── 文档预览区 ── */}

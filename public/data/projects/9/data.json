@@ -4,11 +4,49 @@
     "en": "Childhood Continues"
   },
   "description": {
-    "ua": "Організовуємо відпочинок для дітей військових та ветеранів.",
-    "en": "We organize recreation for children of soldiers and veterans."
+    "ua": "Організовуємо безкоштовний відпочинок для дітей військових та ветеранів.",
+    "en": "Free recreation for the children of soldiers and veterans."
   },
   "goal_amount": 1000000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["children", "recreation"]
+  "tags": ["children", "recreation"],
+  "detail": {
+    "subtitle": {
+      "ua": "Організовуємо безкоштовний відпочинок для дітей військових та ветеранів",
+      "en": "Organising free recreation for the children of soldiers and veterans"
+    },
+    "body": [
+      {
+        "ua": "Дитинство має залишатися дитинством навіть у часи війни. У межах цього проєкту фонд створює можливості для відпочинку, відновлення та емоційного розвантаження дітей військових і ветеранів.",
+        "en": "Childhood should remain childhood, even in times of war. Through this project, the foundation creates opportunities for rest, recovery and emotional relief for the children of soldiers and veterans."
+      },
+      {
+        "ua": "Ми організовуємо безпечний і підтримуючий простір, де діти можуть відволіктися від складних обставин, відчути турботу, знайти нових друзів і просто побути дітьми. Програми відпочинку поєднують дозвілля, творчі активності та елементи психологічної підтримки.",
+        "en": "We build a safe and supportive space where children can step away from difficult circumstances, feel cared for, make new friends and simply be children. Our programmes combine leisure, creative activities and elements of psychological support."
+      },
+      {
+        "ua": "Цей проєкт спрямований на збереження емоційного благополуччя дітей і формування середовища, у якому вони можуть відновлюватися, розвиватися та отримувати позитивний досвід, попри виклики, з якими стикаються їхні родини.",
+        "en": "The project is devoted to protecting the emotional wellbeing of children and shaping an environment in which they can recover, grow and gather positive experiences — despite the challenges their families face."
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "Безкоштовні програми відпочинку для дітей військових і ветеранів",
+        "en": "Free recreation programmes for the children of soldiers and veterans"
+      },
+      {
+        "ua": "Безпечний і підтримуючий простір із досвідченою командою супроводу",
+        "en": "Safe and supportive environment led by an experienced team"
+      },
+      {
+        "ua": "Поєднання творчих активностей та елементів психологічної підтримки",
+        "en": "Creative activities combined with elements of psychological support"
+      },
+      {
+        "ua": "Нові дружби й можливість знову відчути себе дитиною",
+        "en": "Space to build new friendships and feel like a child again"
+      }
+    ]
+  }
 }

@@ -49,8 +49,8 @@
       }
     ],
     "documents": [
-      { "label": { "ua": "Кошторис", "en": "Budget Estimate" }, "url": "/data/projects/12/budget.xlsx" },
-      { "label": { "ua": "Проєкт (креслення)", "en": "Project Blueprints" }, "url": "/data/projects/12/blueprint.pdf" }
+      { "label": { "ua": "Кошторис", "en": "Budget Estimate" }, "url": "/data/projects/1/budget.xlsx" },
+      { "label": { "ua": "Проєкт (креслення)", "en": "Project Blueprints" }, "url": "/data/projects/1/blueprint.pdf" }
     ],
     "gallery": []
   }

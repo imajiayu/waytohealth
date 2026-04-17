@@ -4,11 +4,49 @@
     "en": "By Your Side"
   },
   "description": {
-    "ua": "Забезпечуємо базову підтримку в перші години після обстрілів.",
-    "en": "We provide basic support in the first hours after shelling."
+    "ua": "Підтримуємо в перші години після обстрілів.",
+    "en": "Support in the first hours after shelling."
   },
   "goal_amount": 500000,
   "raised_amount": 0,
   "currency": "UAH",
-  "tags": ["emergency-aid", "humanitarian"]
+  "tags": ["emergency-aid", "humanitarian"],
+  "detail": {
+    "subtitle": {
+      "ua": "Підтримуємо в перші години після обстрілів",
+      "en": "Standing with people in the first hours after shelling"
+    },
+    "body": [
+      {
+        "ua": "У перші години після обстрілів люди часто потребують швидкої підтримки та допомоги з базовими потребами. Проєкт «Поруч» спрямований на оперативну підтримку постраждалих у ці критичні моменти.",
+        "en": "In the first hours after shelling, people often need rapid support and help meeting basic needs. The «By Your Side» project is dedicated to fast, practical assistance for those affected in these critical moments."
+      },
+      {
+        "ua": "Команда фонду виїжджає на місця подій, щоб надати першу необхідну допомогу: базові речі, гуманітарну підтримку та людську присутність, яка так важлива в моменти невизначеності. Ми працюємо там, де допомога потрібна негайно, допомагаючи людям оговтатися та зробити перші кроки до відновлення.",
+        "en": "Our team travels directly to the scene to provide essential first aid: basic supplies, humanitarian relief and the human presence that matters so much in moments of uncertainty. We work where help is needed immediately, helping people regain their footing and take the first steps toward recovery."
+      },
+      {
+        "ua": "Цей проєкт — про швидку реакцію, турботу та підтримку тоді, коли це має найбільше значення.",
+        "en": "This project is about rapid response, care and support — arriving exactly when it matters most."
+      }
+    ],
+    "benefits": [
+      {
+        "ua": "Виїзди на місця подій у перші години після обстрілів",
+        "en": "Rapid response at the scene within the first hours after an attack"
+      },
+      {
+        "ua": "Базові речі та гуманітарна підтримка для постраждалих",
+        "en": "Essential supplies and humanitarian support for those affected"
+      },
+      {
+        "ua": "Людська присутність у моменти невизначеності",
+        "en": "Compassionate human presence in moments of uncertainty"
+      },
+      {
+        "ua": "Перші кроки до відновлення одразу після події",
+        "en": "First steps toward recovery from the very moment of crisis"
+      }
+    ]
+  }
 }
