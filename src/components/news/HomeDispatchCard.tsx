@@ -63,12 +63,6 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
           className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ukraine-navy/92 via-ukraine-navy/48 to-transparent"
         />
 
-        {/* 左上:dispatch 标签 + 金色信号点 */}
-        <div className="absolute left-4 top-4 flex max-w-[calc(100%-4rem)] items-center gap-2 font-[family-name:var(--font-data)] text-[9.5px] uppercase tracking-[0.22em] whitespace-nowrap text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
-          <span className="h-[6px] w-[6px] shrink-0 rounded-full bg-ukraine-gold-500 shadow-[0_0_10px_rgba(245,184,0,0.9)]" />
-          {t('eyebrow')}
-        </div>
-
         {/* 右上:多图角标 */}
         {extras > 0 && (
           <div className="absolute right-4 top-4 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-md">

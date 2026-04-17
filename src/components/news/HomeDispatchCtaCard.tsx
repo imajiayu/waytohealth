@@ -30,12 +30,6 @@ export default async function HomeDispatchCtaCard() {
         }}
       />
 
-      {/* 顶部:eyebrow + 信号点 */}
-      <div className="relative flex items-center gap-2 font-[family-name:var(--font-data)] text-[10px] uppercase tracking-[0.28em] text-white/55">
-        <span className="h-[6px] w-[6px] rounded-full bg-ukraine-gold-500 shadow-[0_0_10px_rgba(245,184,0,0.9)]" />
-        {t('eyebrow')}
-      </div>
-
       {/* 中部:大号 viewAll 标题 */}
       <div className="relative">
         <div className="font-[family-name:var(--font-accent)] text-[2rem] font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-[2.2rem]">

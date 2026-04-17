@@ -38,22 +38,45 @@ export default async function NewsSection() {
         </div>
       </div>
 
-      {/* 横向 snap 滚动 — 与 container-page 对齐,避免宽屏下卡片跑到视口最左 */}
+      {/* 横向 snap 滚动 — CTA 固定在右侧,左侧卡片从它下方滚过并在接近时渐隐 */}
       <div className="container-page relative mt-2 sm:mt-3">
-        {/* py/px 给卡片 hover 上浮 + 阴影留出空间,否则会被 overflow 裁切 */}
-        <div className="hide-scrollbar -mx-3 snap-x snap-mandatory overflow-x-auto scroll-smooth px-3 pb-3 pt-3">
-          <div className="flex items-stretch gap-5 sm:gap-6">
-            {items.map((item) => (
+        {/* --cta-w 控制 CTA 固定区宽度,同时驱动滚动区右 padding 和 mask 渐隐位置 */}
+        <div className="relative [--cta-w:180px] sm:[--cta-w:220px] lg:[--cta-w:260px]">
+          {/* 滚动区 — mask 渐隐区间落在 CTA 覆盖区内(反正被 CTA 遮住看不见),
+              让卡片右端能停在 mask 黑区末尾完整显示,又能在滑入 CTA 前自然淡出 */}
+          <div
+            className="hide-scrollbar snap-x snap-proximity overflow-x-auto scroll-smooth pb-3 pt-3"
+            style={{
+              WebkitMaskImage:
+                'linear-gradient(to right, black 0, black calc(100% - var(--cta-w)), transparent calc(100% - var(--cta-w) + 80px))',
+              maskImage:
+                'linear-gradient(to right, black 0, black calc(100% - var(--cta-w)), transparent calc(100% - var(--cta-w) + 80px))',
+            }}
+          >
+            <div className="flex items-stretch gap-5 sm:gap-6">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="w-[min(86vw,400px)] shrink-0 snap-start"
+                >
+                  <HomeDispatchCard item={item} locale={locale} />
+                </div>
+              ))}
+              {/* spacer = CTA 宽度 — 撑开滚动宽度,让最后一张卡滚到最右时右端贴 CTA 左缘 */}
               <div
-                key={item.id}
-                className="w-[min(86vw,400px)] shrink-0 snap-start"
-              >
-                <HomeDispatchCard item={item} locale={locale} />
-              </div>
-            ))}
+                aria-hidden
+                className="shrink-0"
+                style={{ width: 'var(--cta-w)' }}
+              />
+            </div>
+          </div>
 
-            {/* 末尾:深色 CTA 卡 — 比明信片窄一号,尾注感 */}
-            <div className="w-[min(70vw,260px)] shrink-0 snap-end">
+          {/* 固定 CTA — 始终在容器最右侧,卡片从其下方滚过 */}
+          <div
+            className="pointer-events-none absolute inset-y-3 right-0 z-10"
+            style={{ width: 'var(--cta-w)' }}
+          >
+            <div className="pointer-events-auto h-full">
               <HomeDispatchCtaCard />
             </div>
           </div>
