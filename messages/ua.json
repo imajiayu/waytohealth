@@ -14,48 +14,46 @@
     "homeDescription": "Благодійний фонд «Шлях до здоров'я» повертає сили та надію постраждалим від війни в Україні.",
     "newsTitle": "Новини — Шлях до здоров'я",
     "newsDescription": "Останні новини та оновлення від Благодійного фонду «Шлях до здоров'я».",
-    "donateTitle": "Підтримати — Шлях до здоров'я",
-    "donateDescription": "Підтримайте реабілітацію постраждалих від війни в Україні вашою пожертвою.",
     "merchTitle": "Мерч — Шлях до здоров'я",
     "merchDescription": "Підтримайте фонд «Шлях до здоров'я», придбавши брендований мерч."
   },
   "hero": {
     "title": "ШЛЯХ ДО ЗДОРОВ'Я",
     "foundationLabel": "Благодійний фонд",
-    "subtitle": "Повертаємо сили та надію постраждалим від війни",
-    "donateButton": "Підтримати",
-    "partnerButton": "Запартнеритись"
+    "subtitle": "Повертаємо сили та надію постраждалим від війни"
   },
   "navigation": {
     "donate": "Підтримати",
     "menu": "Меню",
-    "close": "Закрити",
     "projects": "Проєкти",
     "about": "Про фонд",
     "news": "Новини",
     "merch": "Мерч",
-    "partners": "Запартнеритись",
     "contacts": "Контакти"
   },
   "pages": {
     "comingSoon": "Незабаром"
   },
+  "news": {
+    "eyebrow": "Стрічка повідомлень",
+    "intro": "Останні новини, оновлення та історії з життя фонду.",
+    "author": "Шлях до здоров'я",
+    "sectionTitle": "Останні оновлення",
+    "viewAll": "Усі новини",
+    "readOn": "Читати далі",
+    "emptyEyebrow": "Тиша в ефірі",
+    "empty": "Новин поки немає. Слідкуйте за оновленнями."
+  },
   "projects": {
     "title": "Підтримайте активні проєкти",
     "goalOf": "з",
     "raised": "Зібрано",
-    "donateButton": "Підтримати",
-    "moreDetails": "Детальніше",
     "otherProjectsTitle": "Інші проєкти",
     "current": "Поточний"
   },
   "partners": {
-    "label": "Разом з нами",
-    "title": "Партнерство",
-    "allPartners": "Дивитись всіх",
     "becomePartner": "Запартнеритись",
     "requestAssistance": "Звернутися по допомогу",
-    "visitWebsite": "Перейти на сайт",
     "list": {
       "amalna-foundation": { "name": "Amalna Foundation" },
       "comfy": { "name": "Comfy" },
@@ -72,7 +70,6 @@
     }
   },
   "about": {
-    "label": "Про фонд",
     "title": "Шлях, який змінює життя",
     "stats": {
       "years": {
@@ -163,18 +160,10 @@
     "eyebrow": "Про благодійну організацію",
     "title": "Шлях, який",
     "titleAccent": "змінює життя",
-    "chapterLabel": "Розділ",
     "meta": {
       "period": { "label": "Період", "value": "Працюємо з вересня 2022 року по сьогоднішній день" },
       "location": { "label": "Місце", "value": "смт. Слобожанське, Дніпропетровська область, Україна" },
       "scope": { "label": "Сфера", "value": "Реабілітація, гуманітарна допомога, психологічна підтримка" }
-    },
-    "chapters": {
-      "origin": "Початок",
-      "impact": "Вплив",
-      "evolution": "Розвиток",
-      "voices": "Команда",
-      "ledger": "Звітність"
     },
     "paragraphs": {
       "0": "Благодійний фонд «Шлях до здоров'я» був заснований у вересні 2022 року Микитою Жаліним та Олексієм Дубовиком у відповідь на зростаючу потребу в якісній реабілітації в Україні.",
@@ -205,8 +194,6 @@
       "4": { "name": "Єгор Воробйов", "role": "фандрейзер, грантрайтер", "image": "/images/team/yehor-vorobiov.jpg" },
       "5": { "name": "Софія Тарнавська", "role": "СММ менеджерка", "image": "/images/team/sofiia-tarnavska.jpg" }
     },
-    "transparencyTitle": "Прозорість",
-    "transparencySubtitle": "Повний реєстр документів — від статуту до річних фінансових звітів",
     "documents": {
       "0": { "title": "Статут", "href": "/documents/about/statute.pdf" },
       "1": { "title": "Витяг з реєстру неприбуткових організацій", "href": "/documents/about/nonprofit-register-extract.pdf" },
@@ -474,7 +461,6 @@
     }
   },
   "projectDetail": {
-    "backToProjects": "Проєкти",
     "raisedLabel": "Зібрано",
     "goalLabel": "Ціль",
     "selectAmount": "Оберіть суму",
@@ -482,12 +468,9 @@
     "donateButton": "Підтримати проєкт",
     "processing": "Обробка...",
     "donationError": "Помилка, спробуйте ще раз",
-    "donateCta": "Кожен внесок наближає нас до мети",
-    "detailsTitle": "Деталі",
     "injuryTitle": "Історія поранення",
     "recoveryTitle": "Шлях відновлення",
     "resultsTitle": "Результати",
-    "imagePlaceholder": "Фото незабаром",
     "documentsTitle": "Документи проєкту",
     "loadError": "Не вдалося завантажити файл",
     "expand": "На весь екран",
@@ -512,8 +495,7 @@
     "donate": "Підтримати",
     "foundationPage": "Сторінка фонду",
     "legalEntity": "БО «Благодійний фонд «Шлях до здоров'я»» (код ЄДРПОУ 44947699)",
-    "copyright": "© {year} Way to Health Charity Foundation. Всі права захищені.",
-    "language": "Українською"
+    "copyright": "© {year} Way to Health Charity Foundation. Всі права захищені."
   },
   "donationSuccess": {
     "title": "Дякуємо за вашу підтримку!",

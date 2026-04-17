@@ -84,9 +84,11 @@ export default function BottomSheet({
     setCurrentSnap(prev => (prev === 0 ? 1 : 0));
   }, []);
 
-  // 外部触发展开
+  // 外部命令式触发展开：父级递增 expandTrigger → 展开到全屏 snap。
+  // set-state-in-effect 是故意的，这就是 prop→state 的同步点。
   useEffect(() => {
     if (expandTrigger && expandTrigger > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentSnap(1);
     }
   }, [expandTrigger]);

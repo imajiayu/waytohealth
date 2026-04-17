@@ -14,48 +14,46 @@
     "homeDescription": "The Way to Health Charitable Foundation restores strength and hope to those affected by war in Ukraine.",
     "newsTitle": "News — Way to Health",
     "newsDescription": "Latest news and updates from the Way to Health Charitable Foundation.",
-    "donateTitle": "Donate — Way to Health",
-    "donateDescription": "Support the rehabilitation of war victims in Ukraine with your donation.",
     "merchTitle": "Merch — Way to Health",
     "merchDescription": "Support the Way to Health Foundation by purchasing branded merchandise."
   },
   "hero": {
     "title": "WAY TO HEALTH",
     "foundationLabel": "Charity Foundation",
-    "subtitle": "Restoring strength and hope to those affected by war",
-    "donateButton": "Donate",
-    "partnerButton": "Become a Partner"
+    "subtitle": "Restoring strength and hope to those affected by war"
   },
   "navigation": {
     "donate": "Donate",
     "menu": "Menu",
-    "close": "Close",
     "projects": "Projects",
     "about": "About Us",
     "news": "News",
     "merch": "Merch",
-    "partners": "Become a Partner",
     "contacts": "Contacts"
   },
   "pages": {
     "comingSoon": "Coming Soon"
   },
+  "news": {
+    "eyebrow": "Dispatch feed",
+    "intro": "Latest news, updates, and stories from the foundation.",
+    "author": "Way to Health",
+    "sectionTitle": "Latest updates",
+    "viewAll": "View all news",
+    "readOn": "Read on",
+    "emptyEyebrow": "Quiet on the wire",
+    "empty": "No news yet. Stay tuned."
+  },
   "projects": {
     "title": "Support active projects",
     "goalOf": "of",
     "raised": "Raised",
-    "donateButton": "Donate",
-    "moreDetails": "More details",
     "otherProjectsTitle": "Other projects",
     "current": "Current"
   },
   "partners": {
-    "label": "Together with us",
-    "title": "Partnerships",
-    "allPartners": "View all",
     "becomePartner": "Become a Partner",
     "requestAssistance": "Request Assistance",
-    "visitWebsite": "Visit website",
     "list": {
       "amalna-foundation": { "name": "Amalna Foundation" },
       "comfy": { "name": "Comfy" },
@@ -72,7 +70,6 @@
     }
   },
   "about": {
-    "label": "About Us",
     "title": "A path that changes lives",
     "stats": {
       "years": {
@@ -163,18 +160,10 @@
     "eyebrow": "About the charitable organization",
     "title": "A path that",
     "titleAccent": "changes lives",
-    "chapterLabel": "Chapter",
     "meta": {
       "period": { "label": "Period", "value": "Operating since September 2022 to the present day" },
       "location": { "label": "Location", "value": "Slobozhanske, Dnipropetrovsk Oblast, Ukraine" },
       "scope": { "label": "Scope", "value": "Rehabilitation, humanitarian aid, psychological support" }
-    },
-    "chapters": {
-      "origin": "Origin",
-      "impact": "Impact",
-      "evolution": "Evolution",
-      "voices": "Team",
-      "ledger": "Reporting"
     },
     "paragraphs": {
       "0": "The \"Way to Health\" Charity Foundation was established in September 2022 by Mykyta Zhalin and Oleksii Dubovyk in response to the growing need for quality rehabilitation in Ukraine.",
@@ -205,8 +194,6 @@
       "4": { "name": "Yehor Vorobiov", "role": "fundraiser, grant writer", "image": "/images/team/yehor-vorobiov.jpg" },
       "5": { "name": "Sofiia Tarnavska", "role": "SMM manager", "image": "/images/team/sofiia-tarnavska.jpg" }
     },
-    "transparencyTitle": "Transparency",
-    "transparencySubtitle": "A full registry of documents — from the statute to annual financial reports",
     "documents": {
       "0": { "title": "Statute", "href": "/documents/about/statute.pdf" },
       "1": { "title": "Extract from the Register of Non-Profit Organizations", "href": "/documents/about/nonprofit-register-extract.pdf" },
@@ -474,7 +461,6 @@
     }
   },
   "projectDetail": {
-    "backToProjects": "Projects",
     "raisedLabel": "Raised",
     "goalLabel": "Goal",
     "selectAmount": "Select amount",
@@ -482,12 +468,9 @@
     "donateButton": "Support this project",
     "processing": "Processing...",
     "donationError": "Error, please try again",
-    "donateCta": "Every contribution brings us closer to the goal",
-    "detailsTitle": "Details",
     "injuryTitle": "Injury Story",
     "recoveryTitle": "Recovery Path",
     "resultsTitle": "Results",
-    "imagePlaceholder": "Photo coming soon",
     "documentsTitle": "Project Documents",
     "loadError": "Failed to load file",
     "expand": "Full screen",
@@ -512,8 +495,7 @@
     "donate": "Donate",
     "foundationPage": "Foundation page",
     "legalEntity": "CO \"Way to Health Charity Foundation\" (EDRPOU Code 44947699)",
-    "copyright": "© {year} Way to Health Charity Foundation. All rights reserved.",
-    "language": "English"
+    "copyright": "© {year} Way to Health Charity Foundation. All rights reserved."
   },
   "donationSuccess": {
     "title": "Thank you for your support!",

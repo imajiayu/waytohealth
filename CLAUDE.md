@@ -14,8 +14,8 @@
 ### 与 waytofutureua 的关系
 
 - waytofutureua 是 Way to Future UA 的综合慈善平台（waytofutureua.org.ua）
-- 本站是 Way to Health 的独立网站，拥有自己的 Supabase 和 Stripe
-- 两站共享设计语言和技术模式，但后端完全独立
+- 本站是 Way to Health 的独立网站，拥有自己的 Stripe 账号
+- 两站共享设计语言和技术模式，但各自独立
 - 未来可考虑两站之间的品牌联动（互相链接等）
 
 ---
@@ -41,15 +41,13 @@ npm run start    # 启动生产服务器
 | 前端 | Next.js (App Router), TypeScript, Tailwind CSS | Next.js 16, React 19, Tailwind v4 |
 | 国际化 | next-intl | 支持 ua (乌克兰语) + en (英语) |
 | 部署 | Vercel | 与 NGO_web 一致 |
-
 | 支付 | Stripe | 法币支付（UAH，Checkout Sessions） |
 
 ### 计划集成（尚未安装）
 
 | 类型 | 技术 | 说明 |
 |------|------|------|
-| 后端 | Supabase (PostgreSQL + Auth) | 独立实例 |
-| 邮件 | Resend | 捐赠通知、订阅邮件 |
+| 邮件 | Resend | 捐赠通知邮件 |
 | 监控 | Sentry | 错误追踪 |
 | 分析 | Vercel Analytics | 流量分析 |
 
@@ -69,21 +67,121 @@ npm run start    # 启动生产服务器
 
 ---
 
+## 支付方案（Stripe-only，无数据库）
+
+项目**不使用数据库**。所有订单数据（捐赠记录、金额、元数据）全部由 Stripe 托管，通过 Stripe API 读取。
+
+### 核心流程
+
+```
+用户点击「Підтримати」
+    ↓
+createCheckoutSession (src/app/actions/donate.ts)
+    - 校验 projectId（必须在 PROJECTS 常量中）
+    - 校验金额（UAH，1 ~ 999999 正整数）
+    - 创建 Stripe Checkout Session（mode: payment，currency: uah）
+    - metadata 写入 { project_id }（PaymentIntent 也同步写入，用于后续搜索）
+    ↓
+重定向到 Stripe 托管支付页
+    ↓
+成功 → /[locale]/donation-success?session_id=...
+取消 → 回到项目详情页
+```
+
+### 已筹金额展示
+
+`src/lib/donations.ts` 中的 `getRaisedAmount(projectId)`：
+- 调用 `stripe.paymentIntents.search`，按 `status:'succeeded' AND metadata['project_id']:'N'` 聚合金额
+- 用 `next/cache` 的 `unstable_cache` 包裹，`revalidate: 60` 秒
+- Stripe 调用失败时返回 0，不阻塞渲染
+
+### 项目/商品数据
+
+不走数据库，走静态文件 + TypeScript 常量：
+- `public/data/projects/{id}/data.json` + `cover.webp` + `gallery/*`
+- `public/data/projects/index.json` — 列表 + 排序 + `active` 开关
+- `src/data/projects.ts` — `PROJECTS` 常量（id 白名单，编译期类型检查）
+- `src/lib/data.ts` — `getProject(id)` / `getAllProjects()`（`react.cache` 请求级去重）
+
+### 有意省略的能力
+
+下面这些能力在纯 Stripe 架构下**不提供**，如未来需要再引入数据库：
+- 捐赠者留言 / 公开捐赠墙
+- Admin 后台（订单列表、状态机、发货跟踪）
+- 月捐（订阅）
+- 商品购买的收货地址、快递单号
+- Webhook 回调（当前架构不需要，Stripe Search 即数据源）
+- 邮件通知（Resend 未接入）
+
+### 环境变量
+
+```env
+STRIPE_SECRET_KEY=
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+`NEXT_PUBLIC_SITE_URL` 用于拼接 Checkout 的 `success_url` / `cancel_url`。
+
+---
+
+## 新闻系统（GitHub + Vercel Blob，无数据库）
+
+News 页面是 Twitter 风格的双语时间线 (`/[locale]/news`)，配独立 admin 后台 (`/admin/news`)：
+
+**文案存储（GitHub）**：`public/data/news/index.json` + `items/{id}.json`。通过 **GitHub contents API** 直接 commit 到仓库；Vercel 收到 push 自动重建，~1 分钟后上线。
+
+**图片存储（Vercel Blob）**：admin 选图后，浏览器通过 `@vercel/blob/client` 的 `upload()` **直接上传到 Blob**（绕开 server action 4.5MB body 限制），拿到完整 URL 后写入 JSON 的 `images: string[]` 字段。前端 `next/image` 直接用 Blob URL 加载（已在 `next.config.ts` `images.remotePatterns` 里允许 `*.public.blob.vercel-storage.com`）。
+
+**Blob client upload 流程**：
+1. 客户端 `upload()` 先 POST 到 `/api/news/upload`（传 `clientPayload: password`）
+2. API route (`src/app/api/news/upload/route.ts`) 调 `handleUpload`，在 `onBeforeGenerateToken` 里用 `verifyAdminPassword(clientPayload)` 校验
+3. 验证通过后返回短时 upload token → 客户端拿 token 直传 Blob → 得到 URL
+4. 所有 URL 一起提交给 `publishNewsAction` → 仅 commit JSON 到 GitHub
+
+**密码校验**：`src/lib/adminAuth.ts` 提供 `verifyAdminPassword(pw)`（SHA-256(pw+SALT) 常数时间比对 `ADMIN_PASSWORD_HASH`）。生成 hash：`node scripts/gen-admin-hash.mjs <password>`。外层有 IP 速率限制 `src/lib/adminRateLimit.ts`：15 分钟滑动窗口 10 次失败触发 30 分钟锁定（进程内 Map，Vercel 多实例/冷启动会丢状态，仅挡单实例高频探测；真正防爆破需 Vercel KV — TODO）。
+
+**删除**：`deleteNewsAction` 读取 item JSON 的 `images` URLs → 调 `@vercel/blob` 的 `del(urls)` 清理 Blob → 删 GitHub 上的 item JSON + 更新 index。
+
+**Admin 不走 i18n**：`/admin/news` 在 app router 根目录（不是 `[locale]/admin`），有独立 `src/app/admin/layout.tsx`（共享字体从 `src/app/fonts.ts`）。页面内容全英文硬编码，不使用 `useTranslations`。
+
+### 新闻相关环境变量
+
+```env
+# GitHub commit（server action 用）
+GITHUB_TOKEN=github_pat_...       # Fine-grained PAT，Contents RW，限定本仓库
+GITHUB_REPO=owner/waytohealth     # owner/repo
+GITHUB_BRANCH=main
+
+# Vercel Blob（图片上传）
+BLOB_READ_WRITE_TOKEN=            # Vercel Blob store token（Vercel 自动注入于部署环境，本地需手动复制）
+
+# Admin 密码
+ADMIN_PASSWORD_HASH=              # SHA-256(password + SALT)，64 位 hex
+ADMIN_PASSWORD_SALT=wth-news-2026 # 可选，默认值见 src/lib/adminAuth.ts
+```
+
+---
+
 ## 项目结构
 
 ```
 src/
 ├── app/
 │   ├── globals.css              # Tailwind v4 全局样式（@import "tailwindcss"）
-│   ├── layout.tsx               # 根 layout（html lang）
-│   └── [locale]/                # 国际化路由
-│       ├── layout.tsx           # locale layout（字体、NextIntlClientProvider）
+│   ├── layout.tsx               # 根 layout（pass-through）
+│   ├── fonts.ts                 # 共享字体加载（Fixel / PT Serif / JetBrains Mono）
+│   ├── admin/                   # Admin 路由（不走 i18n，独立 HTML/body）
+│   │   ├── layout.tsx           # admin 自己的 <html><body>（英文）
+│   │   └── news/page.tsx        # News 管理后台
+│   ├── api/news/upload/         # Vercel Blob client upload handler
+│   └── [locale]/                # 国际化路由（前台）
+│       ├── layout.tsx           # locale layout（NextIntlClientProvider + Nav/Footer）
 │       ├── page.tsx             # 首页
 │       ├── about/               # 关于我们
 │       ├── projects/            # 项目详情（/projects?id=N）
 │       ├── donation-success/    # 捐赠成功页（Stripe 回调）
 │       ├── merch/               # 周边商品
-│       ├── news/                # 新闻动态
+│       ├── news/                # 新闻动态（Twitter 风格双语时间线）
 │       ├── partners/            # 合作伙伴
 │       ├── terms/               # 条款与条件
 │       ├── privacy/             # 隐私政策
@@ -91,10 +189,12 @@ src/
 ├── components/
 │   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentAccordion）
 │   ├── common/                  # 通用 UI 组件（BottomSheet, DocumentViewer）
-│   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel）
+│   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel, NewsSection）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
 │   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney）
+│   ├── news/                    # 新闻组件（NewsCard, NewsLightbox, HomeDispatchCard, HomeDispatchCtaCard）
+│   ├── admin/                   # Admin 后台组件（news 编辑器、图片上传等）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook
@@ -103,17 +203,23 @@ src/
 ├── data/
 │   ├── partners.json            # 合作伙伴原始数据
 │   ├── partners.ts              # 合作伙伴类型定义 + 类型化导出
-│   └── projects.ts              # 项目类型定义
+│   ├── projects.ts              # 项目类型定义
+│   └── news.ts                  # 新闻类型定义
 ├── i18n/
 │   ├── config.ts                # 语言配置（locales, defaultLocale）
 │   ├── request.ts               # next-intl 请求配置
 │   └── routing.ts               # next-intl 路由配置
 ├── app/actions/
-│   └── donate.ts                # Stripe Checkout server action
+│   ├── donate.ts                # Stripe Checkout server action
+│   └── news.ts                  # News admin（密码校验 + GitHub commit）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── stripe.ts                # Stripe 客户端单例
-│   └── donations.ts             # 已筹金额查询（带缓存）
+│   ├── donations.ts             # 已筹金额查询（带缓存）
+│   ├── news.ts                  # 新闻读取（镜像 data.ts）
+│   ├── github.ts                # GitHub contents API 封装（server-only）
+│   ├── adminAuth.ts             # 管理员密码 hash 校验（server-only）
+│   └── adminRateLimit.ts        # 管理员登录 IP 速率限制（server-only，进程内滑动窗口）
 └── middleware.ts                # i18n 路由中间件
 messages/
 ├── ua.json                      # 乌克兰语翻译
@@ -142,7 +248,7 @@ const t = useTranslations('namespace')
 
 **例外情况：**
 - 品牌名称可以硬编码（如 "Way to Health"）
-- Admin 后台全英文，不使用 i18n
+- **Admin 后台全英文，不走 i18n**：路径为 `/admin/news`（不在 `[locale]` 下），有独立的 `src/app/admin/layout.tsx`。页面内容直接英文硬编码，不调用 `getTranslations` / `useTranslations`。新增 admin 页按同样模式放在 `src/app/admin/<name>/page.tsx`。
 
 ---
 
