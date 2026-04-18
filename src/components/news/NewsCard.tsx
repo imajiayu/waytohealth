@@ -4,14 +4,12 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { type Locale } from '@/i18n/config';
 import { type NewsItem } from '@/data/news';
-import { useInViewOnce } from '@/hooks/useInViewOnce';
 import NewsLightbox from './NewsLightbox';
 
 interface NewsCardProps {
   item: NewsItem;
-  index: number;
   locale: Locale;    // 由父级显式传入（前台从 server component 取 locale，admin 从 composer 传 previewLocale）
-  preview?: boolean; // 预览模式：关闭入场动画 + 关闭灯箱点击
+  preview?: boolean; // 预览模式：关闭灯箱点击
   compact?: boolean; // 紧凑模式（首页横向滚动）：仅显示首图 + 正文 line-clamp + 标题 1 行
 }
 
@@ -67,8 +65,7 @@ function cellClass(n: number, i: number): string {
   return `${base} aspect-square`;
 }
 
-export default function NewsCard({ item, index, locale, preview = false, compact = false }: NewsCardProps) {
-  const { ref, isVisible } = useInViewOnce<HTMLElement>();
+export default function NewsCard({ item, locale, preview = false, compact = false }: NewsCardProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const title = item.title[locale];
@@ -84,19 +81,7 @@ export default function NewsCard({ item, index, locale, preview = false, compact
 
   return (
     <>
-      <article
-        ref={ref}
-        className={preview ? 'relative' : 'relative opacity-0 translate-y-2'}
-        style={
-          preview
-            ? undefined
-            : {
-                animation: isVisible
-                  ? `projectCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(index, 5) * 0.06}s forwards`
-                  : 'none',
-              }
-        }
-      >
+      <article className="relative">
         <div
           className={
             preview

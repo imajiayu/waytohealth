@@ -48,8 +48,8 @@ export default async function NewsPage() {
             <p className="mt-3 text-gray-500">{tNews('empty')}</p>
           </div>
         ) : (
-          items.map((item, index) => (
-            <NewsCard key={item.id} item={item} index={index} locale={locale} />
+          items.map((item) => (
+            <NewsCard key={item.id} item={item} locale={locale} />
           ))
         )}
       </section>

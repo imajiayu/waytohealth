@@ -422,7 +422,6 @@ function Composer({ onDone, onCancel }: { onDone: () => void; onCancel: () => vo
         </div>
       </div>
       <NewsCard
-        index={0}
         locale={previewLocale}
         preview
         item={{
