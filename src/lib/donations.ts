@@ -1,8 +1,10 @@
 import { unstable_cache } from 'next/cache';
 import { getStripe } from './stripe';
+import { getJarBalance } from './monobank';
+import { getProject } from './data';
 
 // 从 Stripe 查询某个项目的已筹金额（UAH）
-async function fetchRaisedAmount(projectId: number): Promise<number> {
+async function fetchStripeRaisedAmount(projectId: number): Promise<number> {
   try {
     const stripe = getStripe();
     let totalKopiykas = 0;
@@ -32,9 +34,22 @@ async function fetchRaisedAmount(projectId: number): Promise<number> {
   }
 }
 
-// 带缓存的已筹金额查询（60 秒 revalidate）
-export const getRaisedAmount = unstable_cache(
-  fetchRaisedAmount,
-  ['raised-amount'],
+const getStripeRaisedCached = unstable_cache(
+  fetchStripeRaisedAmount,
+  ['raised-amount-stripe'],
   { revalidate: 60 }
 );
+
+// 项目已筹金额 = Stripe 聚合 + monobank jar balance（任一失败降级为 0）
+export async function getRaisedAmount(projectId: number): Promise<number> {
+  const [stripeAmount, project] = await Promise.all([
+    getStripeRaisedCached(projectId),
+    getProject(projectId).catch(() => null),
+  ]);
+
+  const jarAmount = project?.monobankJarSendId
+    ? await getJarBalance(project.monobankJarSendId)
+    : 0;
+
+  return stripeAmount + jarAmount;
+}

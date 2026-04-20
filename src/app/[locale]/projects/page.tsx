@@ -1,5 +1,6 @@
 import { getProject, getAllProjects } from '@/lib/data';
 import { getRaisedAmount } from '@/lib/donations';
+import { getUahToEurRate } from '@/lib/exchangeRate';
 import { type Locale } from '@/i18n/config';
 import { notFound } from 'next/navigation';
 import { Check } from 'lucide-react';
@@ -70,8 +71,11 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const title = project.title[typedLocale];
   const detail = project.detail;
 
-  // 从 Stripe 获取实时已筹金额
-  const raisedAmount = await getRaisedAmount(projectId);
+  // 实时已筹金额 + UAH→EUR 汇率（Stripe 视图显示欧元换算参考）
+  const [raisedAmount, eurRate] = await Promise.all([
+    getRaisedAmount(projectId),
+    getUahToEurRate(),
+  ]);
 
   // 文档查看器通用标签
   const t = await getTranslations('projectDetail');
@@ -88,7 +92,9 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const sidebarProps = {
     goalAmount: project.goal_amount,
     raisedAmount,
-    projectId,
+    projectTitle: title,
+    monobankJarSendId: project.monobankJarSendId,
+    eurRate,
   };
 
   return (

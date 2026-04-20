@@ -7,13 +7,17 @@ import DonationSidebar from '@/components/projects/DonationSidebar';
 interface MobileDonationSheetProps {
   goalAmount: number | null;
   raisedAmount: number;
-  projectId: number;
+  projectTitle: string;
+  monobankJarSendId?: string;
+  eurRate: number | null;
 }
 
 export default function MobileDonationSheet({
   goalAmount,
   raisedAmount,
-  projectId,
+  projectTitle,
+  monobankJarSendId,
+  eurRate,
 }: MobileDonationSheetProps) {
   const t = useTranslations('projectDetail');
 
@@ -26,7 +30,9 @@ export default function MobileDonationSheet({
         <DonationSidebar
           goalAmount={goalAmount}
           raisedAmount={raisedAmount}
-          projectId={projectId}
+          projectTitle={projectTitle}
+          monobankJarSendId={monobankJarSendId}
+          eurRate={eurRate}
         />
       </div>
     </BottomSheet>

@@ -466,7 +466,6 @@
     "selectAmount": "Select amount",
     "customAmount": "Custom amount",
     "donateButton": "Support this project",
-    "processing": "Processing...",
     "donationError": "Error, please try again",
     "injuryTitle": "Injury Story",
     "recoveryTitle": "Recovery Path",
@@ -479,7 +478,14 @@
     "close": "Close",
     "before": "Before",
     "after": "After",
-    "stagesTitle": "Recovery Stages"
+    "stagesTitle": "Recovery Stages",
+    "selectPaymentMethod": "Choose payment method",
+    "back": "Back",
+    "comingSoon": "Coming soon",
+    "monobankHint": "Opens monobank jar page. Enter amount there.",
+    "monobankUnavailable": "Jar for this project is not connected yet.",
+    "stripeHint": "Card · Apple Pay · Google Pay",
+    "rateSource": "NBU rate, refreshed hourly"
   },
   "footer": {
     "terms": "Terms & Conditions",

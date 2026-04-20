@@ -227,6 +227,56 @@ body {
   }
 }
 
+/* DonationSidebar 内视图切换：前进（下一步）/ 后退（返回） */
+@keyframes panel-forward-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes panel-backward-in {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-panel-forward {
+  animation: panel-forward-in 300ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.animate-panel-backward {
+  animation: panel-backward-in 300ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* StripeView 中 EUR 换算标签的入场：稍晚于主 pill，轻微 overshoot 强调"换算结果" */
+@keyframes rate-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(-6px) scale(0.88);
+  }
+  60% {
+    transform: translateX(0) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-rate-pop {
+  animation: rate-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 140ms both;
+}
+
 /* Excel 预览表格样式 */
 .excel-preview table {
   border-collapse: collapse;

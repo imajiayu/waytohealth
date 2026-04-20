@@ -13,6 +13,9 @@ export interface ProjectData {
   raised_amount: number;
   currency: string;
   tags: string[];
+  // monobank 募捐罐 sendId — send.monobank.ua/{sendId} 末尾那段
+  // 用来拼跳转链接 + 匹配 /personal/client-info 返回的 jar
+  monobankJarSendId?: string;
   detail?: ProjectDetail;
 }
 

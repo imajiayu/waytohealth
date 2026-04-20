@@ -466,7 +466,6 @@
     "selectAmount": "Оберіть суму",
     "customAmount": "Інша сума",
     "donateButton": "Підтримати проєкт",
-    "processing": "Обробка...",
     "donationError": "Помилка, спробуйте ще раз",
     "injuryTitle": "Історія поранення",
     "recoveryTitle": "Шлях відновлення",
@@ -479,7 +478,14 @@
     "close": "Закрити",
     "before": "До",
     "after": "Після",
-    "stagesTitle": "Етапи відновлення"
+    "stagesTitle": "Етапи відновлення",
+    "selectPaymentMethod": "Оберіть спосіб оплати",
+    "back": "Назад",
+    "comingSoon": "Незабаром",
+    "monobankHint": "Відкриється сторінка банки. Введіть суму там.",
+    "monobankUnavailable": "Банку для цього проєкту ще не підключено.",
+    "stripeHint": "Картка · Apple Pay · Google Pay",
+    "rateSource": "Курс НБУ, оновлюється щогодини"
   },
   "footer": {
     "terms": "Умови та положення",

@@ -67,33 +67,45 @@ npm run start    # 启动生产服务器
 
 ---
 
-## 支付方案（Stripe-only，无数据库）
+## 支付方案（Stripe + monobank jar，无数据库）
 
-项目**不使用数据库**。所有订单数据（捐赠记录、金额、元数据）全部由 Stripe 托管，通过 Stripe API 读取。
+项目**不使用数据库**。捐赠记录由 Stripe + monobank jar 分别托管，两路通过各自 API 读取聚合。
 
 ### 核心流程
 
+DonationSidebar 是一个**双视图状态机**，两步都在同一 panel 里完成（没有蒙版、没有浮窗），靠 `view: 'amount' | 'method'` + `direction: 'forward' | 'backward'` 驱动 `animate-panel-forward` / `animate-panel-backward` 入场过渡。
+
 ```
-用户点击「Підтримати」
-    ↓
-createCheckoutSession (src/app/actions/donate.ts)
-    - 校验 projectId（必须在 PROJECTS 常量中）
-    - 校验金额（UAH，1 ~ 999999 正整数）
-    - 创建 Stripe Checkout Session（mode: payment，currency: uah）
-    - metadata 写入 { project_id }（PaymentIntent 也同步写入，用于后续搜索）
-    ↓
-重定向到 Stripe 托管支付页
-    ↓
-成功 → /[locale]/donation-success?session_id=...
-取消 → 回到项目详情页
+Step 1 · amount 视图
+  进度条 + 快选金额 + 自定义金额 + 捐赠按钮
+    ↓ 点击捐赠 → setView('method'), direction='forward'
+Step 2 · method 视图
+  ← Back      02/02
+  金额徽章（金额 · 项目名）
+    ├─ monobank 按钮
+    │     项目 data.json 配了 monobankJarSendId → send.monobank.ua/jar/{项目 sendId}
+    │     否则 fallback 到 NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID
+    │     都没 → 按钮灰态 "Coming soon"
+    │     （新 tab 打开；用户在 monobank 页面重新输入金额）
+    │
+    └─ stripe 按钮 → createCheckoutSession (src/app/actions/donate.ts)
+            - 校验 projectId（必须在 PROJECTS 常量中）
+            - 校验金额（UAH，1 ~ 999999 正整数）
+            - 创建 Stripe Checkout Session（mode: payment，currency: uah）
+            - metadata 写入 { project_id }（PaymentIntent 也同步写入）
+            → 重定向到 Stripe 托管支付页
+            → 成功回 /[locale]/donation-success?session_id=...
+            → 取消回项目详情页
 ```
 
 ### 已筹金额展示
 
-`src/lib/donations.ts` 中的 `getRaisedAmount(projectId)`：
-- 调用 `stripe.paymentIntents.search`，按 `status:'succeeded' AND metadata['project_id']:'N'` 聚合金额
-- 用 `next/cache` 的 `unstable_cache` 包裹，`revalidate: 60` 秒
-- Stripe 调用失败时返回 0，不阻塞渲染
+`src/lib/donations.ts` 的 `getRaisedAmount(projectId)` 同时聚合两路数据：
+
+1. **Stripe** — `stripe.paymentIntents.search` 按 `status:'succeeded' AND metadata['project_id']:'N'`，`unstable_cache` 60s revalidate
+2. **monobank jar** — `src/lib/monobank.ts` 调 `/personal/client-info`（`X-Token: MONOBANK_TOKEN`）拉所有 jar，`unstable_cache` 60s 缓存（正好匹配官方"1 次/60s"限流），按 `sendId` 匹配 `project.monobankJarSendId` 取 `balance / 100`
+
+任一数据源失败单独降级为 0，不阻塞渲染。每个项目在 `data.json` 里通过可选字段 `monobankJarSendId` 绑定自己的 jar。
 
 ### 项目/商品数据
 
@@ -118,9 +130,13 @@ createCheckoutSession (src/app/actions/donate.ts)
 ```env
 STRIPE_SECRET_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+MONOBANK_TOKEN=                          # 基金会账户的 monobank personal token（api.monobank.ua 自助生成）
+NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID= # 基金会主 jar 的 sendId；项目无 monobankJarSendId 时 fallback 到这个
 ```
 
-`NEXT_PUBLIC_SITE_URL` 用于拼接 Checkout 的 `success_url` / `cancel_url`。
+- `NEXT_PUBLIC_SITE_URL` 用于拼接 Checkout 的 `success_url` / `cancel_url`
+- `MONOBANK_TOKEN` 缺失时进度条只显示 Stripe 那部分，不报错
+- `NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID` 让支付方式面板里的 monobank 按钮始终可点（项目自己的 sendId 缺失时跳 fallback jar）；两者都缺失时 monobank 按钮显示 "Coming soon" 灰态
 
 ---
 
