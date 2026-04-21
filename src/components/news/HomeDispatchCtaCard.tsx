@@ -8,7 +8,7 @@ export default async function HomeDispatchCtaCard() {
   return (
     <Link
       href="/news"
-      className="group relative flex h-full flex-col justify-between overflow-hidden rounded-[20px] bg-ukraine-navy px-6 py-7 text-white transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-12px_rgba(13,27,46,0.5)]"
+      className="group relative flex h-full flex-col justify-between overflow-hidden rounded-[20px] gradient-brand-deep px-6 py-7 text-white transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-10px_rgba(0,108,178,0.55)]"
     >
       {/* 装饰光源 */}
       <div

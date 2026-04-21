@@ -63,3 +63,8 @@ export async function getJarBalance(sendId: string): Promise<number> {
   const found = entries.find(([id]) => id === sendId);
   return found ? found[1] : 0;
 }
+
+// 拉全部 jar 的 sendId → 余额映射（供聚合场景并行预取用）
+export async function getAllJarBalances(): Promise<Map<string, number>> {
+  return new Map(await getJarBalancesCached());
+}

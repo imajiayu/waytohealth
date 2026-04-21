@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { getStripe } from './stripe';
-import { getJarBalance } from './monobank';
+import { getAllJarBalances } from './monobank';
 import { getProject } from './data';
 
 // 从 Stripe 查询某个项目的已筹金额（UAH）
@@ -41,15 +41,16 @@ const getStripeRaisedCached = unstable_cache(
 );
 
 // 项目已筹金额 = Stripe 聚合 + monobank jar balance（任一失败降级为 0）
+// 三路完全并行：Stripe 聚合、项目元数据、monobank jar map —— 冷路径下省一次串行 RTT
 export async function getRaisedAmount(projectId: number): Promise<number> {
-  const [stripeAmount, project] = await Promise.all([
+  const [stripeAmount, project, jars] = await Promise.all([
     getStripeRaisedCached(projectId),
     getProject(projectId).catch(() => null),
+    getAllJarBalances().catch(() => new Map<string, number>()),
   ]);
 
-  const jarAmount = project?.monobankJarSendId
-    ? await getJarBalance(project.monobankJarSendId)
-    : 0;
+  const sendId = project?.monobankJarSendId;
+  const jarAmount = sendId ? jars.get(sendId) ?? 0 : 0;
 
   return stripeAmount + jarAmount;
 }

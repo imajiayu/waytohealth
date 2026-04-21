@@ -1,12 +1,12 @@
 [
   {
     "id": "amalna-foundation",
-    "logo": "/images/partners/amalna-foundation.png",
+    "logo": "/images/partners/amalna-foundation.webp",
     "url": "https://amalna.org"
   },
   {
     "id": "comfy",
-    "logo": "/images/partners/comfy.png",
+    "logo": "/images/partners/comfy.webp",
     "url": "https://comfy.ua"
   },
   {
@@ -16,43 +16,43 @@
   },
   {
     "id": "dcc",
-    "logo": "/images/partners/dcc.png",
+    "logo": "/images/partners/dcc.webp",
     "url": "https://dc-charity.foundation"
   },
   {
     "id": "medux",
-    "logo": "/images/partners/medux.png",
+    "logo": "/images/partners/medux.webp",
     "url": "https://medux.nl"
   },
   {
     "id": "pizza-day",
-    "logo": "/images/partners/pizza-day.png",
+    "logo": "/images/partners/pizza-day.webp",
     "url": "https://pizzaday.ua"
   },
   {
     "id": "rehau",
-    "logo": "/images/partners/rehau.png",
+    "logo": "/images/partners/rehau.webp",
     "url": "https://rehau-ua.com"
   },
   {
     "id": "golfstream",
-    "logo": "/images/partners/golfstream.png",
+    "logo": "/images/partners/golfstream.webp",
     "url": "https://golfstrimfish.com"
   },
   {
     "id": "vataga",
-    "logo": "/images/partners/vataga.png"
+    "logo": "/images/partners/vataga.webp"
   },
   {
     "id": "hto-yakshcho-ne-my",
-    "logo": "/images/partners/hto-yakshcho-ne-my.png"
+    "logo": "/images/partners/hto-yakshcho-ne-my.webp"
   },
   {
     "id": "sunflower-scotland",
-    "logo": "/images/partners/sunflower-scotland.png"
+    "logo": "/images/partners/sunflower-scotland.webp"
   },
   {
     "id": "logo-horizontal-2",
-    "logo": "/images/partners/logo-horizontal-2.png"
+    "logo": "/images/partners/logo-horizontal-2.webp"
   }
 ]

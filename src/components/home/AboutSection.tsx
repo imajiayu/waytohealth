@@ -78,7 +78,7 @@ export default async function AboutSection() {
             <div className="absolute -bottom-4 -left-4 h-full w-full rounded-2xl gradient-brand opacity-10" />
             <div className="relative overflow-hidden rounded-2xl">
               <Image
-                src="/images/about-team.jpg"
+                src="/images/about-team.webp"
                 alt={t('title')}
                 width={1200}
                 height={900}

@@ -1,12 +1,20 @@
 'use server';
 
 import { del } from '@vercel/blob';
+import { revalidateTag } from 'next/cache';
 import { type NewsItem, type NewsIndex, type NewsIndexEntry } from '@/data/news';
 import { commitBatch, getFileText, type FileChange } from '@/lib/github';
 import { verifyAdminPassword } from '@/lib/adminAuth';
 
 const INDEX_PATH = 'public/data/news/index.json';
 const ITEM_DIR = 'public/data/news/items';
+
+// 仅允许 Vercel Blob 主域：防止管理员接口被用来把外链写进前台 next/image
+const BLOB_URL_RE = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\//;
+
+function isBlobUrl(u: string): boolean {
+  return BLOB_URL_RE.test(u);
+}
 
 function toBase64Utf8(text: string): string {
   return Buffer.from(text, 'utf-8').toString('base64');
@@ -62,6 +70,9 @@ export async function publishNewsAction(
   if (!input.body.ua.trim() || !input.body.en.trim()) {
     return { ok: false, error: 'body required' };
   }
+  if (!input.imageUrls.every(isBlobUrl)) {
+    return { ok: false, error: 'invalid image url' };
+  }
 
   const id = makeNewsId(input.published_at);
 
@@ -94,6 +105,8 @@ export async function publishNewsAction(
     ];
     await commitBatch(changes, `news: publish ${id}`);
 
+    // Next.js 16 需要传 cacheLife profile；写操作要立即失效，所以 expire: 0
+    revalidateTag('news', { expire: 0 });
     return { ok: true, id };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
@@ -143,6 +156,8 @@ export async function deleteNewsAction(
     ];
     await commitBatch(changes, `news: unpublish ${id}`);
 
+    // Next.js 16 需要传 cacheLife profile；写操作要立即失效，所以 expire: 0
+    revalidateTag('news', { expire: 0 });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
@@ -156,6 +171,9 @@ export async function cleanupBlobAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!(await verifyAdminPassword(pw))) return { ok: false, error: 'unauthorized' };
   if (urls.length === 0) return { ok: true };
+  if (!urls.every(isBlobUrl)) {
+    return { ok: false, error: 'invalid image url' };
+  }
   try {
     await del(urls);
     return { ok: true };
@@ -174,9 +192,12 @@ export async function listNewsAction(
     const sorted = [...index.items].sort((a, b) =>
       b.published_at.localeCompare(a.published_at)
     );
+    // 并行拉取所有条目；单条失败/损坏跳过，保持列表顺序
+    const texts = await Promise.all(
+      sorted.map((entry) => getFileText(`${ITEM_DIR}/${entry.id}.json`))
+    );
     const items: NewsItem[] = [];
-    for (const entry of sorted) {
-      const text = await getFileText(`${ITEM_DIR}/${entry.id}.json`);
+    for (const text of texts) {
       if (!text) continue;
       try {
         items.push(JSON.parse(text) as NewsItem);

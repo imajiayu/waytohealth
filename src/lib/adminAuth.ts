@@ -3,7 +3,8 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { headers } from 'next/headers';
 import { rateLimit } from './adminRateLimit';
 
-const SALT = process.env.ADMIN_PASSWORD_SALT ?? 'wth-news-2026';
+// 强制从 env 读；不做 fallback，避免未来某环境漏设时静默走上已进 git 的弱默认值
+const SALT = process.env.ADMIN_PASSWORD_SALT;
 
 function sha256Hex(text: string): string {
   return createHash('sha256').update(text).digest('hex');
@@ -22,6 +23,11 @@ async function getClientIp(): Promise<string> {
  * 即使后续提交正确密码也拒绝（直到锁定过期）。
  */
 export async function verifyAdminPassword(pw: string): Promise<boolean> {
+  if (!SALT) {
+    // Fail loud — 配置错误不该静默，否则可能退化到弱默认值
+    throw new Error('ADMIN_PASSWORD_SALT env var is required');
+  }
+
   const ip = await getClientIp();
   const limit = rateLimit(ip);
   if (!limit.allowed) return false;

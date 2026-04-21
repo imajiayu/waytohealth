@@ -131,7 +131,7 @@
             "post-traumatic stress disorder (PTSD)",
             "anxiety disorders"
           ],
-          "image": "/images/achievement-rehabilitation.jpg"
+          "image": "/images/achievement-rehabilitation.webp"
         },
         {
           "title": "Ambulance Procurement",
@@ -187,12 +187,12 @@
     "teamTitle": "Team",
     "teamSubtitle": "The people who turn support into action, every single day",
     "team": {
-      "0": { "name": "Oleksandr Khorev", "role": "communications manager", "image": "/images/team/oleksandr-khorev.jpg" },
-      "1": { "name": "Anastasiia Sydorkina", "role": "project lead", "image": "/images/team/anastasiia-sydorkina.jpg" },
-      "2": { "name": "Oleksii Dubovyk", "role": "co-founder", "image": "/images/team/oleksii-dubovyk.jpg" },
-      "3": { "name": "Oleksandr Fedoniuk", "role": "foundation director", "image": "/images/team/oleksandr-fedoniuk.jpg" },
-      "4": { "name": "Yehor Vorobiov", "role": "fundraiser, grant writer", "image": "/images/team/yehor-vorobiov.jpg" },
-      "5": { "name": "Sofiia Tarnavska", "role": "SMM manager", "image": "/images/team/sofiia-tarnavska.jpg" }
+      "0": { "name": "Oleksandr Khorev", "role": "communications manager", "image": "/images/team/oleksandr-khorev.webp" },
+      "1": { "name": "Anastasiia Sydorkina", "role": "project lead", "image": "/images/team/anastasiia-sydorkina.webp" },
+      "2": { "name": "Oleksii Dubovyk", "role": "co-founder", "image": "/images/team/oleksii-dubovyk.webp" },
+      "3": { "name": "Oleksandr Fedoniuk", "role": "foundation director", "image": "/images/team/oleksandr-fedoniuk.webp" },
+      "4": { "name": "Yehor Vorobiov", "role": "fundraiser, grant writer", "image": "/images/team/yehor-vorobiov.webp" },
+      "5": { "name": "Sofiia Tarnavska", "role": "SMM manager", "image": "/images/team/sofiia-tarnavska.webp" }
     },
     "documents": {
       "0": { "title": "Statute", "href": "/documents/about/statute.pdf" },

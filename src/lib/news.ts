@@ -1,4 +1,4 @@
-import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { type NewsItem, type NewsIndex } from '@/data/news';
@@ -15,31 +15,40 @@ const useGitHub =
   !!process.env.GITHUB_TOKEN &&
   !!process.env.GITHUB_REPO;
 
-export const getNewsIndex = cache(async (): Promise<NewsIndex> => {
-  try {
-    if (useGitHub) {
-      const text = await getFileText(INDEX_PATH_REMOTE);
-      return text ? (JSON.parse(text) as NewsIndex) : { items: [] };
+// 跨请求缓存 10s；admin 写操作会调 revalidateTag('news') 主动失效
+export const getNewsIndex = unstable_cache(
+  async (): Promise<NewsIndex> => {
+    try {
+      if (useGitHub) {
+        const text = await getFileText(INDEX_PATH_REMOTE);
+        return text ? (JSON.parse(text) as NewsIndex) : { items: [] };
+      }
+      const raw = await fs.readFile(path.join(NEWS_DIR, 'index.json'), 'utf-8');
+      return JSON.parse(raw);
+    } catch {
+      return { items: [] };
     }
-    const raw = await fs.readFile(path.join(NEWS_DIR, 'index.json'), 'utf-8');
-    return JSON.parse(raw);
-  } catch {
-    return { items: [] };
-  }
-});
+  },
+  ['news-index'],
+  { revalidate: 10, tags: ['news'] }
+);
 
-export const getNews = cache(async (id: string): Promise<NewsItem | null> => {
-  try {
-    if (useGitHub) {
-      const text = await getFileText(`${ITEM_DIR_REMOTE}/${id}.json`);
-      return text ? (JSON.parse(text) as NewsItem) : null;
+export const getNews = unstable_cache(
+  async (id: string): Promise<NewsItem | null> => {
+    try {
+      if (useGitHub) {
+        const text = await getFileText(`${ITEM_DIR_REMOTE}/${id}.json`);
+        return text ? (JSON.parse(text) as NewsItem) : null;
+      }
+      const raw = await fs.readFile(path.join(NEWS_DIR, 'items', `${id}.json`), 'utf-8');
+      return JSON.parse(raw);
+    } catch {
+      return null;
     }
-    const raw = await fs.readFile(path.join(NEWS_DIR, 'items', `${id}.json`), 'utf-8');
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-});
+  },
+  ['news-item'],
+  { revalidate: 10, tags: ['news'] }
+);
 
 // 读取所有活跃新闻（按 published_at 倒序）
 export async function getAllNews(): Promise<NewsItem[]> {

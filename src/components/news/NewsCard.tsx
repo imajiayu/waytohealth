@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { type Locale } from '@/i18n/config';
 import { type NewsItem } from '@/data/news';
-import NewsLightbox from './NewsLightbox';
+
+// 按需加载 lightbox：只有用户点图打开时才下载这块 ~4KB+ 的 client JS
+const NewsLightbox = dynamic(() => import('./NewsLightbox'));
 
 interface NewsCardProps {
   item: NewsItem;

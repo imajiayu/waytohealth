@@ -1,12 +1,10 @@
-'use client';
-
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { type Locale } from '@/i18n/config';
 import { type ProjectData } from '@/data/projects';
 import { ArrowUpRight } from 'lucide-react';
-import { useInViewOnce } from '@/hooks/useInViewOnce';
+import FadeInOnView from '@/components/common/FadeInOnView';
 
 interface ProjectCardProps {
   id: number;
@@ -30,10 +28,12 @@ function formatAmount(amount: number, currency: string) {
   return `${amount.toLocaleString('en-US')} ${symbol}`;
 }
 
-export default function ProjectCard({ id, data, cover, index, compact }: ProjectCardProps) {
-  const t = useTranslations('projects');
-  const locale = useLocale() as Locale;
-  const { ref: cardRef, isVisible } = useInViewOnce<HTMLDivElement>();
+export default async function ProjectCard({ id, data, cover, index, compact }: ProjectCardProps) {
+  const [t, rawLocale] = await Promise.all([
+    getTranslations('projects'),
+    getLocale(),
+  ]);
+  const locale = rawLocale as Locale;
 
   const title = data.title[locale];
   const description = data.description[locale];
@@ -44,15 +44,7 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
   /* ── 紧凑模式：图片全覆盖 + 底部渐变叠加文字 ── */
   if (compact) {
     return (
-      <div
-        ref={cardRef}
-        className="opacity-0 translate-y-2"
-        style={{
-          animation: isVisible
-            ? `projectCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(index, 5) * 0.06}s forwards`
-            : 'none',
-        }}
-      >
+      <FadeInOnView delayIndex={index}>
         <Link
           href={`/projects?id=${id}`}
           className="group relative block aspect-[4/5] overflow-hidden rounded-xl"
@@ -83,21 +75,13 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
             )}
           </div>
         </Link>
-      </div>
+      </FadeInOnView>
     );
   }
 
   /* ── 标准模式：编辑式简洁卡片 ── */
   return (
-    <div
-      ref={cardRef}
-      className="opacity-0 translate-y-2"
-      style={{
-        animation: isVisible
-          ? `projectCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(index, 5) * 0.06}s forwards`
-          : 'none',
-      }}
-    >
+    <FadeInOnView delayIndex={index}>
       <Link
         href={`/projects?id=${id}`}
         className="group relative flex flex-col overflow-hidden rounded-2xl bg-white transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_12px_40px_-8px_rgba(0,108,178,0.14)]"
@@ -177,6 +161,6 @@ export default function ProjectCard({ id, data, cover, index, compact }: Project
           </div>
         </div>
       </Link>
-    </div>
+    </FadeInOnView>
   );
 }

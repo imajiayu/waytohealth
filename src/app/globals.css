@@ -86,6 +86,11 @@ body {
   background: linear-gradient(90deg, #006CB2, #00A7BD);
 }
 
+/* 品牌深色渐变（深色 CTA 卡片等需要白字高对比的场景） */
+.gradient-brand-deep {
+  background: linear-gradient(140deg, #00243a 0%, #003658 50%, #005a94 100%);
+}
+
 /* ── 布局工具类 ── */
 
 /* 页面内容容器 — 统一最大宽度和水平内边距 */

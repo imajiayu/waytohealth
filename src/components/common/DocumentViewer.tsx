@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { FileSpreadsheet, FileText, X, Download, Maximize2 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 
 export interface ViewerDocument {
   label: string;
@@ -43,7 +42,8 @@ function ExcelPreview({ url, errorMessage }: { url: string; errorMessage: string
 
     async function loadExcel() {
       try {
-        const res = await fetch(url);
+        // 并行：按需下载 xlsx 运行时（从主 bundle 分离）与获取文件
+        const [XLSX, res] = await Promise.all([import('xlsx'), fetch(url)]);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const buf = await res.arrayBuffer();
         const wb = XLSX.read(buf, { type: 'array' });

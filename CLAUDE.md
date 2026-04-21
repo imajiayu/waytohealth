@@ -172,8 +172,8 @@ GITHUB_BRANCH=main
 BLOB_READ_WRITE_TOKEN=            # Vercel Blob store token（Vercel 自动注入于部署环境，本地需手动复制）
 
 # Admin 密码
-ADMIN_PASSWORD_HASH=              # SHA-256(password + SALT)，64 位 hex
-ADMIN_PASSWORD_SALT=wth-news-2026 # 可选，默认值见 src/lib/adminAuth.ts
+ADMIN_PASSWORD_HASH=              # SHA-256(password + SALT)，64 位 hex；必需
+ADMIN_PASSWORD_SALT=              # 必需；任意随机字符串（建议用脚本自动生成）。HASH 与 SALT 必须配对，改一个就得同步改另一个
 ```
 
 ---
@@ -236,7 +236,7 @@ src/
 │   ├── github.ts                # GitHub contents API 封装（server-only）
 │   ├── adminAuth.ts             # 管理员密码 hash 校验（server-only）
 │   └── adminRateLimit.ts        # 管理员登录 IP 速率限制（server-only，进程内滑动窗口）
-└── middleware.ts                # i18n 路由中间件
+└── proxy.ts                     # i18n 路由中间件（Next.js 16 起用 proxy.ts 替代 middleware.ts）
 messages/
 ├── ua.json                      # 乌克兰语翻译
 └── en.json                      # 英语翻译
@@ -278,8 +278,14 @@ const t = useTranslations('namespace')
   - `gradient-brand-line` — 横向渐变（分隔线、LoadingBar）
   - `gradient-brand-progress` — 进度条渐变
   - `shadow-brand-cta` — 品牌色投影（CTA 按钮等）
-  - `glow-teal` / `glow-blue` / `glow-blue-soft` / `glow-gold` / `glow-gold-soft` — 装饰光晕背景
+  - `glow-teal` / `glow-blue` / `glow-blue-soft` / `glow-gold` / `glow-gold-soft` — 装饰光晕背景（小面积）
+  - `aura-cyan-xl` / `aura-blue-lg` / `aura-gold-lg` / `aura-teal-md` — 装饰性巨型光源（区块背景，避免 JSX 写 radial-gradient）
+  - `ambient-canvas` — main 容器的连续天光氛围（渐变主背景 + ::before noise 叠层）
+  - `animate-hero-title` / `animate-hero-cta` — Hero 专属入场动画（错峰触发）
+  - `animate-panel-forward` / `animate-panel-backward` — DonationSidebar 多视图状态机切换动画
+  - `animate-rate-pop` — EUR 换算徽章出现动效
 - **页面内容容器**统一使用 `container-page` 类（max-w-7xl + 响应式内边距），不要手写 `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
+- **纵向区块间距**统一使用 `section-y` 类（py-16 / py-8 响应式）
 - **区域标题装饰线**统一使用 `accent-line` 类
 - **隐藏滚动条**统一使用 `hide-scrollbar` 类，不要写 `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`
 - Tailwind 颜色使用 `@theme` 中定义的语义化 token（如 `text-ukraine-blue-500`），不要用十六进制
@@ -316,7 +322,7 @@ const t = useTranslations('namespace')
 
 - **Tailwind v4**: 使用 CSS-first 配置（`@import "tailwindcss"`），不再有 `tailwind.config.js`。自定义主题通过 `globals.css` 中的 `@theme` 定义
 - **Next.js 16 异步 API**: `cookies()`、`headers()`、`params`、`searchParams` 都需要 `await`
-- **middleware.ts 位置**: 在 `src/middleware.ts`（不是项目根目录），仅用于 next-intl 路由
+- **路由中间件**: 文件位于 `src/proxy.ts`（Next.js 16 起用 `proxy.ts` 替代 `middleware.ts`，使用旧名会触发弃用警告），仅用于 next-intl 路由
 - **默认语言**: `ua`（乌克兰语）是默认语言，不是 `en`
 - **翻译键同步**: 添加新 UI 文案时，`ua.json` 和 `en.json` 必须同时更新
 
