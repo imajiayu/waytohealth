@@ -45,6 +45,8 @@ export interface PatientStory {
   photo?: string;
   photoBefore?: string; // 康复前照片（文件名，相对于项目目录）
   photoAfter?: string;  // 康复后照片（文件名，相对于项目目录）
+  photoBeforePosition?: string; // CSS object-position，覆盖默认 center（如 "top" / "center 20%"）
+  photoAfterPosition?: string;
   background: LocaleString;
   injury: LocaleString[];
   recovery: {

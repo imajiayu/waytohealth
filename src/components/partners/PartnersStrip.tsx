@@ -7,7 +7,7 @@ import { ArrowRight, Handshake, HeartHandshake } from 'lucide-react';
 import { useAutoScroll } from '@/hooks/useAutoScroll';
 import { partners } from '@/data/partners';
 import { cn } from '@/lib/utils';
-import { type Locale } from '@/i18n/config';
+import { type Locale, toLocale } from '@/i18n/config';
 
 /* 外部表单链接（按语言区分） */
 const requestAssistanceUrls: Record<Locale, string> = {
@@ -24,7 +24,7 @@ const becomePartnerUrls: Record<Locale, string> = {
 
 export default function PartnersStrip() {
   const t = useTranslations('partners');
-  const locale = useLocale() as Locale;
+  const locale = toLocale(useLocale());
   const scrollRef = useAutoScroll<HTMLDivElement>();
 
   return (

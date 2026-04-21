@@ -45,6 +45,7 @@ export default function PatientStories({
           return (
             <button
               key={i}
+              type="button"
               onClick={() => setActiveIndex(i)}
               className={cn(
                 'group relative rounded-xl text-left transition-all duration-300',
@@ -100,12 +101,13 @@ export default function PatientStories({
         {hasComparison && (
           <div className="relative grid grid-cols-2">
             {/* Before */}
-            <div className="relative aspect-[3/2] overflow-hidden">
+            <div className="relative aspect-square overflow-hidden">
               <Image
                 src={`${photoBase}/${story.photoBefore}`}
                 alt={`${story.name} — ${t('before')}`}
                 fill
                 className="object-cover"
+                style={story.photoBeforePosition ? { objectPosition: story.photoBeforePosition } : undefined}
                 sizes="(max-width: 640px) 50vw, 35vw"
               />
               <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/50 to-transparent" />
@@ -116,12 +118,13 @@ export default function PatientStories({
             {/* 中线 */}
             <div className="absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-white/80" />
             {/* After */}
-            <div className="relative aspect-[3/2] overflow-hidden">
+            <div className="relative aspect-square overflow-hidden">
               <Image
                 src={`${photoBase}/${story.photoAfter}`}
                 alt={`${story.name} — ${t('after')}`}
                 fill
                 className="object-cover"
+                style={story.photoAfterPosition ? { objectPosition: story.photoAfterPosition } : undefined}
                 sizes="(max-width: 640px) 50vw, 35vw"
               />
               <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/50 to-transparent" />

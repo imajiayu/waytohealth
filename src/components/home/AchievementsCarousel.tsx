@@ -79,7 +79,9 @@ export default function AchievementsCarousel() {
     let list: string[] = [];
     if (t.has(`items.${i}.list`)) {
       const raw = t.raw(`items.${i}.list`);
-      if (Array.isArray(raw)) list = raw as string[];
+      if (Array.isArray(raw)) {
+        list = raw.filter((x): x is string => typeof x === 'string');
+      }
     }
     return {
       title: t(`items.${i}.title`),
@@ -102,6 +104,7 @@ export default function AchievementsCarousel() {
 
         <div className="flex gap-1.5 sm:gap-2">
           <button
+            type="button"
             onClick={() => scroll('left')}
             disabled={!scrollState.left}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
@@ -112,6 +115,7 @@ export default function AchievementsCarousel() {
             </svg>
           </button>
           <button
+            type="button"
             onClick={() => scroll('right')}
             disabled={!scrollState.right}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"

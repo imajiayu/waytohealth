@@ -1,12 +1,14 @@
 import { getProject, getAllProjects } from '@/lib/data';
 import { getRaisedAmount } from '@/lib/donations';
 import { getUahToEurRate } from '@/lib/exchangeRate';
-import { type Locale } from '@/i18n/config';
+import { toLocale } from '@/i18n/config';
+import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 import { Check } from 'lucide-react';
 import Image from 'next/image';
 import DonationSidebar from '@/components/projects/DonationSidebar';
-import MobileDonationSheet from '@/components/projects/MobileDonationSheet';
+// 移动端 donation sheet 只在 lg 以下显示；dynamic + 媒体查询在 MobileDonationSheetMount 里处理
+import MobileDonationSheetMount from '@/components/projects/MobileDonationSheetMount';
 import DocumentViewer from '@/components/common/DocumentViewer';
 import { getTranslations } from 'next-intl/server';
 import PatientStories from '@/components/projects/PatientStories';
@@ -21,7 +23,7 @@ type Props = {
 export async function generateMetadata({ params, searchParams }: Props) {
   const { locale } = await params;
   const { id } = await searchParams;
-  const typedLocale: Locale = (locale as Locale) ?? 'ua';
+  const typedLocale = toLocale(locale);
 
   try {
     const allProjects = await getAllProjects();
@@ -29,9 +31,17 @@ export async function generateMetadata({ params, searchParams }: Props) {
     if (!projectId) return { title: 'Projects' };
 
     const project = await getProject(projectId);
+    const title = project.title[typedLocale];
+    const description = project.description[typedLocale];
+    // 项目详情页 URL 含 ?id=N；sitemap 已列出每个 id，这里 canonical / alternates 也带上
+    const pathWithId = `/projects?id=${projectId}`;
+    const cover = `/data/projects/${projectId}/cover.webp`;
     return {
-      title: project.title[typedLocale],
-      description: project.description[typedLocale],
+      title,
+      description,
+      alternates: buildAlternates(typedLocale, pathWithId),
+      openGraph: buildOpenGraph({ title, description, locale: typedLocale, path: pathWithId, image: cover }),
+      twitter: buildTwitter({ title, description, image: cover }),
     };
   } catch {
     return { title: 'Projects' };
@@ -41,7 +51,7 @@ export async function generateMetadata({ params, searchParams }: Props) {
 export default async function ProjectDetailPage({ params, searchParams }: Props) {
   const { locale } = await params;
   const { id } = await searchParams;
-  const typedLocale: Locale = (locale as Locale) ?? 'ua';
+  const typedLocale = toLocale(locale);
 
   const allProjects = await getAllProjects();
 
@@ -287,10 +297,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
         </div>
       </div>
 
-      {/* ── 移动端捐赠浮窗（lg 以下显示） ── */}
-      <div className="lg:hidden">
-        <MobileDonationSheet {...sidebarProps} />
-      </div>
+      {/* ── 移动端捐赠浮窗（lg 以下显示） —— 桌面端完全跳过 JS，由 Mount wrapper 用媒体查询判定 ── */}
+      <MobileDonationSheetMount {...sidebarProps} />
     </article>
   );
 }

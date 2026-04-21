@@ -1,25 +1,32 @@
 import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { type Locale } from '@/i18n/config';
+import { toLocale } from '@/i18n/config';
+import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { getAllNews } from '@/lib/news';
 import NewsCard from '@/components/news/NewsCard';
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = toLocale(await getLocale());
   const t = await getTranslations('metadata');
+  const title = t('newsTitle');
+  const description = t('newsDescription');
   return {
-    title: t('newsTitle'),
-    description: t('newsDescription'),
+    title,
+    description,
+    alternates: buildAlternates(locale, '/news'),
+    openGraph: buildOpenGraph({ title, description, locale, path: '/news' }),
+    twitter: buildTwitter({ title, description }),
   };
 }
 
 export default async function NewsPage() {
   const tNav = await getTranslations('navigation');
   const tNews = await getTranslations('news');
-  const locale = (await getLocale()) as Locale;
+  const locale = toLocale(await getLocale());
   const items = await getAllNews();
 
   return (
-    <div className="container-page py-16 sm:py-24">
+    <div className="container-page section-y">
       <header className="mx-auto max-w-2xl">
         <div className="flex items-center gap-3">
           <div className="h-[2px] w-10 rounded-full bg-ukraine-gold-500" />
@@ -28,7 +35,7 @@ export default async function NewsPage() {
           </span>
         </div>
 
-        <h1 className="mt-5 font-[family-name:var(--font-display)] text-4xl font-extrabold leading-[1] tracking-[-0.02em] text-ukraine-blue-600 sm:text-5xl">
+        <h1 className="mt-5 font-[family-name:var(--font-display)] text-4xl font-bold leading-[1] tracking-[-0.02em] text-ukraine-blue-600 sm:text-5xl">
           {tNav('news')}
         </h1>
 

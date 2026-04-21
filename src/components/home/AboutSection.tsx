@@ -49,14 +49,7 @@ export default async function AboutSection() {
       {/* 背景装饰 — 左上次光晕(微金,平衡上方) */}
       <div className="aura-gold-lg pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full opacity-50 blur-3xl" />
       {/* 背景装饰 — 右上点阵(精密感) */}
-      <div
-        className="pointer-events-none absolute right-[5%] top-16 hidden h-40 w-40 opacity-[0.22] lg:block"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle, var(--color-ukraine-blue-300) 1px, transparent 1.5px)',
-          backgroundSize: '14px 14px',
-        }}
-      />
+      <div className="dot-matrix-blue pointer-events-none absolute right-[5%] top-16 hidden h-40 w-40 opacity-[0.22] lg:block" />
 
       <div className="container-page relative">
         {/* 区域标签 + 标题 */}
@@ -84,6 +77,7 @@ export default async function AboutSection() {
                 height={900}
                 className="h-auto w-full"
                 sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
               />
               {/* 底部渐变遮罩 — 增加层次感 */}
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent" />

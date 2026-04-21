@@ -15,7 +15,9 @@
     "newsTitle": "News — Way to Health",
     "newsDescription": "Latest news and updates from the Way to Health Charitable Foundation.",
     "merchTitle": "Merch — Way to Health",
-    "merchDescription": "Support the Way to Health Foundation by purchasing branded merchandise."
+    "merchDescription": "Support the Way to Health Foundation by purchasing branded merchandise.",
+    "donationSuccessTitle": "Thank you for your donation — Way to Health",
+    "donationSuccessDescription": "Your contribution supports the rehabilitation of those affected by war in Ukraine."
   },
   "hero": {
     "title": "WAY TO HEALTH",

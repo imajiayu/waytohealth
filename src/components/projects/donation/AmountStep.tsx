@@ -108,10 +108,14 @@ export default function AmountStep({
         </div>
 
         <div className="relative mt-3">
+          <label htmlFor="donate-custom-amount" className="sr-only">
+            {t('customAmount')}
+          </label>
           <span className="absolute left-3 top-1/2 -translate-y-1/2 font-[family-name:var(--font-data)] text-sm font-semibold text-ukraine-blue-400">
             ₴
           </span>
           <input
+            id="donate-custom-amount"
             type="text"
             inputMode="numeric"
             value={customAmount}
@@ -129,6 +133,7 @@ export default function AmountStep({
 
       {/* ── Donate 按钮 ── */}
       <button
+        type="button"
         onClick={onDonate}
         disabled={currentAmount <= 0}
         className={`gradient-brand mt-5 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl py-3.5 font-semibold text-white transition-opacity ${

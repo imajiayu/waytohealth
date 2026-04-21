@@ -9,7 +9,8 @@ import { triggerRouteChange } from './LoadingBar';
 
 // UA / EN 双向切换胶囊，保留当前 path + query。
 export default function LocaleSwitcher() {
-  const locale = useLocale() as Locale;
+  const rawLocale = useLocale();
+  const locale: Locale = rawLocale === 'en' ? 'en' : 'ua';
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -28,6 +29,7 @@ export default function LocaleSwitcher() {
   return (
     <div className="inline-flex items-center rounded-full bg-gray-100 p-[2px]">
       <button
+        type="button"
         onClick={locale !== 'ua' ? switchLocale : undefined}
         disabled={isPending || locale === 'ua'}
         className={`rounded-full px-2 sm:px-2.5 py-[3px] text-[11px] sm:text-[12px]
@@ -39,6 +41,7 @@ export default function LocaleSwitcher() {
         UA
       </button>
       <button
+        type="button"
         onClick={locale !== 'en' ? switchLocale : undefined}
         disabled={isPending || locale === 'en'}
         className={`rounded-full px-2 sm:px-2.5 py-[3px] text-[11px] sm:text-[12px]

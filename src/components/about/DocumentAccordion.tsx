@@ -153,6 +153,7 @@ function DocumentRow({
                   src={doc.href}
                   className="h-full w-full border-0"
                   title={doc.title}
+                  sandbox="allow-same-origin allow-scripts allow-downloads allow-popups"
                 />
               </div>
             </div>

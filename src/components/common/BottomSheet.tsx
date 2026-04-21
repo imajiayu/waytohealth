@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
@@ -141,15 +141,16 @@ export default function BottomSheet({
     };
   }, [isDragging, handleDragEnd]);
 
-  // 检测移动端断点
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const MOBILE_BREAKPOINT = 1024;
-    const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+  // 检测移动端断点 —— 用 matchMedia 订阅变化，比 resize 高效且与 CSS 媒体查询断点一致
+  const isMobile = useSyncExternalStore(
+    (cb) => {
+      const mql = window.matchMedia('(max-width: 1023.98px)');
+      mql.addEventListener('change', cb);
+      return () => mql.removeEventListener('change', cb);
+    },
+    () => window.matchMedia('(max-width: 1023.98px)').matches,
+    () => false, // SSR 默认桌面，hydrate 后再纠正
+  );
 
   // 展开时锁定背景滚动（仅移动端）
   useBodyScrollLock(isOpen && isExpanded && isMobile);
@@ -224,10 +225,19 @@ export default function BottomSheet({
       >
         {/* 拖拽手柄 - 向下箭头 */}
         <div
-          className="cursor-pointer touch-none select-none"
+          role="button"
+          tabIndex={0}
+          aria-label="Toggle donation panel"
+          className="cursor-pointer touch-none select-none outline-none focus-visible:ring-2 focus-visible:ring-ukraine-gold-500"
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onClick={toggleSheet}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleSheet();
+            }
+          }}
         >
           <div className="pt-2 pb-1 flex items-center justify-center">
             <ChevronDown className="h-5 w-5 text-gray-400" />

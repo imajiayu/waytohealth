@@ -29,12 +29,12 @@ export async function verifyAdminPassword(pw: string): Promise<boolean> {
   }
 
   const ip = await getClientIp();
-  const limit = rateLimit(ip);
+  const limit = await rateLimit(ip);
   if (!limit.allowed) return false;
 
   const expected = process.env.ADMIN_PASSWORD_HASH;
   if (!pw || !expected || expected.length !== 64) {
-    limit.recordFailure();
+    await limit.recordFailure();
     return false;
   }
   const actual = sha256Hex(pw + SALT);
@@ -43,10 +43,10 @@ export async function verifyAdminPassword(pw: string): Promise<boolean> {
       Buffer.from(actual, 'hex'),
       Buffer.from(expected, 'hex')
     );
-    if (!ok) limit.recordFailure();
+    if (!ok) await limit.recordFailure();
     return ok;
   } catch {
-    limit.recordFailure();
+    await limit.recordFailure();
     return false;
   }
 }

@@ -1,5 +1,5 @@
 import { getTranslations, getLocale } from 'next-intl/server';
-import { type Locale } from '@/i18n/config';
+import { toLocale } from '@/i18n/config';
 import { getAllNews } from '@/lib/news';
 import HomeDispatchCard from '@/components/news/HomeDispatchCard';
 import HomeDispatchCtaCard from '@/components/news/HomeDispatchCtaCard';
@@ -13,7 +13,7 @@ export default async function NewsSection() {
     getTranslations('navigation'),
     getAllNews(),
   ]);
-  const locale = (await getLocale()) as Locale;
+  const locale = toLocale(await getLocale());
 
   if (all.length === 0) return null;
 
@@ -44,15 +44,7 @@ export default async function NewsSection() {
         <div className="relative [--cta-w:180px] sm:[--cta-w:220px] lg:[--cta-w:260px]">
           {/* 滚动区 — mask 渐隐区间落在 CTA 覆盖区内(反正被 CTA 遮住看不见),
               让卡片右端能停在 mask 黑区末尾完整显示,又能在滑入 CTA 前自然淡出 */}
-          <div
-            className="hide-scrollbar snap-x snap-proximity overflow-x-auto scroll-smooth pb-3 pt-3"
-            style={{
-              WebkitMaskImage:
-                'linear-gradient(to right, black 0, black calc(100% - var(--cta-w)), transparent calc(100% - var(--cta-w) + 80px))',
-              maskImage:
-                'linear-gradient(to right, black 0, black calc(100% - var(--cta-w)), transparent calc(100% - var(--cta-w) + 80px))',
-            }}
-          >
+          <div className="hide-scrollbar mask-fade-right snap-x snap-proximity overflow-x-auto scroll-smooth pb-3 pt-3">
             <div className="flex items-stretch gap-5 sm:gap-6">
               {items.map((item) => (
                 <div

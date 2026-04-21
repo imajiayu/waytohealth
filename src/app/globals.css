@@ -51,6 +51,9 @@ html {
    * 由 font-weight 区分层级 (正文 400/500,标题 700/800)
    */
   --font-display: var(--font-body);
+  /* 导航栏高度 (h-14 = 56px) + 外边距 (mt-[2px] + py-2px = 8px) + Hero 外 pt-2 (8px) */
+  --nav-h: 3.5rem;
+  --nav-mt: 0.5rem;
 }
 
 body {
@@ -88,7 +91,12 @@ body {
 
 /* 品牌深色渐变（深色 CTA 卡片等需要白字高对比的场景） */
 .gradient-brand-deep {
-  background: linear-gradient(140deg, #00243a 0%, #003658 50%, #005a94 100%);
+  background: linear-gradient(
+    140deg,
+    var(--color-ukraine-blue-900) 0%,
+    var(--color-ukraine-blue-800) 50%,
+    var(--color-ukraine-blue-600) 100%
+  );
 }
 
 /* ── 布局工具类 ── */
@@ -140,6 +148,38 @@ body {
 
 /* ── 品牌投影工具类 ── */
 .shadow-brand-cta { box-shadow: 0 2px 12px color-mix(in srgb, var(--color-ukraine-blue-500) 35%, transparent); }
+
+/* ── 品牌圆形渐变（RecoveryJourney 等小圆球形图标） ── */
+.gradient-brand-circle {
+  background: linear-gradient(
+    to bottom right,
+    var(--color-ukraine-blue-500),
+    var(--color-ukraine-blue-300)
+  );
+}
+
+/* ── 金色描边文字（about 页大字装饰） ── */
+.text-stroke-gold {
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-ukraine-gold-500) 55%, transparent);
+}
+
+/* ── 蓝色点阵装饰背景（AboutSection 等） ── */
+.dot-matrix-blue {
+  background-image: radial-gradient(circle, var(--color-ukraine-blue-300) 1px, transparent 1.5px);
+  background-size: var(--dot-size, 14px) var(--dot-size, 14px);
+}
+
+/* ── 垂直竖排文字（下至上，about 页装饰） ── */
+.writing-vertical {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+/* ── 右侧淡出遮罩（NewsSection 横向滚动区，依赖 --cta-w 变量） ── */
+.mask-fade-right {
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - var(--cta-w)), transparent calc(100% - var(--cta-w) + 80px));
+  mask-image: linear-gradient(to right, black 0, black calc(100% - var(--cta-w)), transparent calc(100% - var(--cta-w) + 80px));
+}
 
 /* ── 全局环境光底层 — 「光与水」呼吸渐变 ── */
 /* 用于 main 容器,营造 Hero 之后到 Footer 之前的连续天光氛围 */
@@ -313,4 +353,18 @@ body {
 
 .excel-preview tr:hover {
   background-color: rgba(230, 244, 248, 0.6);
+}
+
+/* ── 减动画偏好 — 尊重 prefers-reduced-motion: reduce ──
+ * 前庭障碍 / 晕动症用户 OS 打开该选项后，所有 keyframes 和 transition 几乎秒停，
+ * 但保留 state 切换的必要 CSS 变化（不是禁用视觉反馈） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

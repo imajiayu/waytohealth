@@ -4,7 +4,7 @@ import { del } from '@vercel/blob';
 import { revalidateTag } from 'next/cache';
 import { type NewsItem, type NewsIndex, type NewsIndexEntry } from '@/data/news';
 import { commitBatch, getFileText, type FileChange } from '@/lib/github';
-import { verifyAdminPassword } from '@/lib/adminAuth';
+import { requireAdmin } from '@/lib/adminSession';
 
 const INDEX_PATH = 'public/data/news/index.json';
 const ITEM_DIR = 'public/data/news/items';
@@ -24,9 +24,12 @@ function randomSuffix(): string {
   return Math.random().toString(36).slice(2, 6);
 }
 
-// 从 ISO 时间串生成 id
+// 从 ISO 时间串生成 id；无效日期直接抛错，避免生成 "NaN-NaN-NaN-..." 文件名写入 git
 function makeNewsId(publishedAt: string): string {
   const d = new Date(publishedAt);
+  if (!Number.isFinite(d.getTime())) {
+    throw new Error(`invalid published_at: ${publishedAt}`);
+  }
   const pad = (n: number) => String(n).padStart(2, '0');
   const dateStr = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
   const timeStr = `${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}`;
@@ -38,17 +41,15 @@ async function readIndex(): Promise<NewsIndex> {
   if (!text) return { items: [] };
   try {
     return JSON.parse(text) as NewsIndex;
-  } catch {
-    return { items: [] };
+  } catch (err) {
+    // 不能静默返回空 index — 会让下一次 publish 用空数据覆盖，等同于批量删除
+    console.error('[news:readIndex] index.json parse failed', err);
+    throw new Error('index.json corrupted; abort to prevent data loss');
   }
 }
 
 function indexToBase64(index: NewsIndex): string {
   return toBase64Utf8(JSON.stringify(index, null, 2) + '\n');
-}
-
-export async function verifyPasswordAction(pw: string): Promise<boolean> {
-  return await verifyAdminPassword(pw);
 }
 
 export interface PublishInput {
@@ -59,10 +60,13 @@ export interface PublishInput {
 }
 
 export async function publishNewsAction(
-  pw: string,
   input: PublishInput
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  if (!(await verifyAdminPassword(pw))) return { ok: false, error: 'unauthorized' };
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: 'unauthorized' };
+  }
 
   if (!input.title.ua.trim() || !input.title.en.trim()) {
     return { ok: false, error: 'title required' };
@@ -74,7 +78,12 @@ export async function publishNewsAction(
     return { ok: false, error: 'invalid image url' };
   }
 
-  const id = makeNewsId(input.published_at);
+  let id: string;
+  try {
+    id = makeNewsId(input.published_at);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'invalid date' };
+  }
 
   try {
     const item: NewsItem = {
@@ -114,10 +123,13 @@ export async function publishNewsAction(
 }
 
 export async function deleteNewsAction(
-  pw: string,
   id: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!(await verifyAdminPassword(pw))) return { ok: false, error: 'unauthorized' };
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: 'unauthorized' };
+  }
 
   try {
     const itemText = await getFileText(`${ITEM_DIR}/${id}.json`);
@@ -125,13 +137,29 @@ export async function deleteNewsAction(
     if (itemText) {
       try {
         const parsed = JSON.parse(itemText) as NewsItem;
-        blobUrls = (parsed.images ?? []).filter((u) => /^https?:\/\//.test(u));
+        // 只清理真正由本服务上传到 Vercel Blob 的图；其他 URL 不动
+        blobUrls = (parsed.images ?? []).filter(isBlobUrl);
       } catch {
         /* ignore */
       }
     }
 
-    // 从 Vercel Blob 删除图片（失败不阻塞流程，但必须记录日志以便排查孤儿文件）
+    const index = await readIndex();
+    const nextIndex: NewsIndex = {
+      items: index.items.filter((e) => e.id !== id),
+    };
+
+    // 1) 先 commit GitHub（source-of-truth）；commit 失败则 blob 图片仍然在，不会造成"JSON 引用的图已经 404"
+    const changes: FileChange[] = [
+      { path: `${ITEM_DIR}/${id}.json`, contentBase64: null },
+      { path: INDEX_PATH, contentBase64: indexToBase64(nextIndex) },
+    ];
+    await commitBatch(changes, `news: unpublish ${id}`);
+
+    // Next.js 16 需要传 cacheLife profile；写操作要立即失效，所以 expire: 0
+    revalidateTag('news', { expire: 0 });
+
+    // 2) commit 成功后才清理 Blob 图片；失败不回滚（JSON 已删）但记日志
     if (blobUrls.length > 0) {
       try {
         await del(blobUrls);
@@ -144,20 +172,6 @@ export async function deleteNewsAction(
       }
     }
 
-    const index = await readIndex();
-    const nextIndex: NewsIndex = {
-      items: index.items.filter((e) => e.id !== id),
-    };
-
-    // 一次 commit：删除 item JSON + 更新 index.json
-    const changes: FileChange[] = [
-      { path: `${ITEM_DIR}/${id}.json`, contentBase64: null },
-      { path: INDEX_PATH, contentBase64: indexToBase64(nextIndex) },
-    ];
-    await commitBatch(changes, `news: unpublish ${id}`);
-
-    // Next.js 16 需要传 cacheLife profile；写操作要立即失效，所以 expire: 0
-    revalidateTag('news', { expire: 0 });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
@@ -166,10 +180,13 @@ export async function deleteNewsAction(
 
 // 清理未关联到任何新闻的 Blob 图（发布失败时回滚用）
 export async function cleanupBlobAction(
-  pw: string,
   urls: string[]
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!(await verifyAdminPassword(pw))) return { ok: false, error: 'unauthorized' };
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: 'unauthorized' };
+  }
   if (urls.length === 0) return { ok: true };
   if (!urls.every(isBlobUrl)) {
     return { ok: false, error: 'invalid image url' };
@@ -182,10 +199,12 @@ export async function cleanupBlobAction(
   }
 }
 
-export async function listNewsAction(
-  pw: string
-): Promise<{ ok: true; items: NewsItem[] } | { ok: false; error: string }> {
-  if (!(await verifyAdminPassword(pw))) return { ok: false, error: 'unauthorized' };
+export async function listNewsAction(): Promise<{ ok: true; items: NewsItem[] } | { ok: false; error: string }> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: 'unauthorized' };
+  }
 
   try {
     const index = await readIndex();

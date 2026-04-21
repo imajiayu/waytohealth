@@ -1,12 +1,10 @@
 'use client';
 
+// Admin 不走 i18n —— 这里用 next/link 和 next/navigation 而非 @/i18n/navigation 是刻意为之
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { verifyPasswordAction } from '@/app/actions/news';
 import { AdminAuthContext } from './AdminAuthContext';
-
-const STORAGE_KEY = 'wth_admin_pw';
 
 // 加新 tab：追加一行，路径指向 src/app/admin/<feature>/page.tsx
 const TABS = [
@@ -14,8 +12,8 @@ const TABS = [
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
-  const [pw, setPw] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  // 登录态完全由 server cookie 承载：首次 mount GET /api/admin/me 探活；无 cookie → 显示登录表单
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -25,20 +23,26 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const pathname = usePathname() ?? '/admin';
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const saved = typeof window !== 'undefined' ? sessionStorage.getItem(STORAGE_KEY) : null;
-      if (saved) {
-        const ok = await verifyPasswordAction(saved);
-        if (ok) setPw(saved);
-        else sessionStorage.removeItem(STORAGE_KEY);
+      try {
+        const res = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (cancelled) return;
+        setAuthed(res.ok);
+      } catch {
+        if (!cancelled) setAuthed(false);
       }
-      setLoading(false);
     })();
+    return () => { cancelled = true; };
   }, []);
 
-  function signOut() {
-    sessionStorage.removeItem(STORAGE_KEY);
-    setPw(null);
+  async function signOut() {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+    } catch {
+      /* ignore */
+    }
+    setAuthed(false);
     setInput('');
   }
 
@@ -46,17 +50,27 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const ok = await verifyPasswordAction(input);
-    setBusy(false);
-    if (!ok) {
-      setError('Invalid password');
-      return;
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ pw: input }),
+      });
+      if (!res.ok) {
+        setError('Invalid password or account locked');
+        return;
+      }
+      setInput('');
+      setAuthed(true);
+    } catch {
+      setError('Network error');
+    } finally {
+      setBusy(false);
     }
-    sessionStorage.setItem(STORAGE_KEY, input);
-    setPw(input);
   }
 
-  if (loading) {
+  if (authed === null) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
@@ -64,7 +78,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     );
   }
 
-  if (!pw) {
+  if (!authed) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
         <form onSubmit={handleLogin} className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -91,7 +105,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <AdminAuthContext.Provider value={{ pw, signOut }}>
+    <AdminAuthContext.Provider value={{ signOut }}>
       <nav className="bg-white shadow">
         <div className="container-page">
           <div className="flex h-14 justify-between sm:h-16">

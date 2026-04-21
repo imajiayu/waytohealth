@@ -3,8 +3,9 @@
 import Image from 'next/image';
 import { Mail, Phone } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import FocusTrap from 'focus-trap-react';
 import { useRouter, usePathname } from '@/i18n/navigation';
-import { type Locale } from '@/i18n/config';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { triggerRouteChange } from './LoadingBar';
 import { SOCIAL_LINKS, CONTACT } from '@/data/social';
 
@@ -30,9 +31,11 @@ interface MobileMenuPanelProps {
 
 export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps) {
   const t = useTranslations('navigation');
-  const locale = useLocale() as Locale;
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+
+  useEscapeKey(open, onClose);
 
   function handleItemClick(item: MenuItem) {
     onClose();
@@ -67,7 +70,15 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
         aria-hidden="true"
       />
 
-      {/* 右侧滑出面板 */}
+      {/* 右侧滑出面板 — 面板常驻 DOM 用 translate-x 切换；FocusTrap 仅在 open 时激活 */}
+      <FocusTrap
+        active={open}
+        focusTrapOptions={{
+          escapeDeactivates: false, // ESC 交给 useEscapeKey 处理，避免双回调
+          allowOutsideClick: true,  // 点击蒙版时允许外部 click 穿透到 onClose
+          clickOutsideDeactivates: false,
+        }}
+      >
       <div
         className={`fixed top-0 right-0 z-[100] h-full w-[min(380px,85vw)]
                    bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.08)]
@@ -104,6 +115,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                     </span>
                   ) : (
                     <button
+                      type="button"
                       onClick={() => handleItemClick(item)}
                       className={`w-full text-left py-[14px] text-[20px]
                                  font-[family-name:var(--font-display)] font-medium tracking-wide
@@ -207,6 +219,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
           </div>
         </div>
       </div>
+      </FocusTrap>
     </>
   );
 }

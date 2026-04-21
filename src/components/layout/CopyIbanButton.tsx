@@ -12,7 +12,7 @@ export default function CopyIbanButton({ iban, ariaLabel }: CopyIbanButtonProps)
   const [copied, setCopied] = useState(false);
 
   const copyIban = useCallback(() => {
-    navigator.clipboard.writeText(iban).then(() => {
+    navigator.clipboard?.writeText(iban).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {
@@ -22,6 +22,7 @@ export default function CopyIbanButton({ iban, ariaLabel }: CopyIbanButtonProps)
 
   return (
     <button
+      type="button"
       onClick={copyIban}
       className="flex-shrink-0 w-9 h-9 rounded-lg bg-white/[0.06] flex items-center justify-center
                  text-white/50 hover:bg-white/[0.15] hover:text-white

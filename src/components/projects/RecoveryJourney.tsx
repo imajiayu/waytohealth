@@ -57,7 +57,7 @@ export default function RecoveryJourney({ stages, locale }: Props) {
                 }}
               >
                 {/* 编号圆点 */}
-                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-ukraine-blue-500 to-ukraine-blue-300 shadow-[0_2px_14px_rgba(0,108,178,0.28)] transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(0,108,178,0.4)]">
+                <div className="gradient-brand-circle relative z-10 flex h-12 w-12 items-center justify-center rounded-full shadow-[0_2px_14px_rgba(0,108,178,0.28)] transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(0,108,178,0.4)]">
                   <span className="font-[family-name:var(--font-data)] text-sm font-bold text-white">
                     {String(i + 1).padStart(2, '0')}
                   </span>
@@ -98,7 +98,7 @@ export default function RecoveryJourney({ stages, locale }: Props) {
               >
                 {/* 左列：节点 + 连接线 */}
                 <div className="flex flex-col items-center">
-                  <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ukraine-blue-500 to-ukraine-blue-300 shadow-[0_2px_10px_rgba(0,108,178,0.25)]">
+                  <div className="gradient-brand-circle relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-[0_2px_10px_rgba(0,108,178,0.25)]">
                     <span className="font-[family-name:var(--font-data)] text-xs font-bold text-white">
                       {String(i + 1).padStart(2, '0')}
                     </span>

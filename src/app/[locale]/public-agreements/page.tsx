@@ -1,14 +1,21 @@
 import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Mail, MapPin, Phone } from 'lucide-react';
+import { toLocale } from '@/i18n/config';
+import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import TermsTOC from '@/components/terms/TermsTOC';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
+  const locale = toLocale(await getLocale());
   const t = await getTranslations({ locale, namespace: 'metadata' });
+  const title = t('publicAgreementsTitle');
+  const description = t('publicAgreementsDescription');
   return {
-    title: t('publicAgreementsTitle'),
-    description: t('publicAgreementsDescription'),
+    title,
+    description,
+    alternates: buildAlternates(locale, '/public-agreements'),
+    openGraph: buildOpenGraph({ title, description, locale, path: '/public-agreements' }),
+    twitter: buildTwitter({ title, description }),
   };
 }
 
@@ -213,7 +220,7 @@ export default async function PublicAgreementsPage() {
       </section>
 
       {/* ═══════════ 2. BODY: 目录 + 正文 ═══════════ */}
-      <section className="relative overflow-hidden py-10 sm:py-14 lg:py-16">
+      <section className="section-y relative overflow-hidden">
         {/* 装饰光晕 */}
         <div className="pointer-events-none absolute -left-40 top-40 h-96 w-96 rounded-full opacity-[0.04] glow-blue-soft" />
         <div className="pointer-events-none absolute -right-40 bottom-40 h-96 w-96 rounded-full opacity-[0.04] glow-gold-soft" />

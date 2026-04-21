@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import FocusTrap from 'focus-trap-react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 interface NewsLightboxProps {
   images: string[];
@@ -38,16 +40,18 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
     [images.length]
   );
 
-  // 键盘：ESC 关闭、← → 翻页
+  // ESC 关闭由 useEscapeKey 统一处理
+  useEscapeKey(true, onClose);
+
+  // ← → 翻页
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'ArrowLeft') go(-1);
       else if (e.key === 'ArrowRight') go(1);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [go, onClose]);
+  }, [go]);
 
   // 当前缩略图滚入视图
   useEffect(() => {
@@ -59,6 +63,13 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
   return (
+    <FocusTrap
+      focusTrapOptions={{
+        escapeDeactivates: false,
+        clickOutsideDeactivates: false,
+        allowOutsideClick: true,
+      }}
+    >
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-ukraine-navy/96 backdrop-blur-md"
       role="dialog"
@@ -131,7 +142,7 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
             fill
             sizes="(max-width: 640px) 92vw, 80vw"
             className="object-contain"
-            priority
+            loading="eager"
             unoptimized={isRemote(images[index])}
           />
         </div>
@@ -170,5 +181,6 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
         </div>
       )}
     </div>
+    </FocusTrap>
   );
 }

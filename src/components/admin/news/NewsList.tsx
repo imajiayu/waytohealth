@@ -3,31 +3,36 @@
 import { useEffect, useState } from 'react';
 import { type NewsItem } from '@/data/news';
 import { deleteNewsAction, listNewsAction } from '@/app/actions/news';
-import { useAdminAuth } from '../AdminAuthContext';
 
-// admin dashboard：列出所有新闻 + 内联删除
+// admin dashboard：列出所有新闻 + 内联删除。身份由 server cookie 承载，不需要 pw prop。
 export default function NewsList() {
-  const { pw } = useAdminAuth();
   const [items, setItems] = useState<NewsItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // cancelled flag + server action 调用；组件卸载后忽略迟到的结果，避免 setState 污染新挂载实例
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await listNewsAction();
+      if (cancelled) return;
+      if (res.ok) setItems(res.items);
+      else setError(res.error);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   async function refresh() {
     setError(null);
-    const res = await listNewsAction(pw);
+    const res = await listNewsAction();
     if (res.ok) setItems(res.items);
     else setError(res.error);
   }
 
-  useEffect(() => {
-    refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function handleDelete(id: string) {
     if (!confirm(`Delete ${id}?`)) return;
     setDeletingId(id);
-    const res = await deleteNewsAction(pw, id);
+    const res = await deleteNewsAction(id);
     setDeletingId(null);
     if (!res.ok) {
       setError(res.error);

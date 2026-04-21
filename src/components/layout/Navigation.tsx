@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
-import { type Locale } from '@/i18n/config';
+import { toLocale } from '@/i18n/config';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import Image from 'next/image';
 import { triggerRouteChange } from './LoadingBar';
 import LocaleSwitcher from './LocaleSwitcher';
@@ -11,7 +12,7 @@ import MobileMenuPanel from './MobileMenuPanel';
 
 export default function Navigation() {
   const t = useTranslations('navigation');
-  const locale = useLocale() as Locale;
+  const locale = toLocale(useLocale());
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,20 +40,8 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 菜单打开时锁定页面滚动（仅 body，不动 html — 避免破坏 sticky 定位）
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.overscrollBehavior = 'none';
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.overscrollBehavior = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.overscrollBehavior = '';
-    };
-  }, [isMenuOpen]);
+  // 菜单打开时锁定页面滚动（走共享 hook，避免与 lightbox/bottom-sheet 双重锁互相覆盖）
+  useBodyScrollLock(isMenuOpen);
 
   function handleDonateClick() {
     triggerRouteChange();
@@ -86,6 +75,7 @@ export default function Navigation() {
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Donate 按钮 */}
               <button
+                type="button"
                 onClick={handleDonateClick}
                 className="gradient-brand flex items-center rounded-xl
                            px-3.5 sm:px-5 py-1.5 sm:py-2 text-[12px] sm:text-[13px]
@@ -102,6 +92,7 @@ export default function Navigation() {
 
               {/* 汉堡菜单按钮 */}
               <button
+                type="button"
                 onClick={() => setIsMenuOpen(prev => !prev)}
                 className="relative w-9 h-9 flex items-center justify-center
                            text-ukraine-blue-600 hover:text-ukraine-blue-800

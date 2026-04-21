@@ -7,7 +7,6 @@ import {
   publishNewsAction,
   type PublishInput,
 } from '@/app/actions/news';
-import { useAdminAuth } from '../AdminAuthContext';
 import NewsCard from '@/components/news/NewsCard';
 import { type Locale } from '@/i18n/config';
 import ImageUploader from './ImageUploader';
@@ -24,7 +23,6 @@ interface NewsEditorProps {
 }
 
 export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
-  const { pw } = useAdminAuth();
   const [publishedAt, setPublishedAt] = useState(toLocalInputValue(new Date()));
   const [titleUa, setTitleUa] = useState('');
   const [titleEn, setTitleEn] = useState('');
@@ -45,6 +43,14 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
   useEffect(() => {
     return () => {
       imagesRef.current.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    };
+  }, []);
+
+  // 成功后延迟跳转；组件卸载必须清掉 timeout 否则会 setState on dead tree
+  const doneTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (doneTimeoutRef.current) clearTimeout(doneTimeoutRef.current);
     };
   }, []);
 
@@ -80,12 +86,20 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
+    // 提交前校验发布时间；datetime-local 可能被清空导致 new Date('') → Invalid Date
+    const publishedDate = new Date(publishedAt);
+    if (!Number.isFinite(publishedDate.getTime())) {
+      setError('Invalid publish time. Please pick a valid date/time.');
+      return;
+    }
+
     setBusy(true);
 
     const uploadedUrls: string[] = [];
 
     try {
-      // 1. 并行上传所有图到 Blob
+      // 1. 并行上传所有图到 Blob（身份由 cookie 承载，upload route 自己读 session）
       if (images.length > 0) {
         setUploadProgress({ current: 0, total: images.length });
         let completed = 0;
@@ -94,7 +108,6 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
             const blob = await upload(`news/${img.name}`, img.file, {
               access: 'public',
               handleUploadUrl: '/api/news/upload',
-              clientPayload: pw,
             });
             completed++;
             setUploadProgress({ current: completed, total: images.length });
@@ -109,7 +122,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
         const firstFail = results.find((r) => r.status === 'rejected');
         if (firstFail) {
           if (uploadedUrls.length > 0) {
-            await cleanupBlobAction(pw, uploadedUrls).catch(() => {});
+            await cleanupBlobAction(uploadedUrls).catch(() => {});
           }
           const reason = (firstFail as PromiseRejectedResult).reason;
           setError(`Upload failed: ${reason instanceof Error ? reason.message : 'unknown'}`);
@@ -119,16 +132,16 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
 
       // 2. 提交 JSON
       const input: PublishInput = {
-        published_at: new Date(publishedAt).toISOString(),
+        published_at: publishedDate.toISOString(),
         title: { ua: titleUa.trim(), en: titleEn.trim() },
         body: { ua: bodyUa.trim(), en: bodyEn.trim() },
         imageUrls: uploadedUrls,
       };
-      const res = await publishNewsAction(pw, input);
+      const res = await publishNewsAction(input);
 
       if (!res.ok) {
         if (uploadedUrls.length > 0) {
-          await cleanupBlobAction(pw, uploadedUrls).catch(() => {});
+          await cleanupBlobAction(uploadedUrls).catch(() => {});
         }
         setError(res.error);
         return;
@@ -137,10 +150,10 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
       // 成功：释放 ObjectURL，返回 dashboard
       images.forEach((img) => URL.revokeObjectURL(img.previewUrl));
       setSuccess(`Published as ${res.id}. Live in ~1 min after Vercel rebuilds.`);
-      setTimeout(() => onDone(), 1200);
+      doneTimeoutRef.current = setTimeout(() => onDone(), 1200);
     } catch (err) {
       if (uploadedUrls.length > 0) {
-        await cleanupBlobAction(pw, uploadedUrls).catch(() => {});
+        await cleanupBlobAction(uploadedUrls).catch(() => {});
       }
       setError(err instanceof Error ? err.message : 'Publish failed.');
     } finally {
@@ -153,11 +166,8 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
   const labelCls = 'block text-sm font-medium text-gray-700';
 
   const previewIso = (() => {
-    try {
-      return new Date(publishedAt).toISOString();
-    } catch {
-      return new Date().toISOString();
-    }
+    const d = new Date(publishedAt);
+    return Number.isFinite(d.getTime()) ? d.toISOString() : new Date().toISOString();
   })();
 
   return (

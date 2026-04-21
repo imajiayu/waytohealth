@@ -1,6 +1,9 @@
 import 'server-only';
+import { fetchWithTimeout } from './fetchWithTimeout';
 
 const API = 'https://api.github.com';
+// GitHub API p99 也在秒级；15s 超时已足够，悬挂请求不会阻塞整条 admin flow
+const GITHUB_TIMEOUT_MS = 15_000;
 
 function env() {
   const REPO = process.env.GITHUB_REPO;
@@ -14,7 +17,7 @@ function env() {
 
 async function gh(path: string, init?: RequestInit): Promise<unknown> {
   const { TOKEN } = env();
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetchWithTimeout(`${API}${path}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${TOKEN}`,
@@ -24,7 +27,7 @@ async function gh(path: string, init?: RequestInit): Promise<unknown> {
       ...(init?.headers ?? {}),
     },
     cache: 'no-store',
-  });
+  }, GITHUB_TIMEOUT_MS);
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`GitHub ${res.status}: ${text}`);

@@ -26,6 +26,18 @@ const AUTHOR_NAME: Record<Locale, string> = {
   en: 'Way to Health',
 };
 
+// 图片点击按钮的 aria-label — 同上,admin 无 i18n provider,走本地表
+const IMAGE_ARIA: Record<Locale, { viewAll: (n: number) => string; viewOne: (n: number) => string }> = {
+  ua: {
+    viewAll: (n) => `Переглянути всі ${n} зображень`,
+    viewOne: (n) => `Переглянути зображення ${n}`,
+  },
+  en: {
+    viewAll: (n) => `View all ${n} images`,
+    viewOne: (n) => `View image ${n}`,
+  },
+};
+
 function formatFeedDateTime(iso: string, locale: Locale): string {
   const d = new Date(iso);
   const tag = LOCALE_TAG[locale];
@@ -173,7 +185,7 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
                         key={`${src}-${i}`}
                         type="button"
                         onClick={() => setLightboxIndex(i)}
-                        aria-label={isLastWithOverflow ? `View all ${allImages.length} images` : `View image ${i + 1}`}
+                        aria-label={isLastWithOverflow ? IMAGE_ARIA[locale].viewAll(allImages.length) : IMAGE_ARIA[locale].viewOne(i + 1)}
                         className={`group/cell cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-ukraine-gold-500 ${cellClass(shown.length, i)}`}
                       >
                         {CellImage}

@@ -33,7 +33,7 @@ export default async function ProjectCard({ id, data, cover, index, compact }: P
     getTranslations('projects'),
     getLocale(),
   ]);
-  const locale = rawLocale as Locale;
+  const locale: Locale = rawLocale === 'en' ? 'en' : 'ua';
 
   const title = data.title[locale];
   const description = data.description[locale];

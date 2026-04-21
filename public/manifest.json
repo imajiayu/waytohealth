@@ -1,0 +1,12 @@
+{
+  "name": "Way to Health",
+  "short_name": "WaytoHealth",
+  "description": "Way to Health Rehabilitation Center — Ukraine Charitable Foundation",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#006CB2",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

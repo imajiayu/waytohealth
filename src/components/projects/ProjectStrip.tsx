@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { type Locale } from '@/i18n/config';
+import { toLocale } from '@/i18n/config';
 import { type ProjectData } from '@/data/projects';
 import { useRef, useEffect, useState, useCallback } from 'react';
 
@@ -45,7 +45,7 @@ function formatGoal(amount: number, currency: string) {
 
 export default function ProjectStrip({ projects, currentId }: ProjectStripProps) {
   const t = useTranslations('projects');
-  const locale = useLocale() as Locale;
+  const locale = toLocale(useLocale());
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);

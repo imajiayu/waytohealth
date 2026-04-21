@@ -1,21 +1,41 @@
 import type { Metadata } from 'next';
 import fs from 'node:fs';
 import path from 'node:path';
+import { cache } from 'react';
 import { getTranslations } from 'next-intl/server';
+import { toLocale } from '@/i18n/config';
+import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import VideoStory from '@/components/about/VideoStory';
 import TeamCollage from '@/components/about/TeamCollage';
 import DocumentAccordion from '@/components/about/DocumentAccordion';
+
+// 请求级去重：多个文档命中同一 statSync 时只走一次
+const getFileSize = cache((relHref: string): string => {
+  try {
+    const filepath = path.join(process.cwd(), 'public', relHref.replace(/^\//, ''));
+    const kb = fs.statSync(filepath).size / 1024;
+    return kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${Math.round(kb)} KB`;
+  } catch {
+    return '—';
+  }
+});
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale: rawLocale } = await params;
+  const locale = toLocale(rawLocale);
   const t = await getTranslations({ locale, namespace: 'metadata' });
+  const title = t('aboutTitle');
+  const description = t('aboutDescription');
   return {
-    title: t('aboutTitle'),
-    description: t('aboutDescription'),
+    title,
+    description,
+    alternates: buildAlternates(locale, '/about'),
+    openGraph: buildOpenGraph({ title, description, locale, path: '/about' }),
+    twitter: buildTwitter({ title, description }),
   };
 }
 
@@ -30,6 +50,40 @@ type DocumentItem = {
   href: string;
 };
 
+type ViewerLabels = {
+  title: string;
+  expand: string;
+  collapse: string;
+  download: string;
+  close: string;
+};
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null;
+}
+
+function toTeamMember(v: unknown): TeamMember | null {
+  if (!isRecord(v) || typeof v.name !== 'string' || typeof v.role !== 'string') return null;
+  const image = typeof v.image === 'string' ? v.image : undefined;
+  return { name: v.name, role: v.role, image };
+}
+
+function toDocumentItem(v: unknown): DocumentItem | null {
+  if (!isRecord(v) || typeof v.title !== 'string' || typeof v.href !== 'string') return null;
+  return { title: v.title, href: v.href };
+}
+
+function toViewerLabels(v: unknown): ViewerLabels {
+  const r = isRecord(v) ? v : {};
+  return {
+    title: typeof r.title === 'string' ? r.title : '',
+    expand: typeof r.expand === 'string' ? r.expand : '',
+    collapse: typeof r.collapse === 'string' ? r.collapse : '',
+    download: typeof r.download === 'string' ? r.download : '',
+    close: typeof r.close === 'string' ? r.close : '',
+  };
+}
+
 export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations('aboutPage');
@@ -40,19 +94,13 @@ export default async function AboutPage({ params }: Props) {
     ? 'https://tuilgvi6ppemprps.public.blob.vercel-storage.com/about-us-videos/about-en.mp4'
     : 'https://tuilgvi6ppemprps.public.blob.vercel-storage.com/about-us-videos/about-ua.mp4';
 
-  // 从翻译中获取结构化数据
-  const team = Array.from({ length: 6 }, (_, i) => t.raw(`team.${i}`)) as TeamMember[];
-  const rawDocs = Array.from({ length: 6 }, (_, i) => t.raw(`documents.${i}`)) as DocumentItem[];
-  const documents = rawDocs.map(d => {
-    let size = '—';
-    try {
-      const filepath = path.join(process.cwd(), 'public', d.href.replace(/^\//, ''));
-      const kb = fs.statSync(filepath).size / 1024;
-      size = kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${Math.round(kb)} KB`;
-    } catch { /* 文件不存在 */ }
-    return { title: d.title, href: d.href, size };
-  });
-  const viewerLabels = t.raw('viewerLabels') as { title: string; expand: string; collapse: string; download: string; close: string };
+  // 从翻译中获取结构化数据（带 runtime 守卫，缺键自动过滤）
+  const team = Array.from({ length: 6 }, (_, i) => toTeamMember(t.raw(`team.${i}`)))
+    .filter((m): m is TeamMember => m !== null);
+  const rawDocs = Array.from({ length: 6 }, (_, i) => toDocumentItem(t.raw(`documents.${i}`)))
+    .filter((d): d is DocumentItem => d !== null);
+  const documents = rawDocs.map(d => ({ title: d.title, href: d.href, size: getFileSize(d.href) }));
+  const viewerLabels = toViewerLabels(t.raw('viewerLabels'));
 
   return (
     <article className="relative overflow-hidden">
@@ -138,12 +186,7 @@ export default async function AboutPage({ params }: Props) {
             {/* 巨大描边数字背景 */}
             <div
               aria-hidden="true"
-              className="pointer-events-none select-none text-center font-[family-name:var(--font-display)] text-[11rem] font-semibold leading-[0.78] tracking-[-0.04em] sm:text-[18rem] lg:text-[24rem]"
-              style={{
-                // ukraine-gold-500 的半透明描边，Tailwind 无法直接设置 WebkitTextStroke
-                WebkitTextStroke: '1.5px rgba(245, 184, 0, 0.55)',
-                color: 'transparent',
-              }}
+              className="text-stroke-gold pointer-events-none select-none text-center font-[family-name:var(--font-display)] text-[11rem] font-semibold leading-[0.78] tracking-[-0.04em] text-transparent sm:text-[18rem] lg:text-[24rem]"
             >
               {t('impactBig')}
             </div>
@@ -168,10 +211,7 @@ export default async function AboutPage({ params }: Props) {
             <div className="col-span-12 lg:col-span-2 lg:pt-2">
               {/* 左侧装饰：垂直运行字 */}
               <div className="hidden lg:block">
-                <div
-                  className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.32em] text-ukraine-blue-500"
-                  style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-                >
+                <div className="writing-vertical font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.32em] text-ukraine-blue-500">
                   {t('watchListenWitness')}
                 </div>
               </div>

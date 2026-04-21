@@ -1,6 +1,7 @@
 import { getStripe } from '@/lib/stripe';
 import { getProject } from '@/lib/data';
-import { type Locale } from '@/i18n/config';
+import { toLocale } from '@/i18n/config';
+import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { CircleCheck, ArrowLeft, Home } from 'lucide-react';
@@ -11,16 +12,26 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props) {
-  const { locale } = await params;
-  const typedLocale: Locale = locale === 'en' ? 'en' : 'ua';
-  const t = await getTranslations({ locale: typedLocale, namespace: 'donationSuccess' });
-  return { title: t('title') };
+  const { locale: rawLocale } = await params;
+  const locale = toLocale(rawLocale);
+  const tMeta = await getTranslations({ locale, namespace: 'metadata' });
+  const title = tMeta('donationSuccessTitle');
+  const description = tMeta('donationSuccessDescription');
+  return {
+    title,
+    description,
+    alternates: buildAlternates(locale, '/donation-success'),
+    openGraph: buildOpenGraph({ title, description, locale, path: '/donation-success' }),
+    twitter: buildTwitter({ title, description }),
+    // 感谢页不需要被索引
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function DonationSuccessPage({ params, searchParams }: Props) {
-  const { locale } = await params;
+  const { locale: rawLocale } = await params;
   const { session_id } = await searchParams;
-  const typedLocale: Locale = locale === 'en' ? 'en' : 'ua';
+  const typedLocale = toLocale(rawLocale);
   const t = await getTranslations({ locale: typedLocale, namespace: 'donationSuccess' });
 
   let amount: number | null = null;
@@ -51,7 +62,7 @@ export default async function DonationSuccessPage({ params, searchParams }: Prop
       <div className="pointer-events-none absolute -top-20 right-[-10%] h-[36rem] w-[36rem] rounded-full aura-cyan-xl opacity-30" />
       <div className="pointer-events-none absolute left-[-15%] bottom-0 h-[28rem] w-[28rem] rounded-full aura-gold-lg opacity-20" />
 
-      <div className="container-page relative flex flex-col items-center py-20 sm:py-28 lg:py-36">
+      <div className="container-page section-y relative flex flex-col items-center">
         {/* 成功图标 */}
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-life-50">
           <CircleCheck className="h-10 w-10 text-life-500" strokeWidth={1.5} />

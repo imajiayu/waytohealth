@@ -42,6 +42,10 @@ npm run start    # 启动生产服务器
 | 国际化 | next-intl | 支持 ua (乌克兰语) + en (英语) |
 | 部署 | Vercel | 与 NGO_web 一致 |
 | 支付 | Stripe | 法币支付（UAH，Checkout Sessions） |
+| KV 限流 | @upstash/redis | Vercel Marketplace KV，admin 登录速率限制跨实例共享（`Redis.fromEnv()` 读 `KV_REST_API_*`） |
+| Admin 安全 | node:crypto HMAC cookie | HttpOnly 签名 cookie 承载 admin 会话，不走第三方库（见 `src/lib/adminSession.ts`） |
+| XSS 过滤 | isomorphic-dompurify | DocumentViewer 的 xlsx HTML 走 DOMPurify 过滤再 dangerouslySetInnerHTML |
+| Focus trap | focus-trap-react | MobileMenuPanel / NewsLightbox 打开时锁键盘焦点在面板内 |
 
 ### 计划集成（尚未安装）
 
@@ -59,7 +63,7 @@ npm run start    # 启动生产服务器
 | CTA | Ukraine Gold (#F5B800) |
 | 成功 | #10B981 (绿) |
 | 警告 | #E76F51 (橙) |
-| 主字体 | **Fixel Text** (无衬线，MacPaw 开源乌克兰字体，自托管在 `public/fonts/fixel/`) — 同时承担正文 (`--font-body`) 和标题 (`--font-display`)，靠权重区分 (400/500/600/700/800) |
+| 主字体 | **Fixel Text** (无衬线，MacPaw 开源乌克兰字体，自托管在 `public/fonts/fixel/`) — 同时承担正文 (`--font-body`) 和标题 (`--font-display`)，靠权重区分 (400/500/600/700；ExtraBold 已移除，全部标题封顶 Bold) |
 | 辅助衬线字体 | **PT Serif** (Google Fonts，替代品牌规范中的 Sitka Text) — 用于装饰性标题点缀 (`--font-accent`)，不用于大段正文 |
 | 数据字体 | **JetBrains Mono** (等宽，`--font-data`) — 用于数字、标签、序号 |
 | 图标 | Lucide React |
@@ -148,15 +152,24 @@ News 页面是 Twitter 风格的双语时间线 (`/[locale]/news`)，配独立 a
 
 **图片存储（Vercel Blob）**：admin 选图后，浏览器通过 `@vercel/blob/client` 的 `upload()` **直接上传到 Blob**（绕开 server action 4.5MB body 限制），拿到完整 URL 后写入 JSON 的 `images: string[]` 字段。前端 `next/image` 直接用 Blob URL 加载（已在 `next.config.ts` `images.remotePatterns` 里允许 `*.public.blob.vercel-storage.com`）。
 
+**Admin 认证流（HttpOnly 签名 cookie）**：
+1. 用户在 `/admin/*` 的登录表单提交密码 → `POST /api/admin/login`
+2. `verifyAdminPassword(pw)`（`src/lib/adminAuth.ts`）— SHA-256(pw+SALT) 常数时间比对 `ADMIN_PASSWORD_HASH`，同时按 IP 走 `rateLimit()`
+3. 通过 → `issueSession()` 发一张 HttpOnly + Secure + SameSite=Strict 的 cookie `wth_admin`，值为 `base64url(payload).base64url(HMAC-SHA256(ADMIN_COOKIE_SECRET, payload))`，8 小时滑动过期
+4. 后续所有 server action 和 `/api/news/upload` 调 `requireAdmin()`（`src/lib/adminSession.ts`）读 cookie + 验签；失败抛 `unauthorized`
+5. `/api/admin/logout` 清 cookie；`/api/admin/me` 供前端探活
+
 **Blob client upload 流程**：
-1. 客户端 `upload()` 先 POST 到 `/api/news/upload`（传 `clientPayload: password`）
-2. API route (`src/app/api/news/upload/route.ts`) 调 `handleUpload`，在 `onBeforeGenerateToken` 里用 `verifyAdminPassword(clientPayload)` 校验
-3. 验证通过后返回短时 upload token → 客户端拿 token 直传 Blob → 得到 URL
-4. 所有 URL 一起提交给 `publishNewsAction` → 仅 commit JSON 到 GitHub
+1. 客户端 `upload()` POST 到 `/api/news/upload`（不传密码，身份由 cookie 承载）
+2. `onBeforeGenerateToken` 调 `getSession()` 验 cookie；验 `pathname` 前缀为 `news/`；限 MIME 为 jpeg/png/webp；限 size ≤ 8MB
+3. 返回短时 upload token → 客户端拿 token 直传 Blob → 得到 URL
+4. 所有 URL 一起提交给 `publishNewsAction`（同样走 `requireAdmin()`）→ 仅 commit JSON 到 GitHub
 
-**密码校验**：`src/lib/adminAuth.ts` 提供 `verifyAdminPassword(pw)`（SHA-256(pw+SALT) 常数时间比对 `ADMIN_PASSWORD_HASH`）。生成 hash：`node scripts/gen-admin-hash.mjs <password>`。外层有 IP 速率限制 `src/lib/adminRateLimit.ts`：15 分钟滑动窗口 10 次失败触发 30 分钟锁定（进程内 Map，Vercel 多实例/冷启动会丢状态，仅挡单实例高频探测；真正防爆破需 Vercel KV — TODO）。
+**速率限制（@upstash/redis）**：`src/lib/adminRateLimit.ts` 用 `Redis.fromEnv()` 跨实例共享计数器。key: `admin:fail:{ip}`（ZSET 记失败时间戳，TTL = 窗口 + 60s）+ `admin:lock:{ip}`（String + TTL 30min）。15 分钟窗口 10 次失败触发 30 分钟锁定。KV 不可用时 fallback 到进程内 Map（开发环境 / 未接 KV 的部署）。
 
-**删除**：`deleteNewsAction` 读取 item JSON 的 `images` URLs → 调 `@vercel/blob` 的 `del(urls)` 清理 Blob → 删 GitHub 上的 item JSON + 更新 index。
+**删除**：`deleteNewsAction` 先 `commitBatch` 更新 GitHub（source of truth），再调 `@vercel/blob` 的 `del(urls)` 清理 Blob；commit 失败则 blob 图不清理，保证"JSON 没引用的图"不会出现。
+
+**密码工具**：`node scripts/gen-admin-hash.mjs <password>` 一次性输出配对的 `ADMIN_PASSWORD_HASH` / `ADMIN_PASSWORD_SALT` / `ADMIN_COOKIE_SECRET` 三个 env var。改密码必须同时更新前两个；cookie secret 一般不需要轮换，除非怀疑泄露。
 
 **Admin 不走 i18n**：`/admin/news` 在 app router 根目录（不是 `[locale]/admin`），有独立 `src/app/admin/layout.tsx`（共享字体从 `src/app/fonts.ts`）。页面内容全英文硬编码，不使用 `useTranslations`。
 
@@ -171,9 +184,15 @@ GITHUB_BRANCH=main
 # Vercel Blob（图片上传）
 BLOB_READ_WRITE_TOKEN=            # Vercel Blob store token（Vercel 自动注入于部署环境，本地需手动复制）
 
-# Admin 密码
+# Admin 密码 / 会话
 ADMIN_PASSWORD_HASH=              # SHA-256(password + SALT)，64 位 hex；必需
-ADMIN_PASSWORD_SALT=              # 必需；任意随机字符串（建议用脚本自动生成）。HASH 与 SALT 必须配对，改一个就得同步改另一个
+ADMIN_PASSWORD_SALT=              # 必需；任意随机字符串（用脚本自动生成）。HASH 与 SALT 必须配对，改一个就得同步改另一个
+ADMIN_COOKIE_SECRET=              # 必需；≥32 字节 base64url 随机，用于 HMAC 签 admin 会话 cookie。轮换会让所有现有 cookie 立即失效
+
+# Upstash Redis（限流，由 Vercel Marketplace KV integration 自动注入到生产/预览）
+KV_REST_API_URL=                  # Upstash REST endpoint
+KV_REST_API_TOKEN=                # Upstash REST token
+# 未配置时 adminRateLimit 自动 fallback 到进程内 Map（开发环境可不配）
 ```
 
 ---
@@ -189,7 +208,11 @@ src/
 │   ├── admin/                   # Admin 路由（不走 i18n，独立 HTML/body）
 │   │   ├── layout.tsx           # admin 自己的 <html><body>（英文）
 │   │   └── news/page.tsx        # News 管理后台
-│   ├── api/news/upload/         # Vercel Blob client upload handler
+│   ├── api/
+│   │   ├── admin/{login,logout,me}/  # 签名 cookie 发放 / 清除 / 探活
+│   │   └── news/upload/              # Vercel Blob client upload handler
+│   ├── sitemap.ts               # 11 项目 × 2 locale + 静态页
+│   ├── robots.ts                # 允许 / ，禁 /admin /api
 │   └── [locale]/                # 国际化路由（前台）
 │       ├── layout.tsx           # locale layout（NextIntlClientProvider + Nav/Footer）
 │       ├── page.tsx             # 首页
@@ -214,8 +237,9 @@ src/
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook
-│   ├── useBodyScrollLock.ts     # 锁定页面滚动（Modal、BottomSheet 等场景）
-│   └── useInViewOnce.ts         # 滚动入场检测（共享 IntersectionObserver）
+│   ├── useBodyScrollLock.ts     # 锁定页面滚动（Modal、BottomSheet 等场景，模块级栈化）
+│   ├── useEscapeKey.ts          # ESC 键关闭通用 hook
+│   └── useInViewOnce.ts         # 滚动入场检测（共享 IntersectionObserver，HMR 安全）
 ├── data/
 │   ├── partners.json            # 合作伙伴原始数据
 │   ├── partners.ts              # 合作伙伴类型定义 + 类型化导出
@@ -227,15 +251,19 @@ src/
 │   └── routing.ts               # next-intl 路由配置
 ├── app/actions/
 │   ├── donate.ts                # Stripe Checkout server action
-│   └── news.ts                  # News admin（密码校验 + GitHub commit）
+│   └── news.ts                  # News admin（要求 cookie session + GitHub commit）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── stripe.ts                # Stripe 客户端单例
 │   ├── donations.ts             # 已筹金额查询（带缓存）
 │   ├── news.ts                  # 新闻读取（镜像 data.ts）
-│   ├── github.ts                # GitHub contents API 封装（server-only）
+│   ├── github.ts                # GitHub contents API 封装（server-only，带 15s 超时）
+│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（github / NBU 等对外调用）
+│   ├── exchangeRate.ts          # NBU 汇率（带 5s 超时 + 1h 缓存）
+│   ├── seo.ts                   # SEO helper：canonical / hreflang / openGraph / twitter
 │   ├── adminAuth.ts             # 管理员密码 hash 校验（server-only）
-│   └── adminRateLimit.ts        # 管理员登录 IP 速率限制（server-only，进程内滑动窗口）
+│   ├── adminSession.ts          # HMAC-SHA256 签名 cookie 会话发放/验证/清除
+│   └── adminRateLimit.ts        # 管理员登录 IP 速率限制（@upstash/redis，fallback 进程内 Map）
 └── proxy.ts                     # i18n 路由中间件（Next.js 16 起用 proxy.ts 替代 middleware.ts）
 messages/
 ├── ua.json                      # 乌克兰语翻译
@@ -284,18 +312,25 @@ const t = useTranslations('namespace')
   - `animate-hero-title` / `animate-hero-cta` — Hero 专属入场动画（错峰触发）
   - `animate-panel-forward` / `animate-panel-backward` — DonationSidebar 多视图状态机切换动画
   - `animate-rate-pop` — EUR 换算徽章出现动效
+  - `gradient-brand-deep` — 深色 CTA 卡片（白字高对比）
+  - `gradient-brand-circle` — 品牌圆形渐变（RecoveryJourney 小圆球图标）
+  - `text-stroke-gold` — 金色半透明描边文字（about 大字装饰）
+  - `dot-matrix-blue` — 蓝色点阵背景（通过 `--dot-size` 变量可覆写间距）
+  - `mask-fade-right` — 右侧淡出遮罩（依赖父级 `--cta-w` 变量）
+  - `writing-vertical` — 垂直竖排文字
 - **页面内容容器**统一使用 `container-page` 类（max-w-7xl + 响应式内边距），不要手写 `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`
-- **纵向区块间距**统一使用 `section-y` 类（py-16 / py-8 响应式）
+- **纵向区块间距**统一使用 `section-y` 类（py-6 / py-8 响应式）
 - **区域标题装饰线**统一使用 `accent-line` 类
 - **隐藏滚动条**统一使用 `hide-scrollbar` 类，不要写 `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`
-- Tailwind 颜色使用 `@theme` 中定义的语义化 token（如 `text-ukraine-blue-500`），不要用十六进制
+- **动画降级**：`globals.css` 末尾已全局响应 `prefers-reduced-motion: reduce`，不要在组件里重复写降级逻辑
+- Tailwind 颜色使用 `@theme` 中定义的语义化 token（如 `text-ukraine-blue-500`），不要用十六进制；`globals.css` 里定义工具类时用 `var(--color-ukraine-blue-*)`，不要硬编码 hex
 
 ### TypeScript
 
-- **Locale 类型**：使用 `import { type Locale } from '@/i18n/config'`，禁止硬编码 `as 'ua' | 'en'`
+- **Locale 类型**：从 `@/i18n/config` 导入 `toLocale(v)` 或 `isLocale(v)` 守卫，禁止用 `as Locale` / `as 'ua' | 'en'` 断言。`useLocale()` / `getLocale()` / `params.locale` 的返回值都走 `toLocale()` 窄化
 - 保持 `strict: true`，避免 `any`
 - **JSON 数据文件**必须有对应的 `.ts` 文件提供类型定义和类型化导出（如 `partners.json` → `partners.ts`），组件中导入类型化版本而非直接导入 JSON
-- **禁止 `as` 类型断言绕过类型检查**，应通过接口定义正确的类型
+- **禁止 `as` 类型断言绕过类型检查**，应通过接口定义正确的类型；对 `t.raw()` 等返回 unknown 的 API，写手动 guard 函数（见 `about/page.tsx` 的 `toTeamMember` / `toDocumentItem`）
 
 ### 路由链接
 
@@ -315,6 +350,22 @@ const t = useTranslations('namespace')
 
 - 可复用的 hook 放在 `src/hooks/` 目录
 - 横向自动滚动使用 `useAutoScroll` hook（`src/hooks/useAutoScroll.ts`），不要重复实现 requestAnimationFrame 逻辑
+- 锁定 body 滚动用 `useBodyScrollLock(isLocked)`，禁止直接写 `document.body.style.overflow = 'hidden'`（会和 hook 内的栈化计数器冲突）
+- ESC 关闭弹层用 `useEscapeKey(active, onEscape)`，不要每个组件各自绑 `keydown`
+- `matchMedia` 断点检测用 `useSyncExternalStore`（避免 `useEffect` + setState 级联渲染告警），参考 `BottomSheet.tsx` / `MobileDonationSheetMount.tsx`
+
+### 安全 / 外部调用
+
+- 所有对外 API 调用走 `fetchWithTimeout(url, init, timeoutMs)`，不要直接 `fetch` 外部地址（否则悬挂请求会阻塞 server action / ISR）
+- 任何 `dangerouslySetInnerHTML` 必须经 `isomorphic-dompurify` 的 `DOMPurify.sanitize()`
+- 任何 `<iframe src>` 加 `sandbox` 属性（最少 `allow-same-origin`，PDF 预览用 `allow-same-origin allow-scripts allow-downloads allow-popups`）
+- Admin server action / API route 不接受 `pw` 参数，一律 `await requireAdmin()` 从 cookie 取身份
+
+### Button / a11y
+
+- 所有 `<button>` 必须有 `type="button"`（除非确实要 submit），否则在 `<form>` 内会误触发提交
+- 弹层组件（drawer / lightbox / modal）用 `<FocusTrap>`（focus-trap-react）包裹，打开时锁键盘焦点
+- `<input>` 必须配 `<label htmlFor>` 或 `aria-label`
 
 ---
 
@@ -325,6 +376,9 @@ const t = useTranslations('namespace')
 - **路由中间件**: 文件位于 `src/proxy.ts`（Next.js 16 起用 `proxy.ts` 替代 `middleware.ts`，使用旧名会触发弃用警告），仅用于 next-intl 路由
 - **默认语言**: `ua`（乌克兰语）是默认语言，不是 `en`
 - **翻译键同步**: 添加新 UI 文案时，`ua.json` 和 `en.json` 必须同时更新
+- **SEO metadata**: 新页 `generateMetadata` 走 `src/lib/seo.ts` 的 `buildAlternates` / `buildOpenGraph` / `buildTwitter` helper，不要手写 canonical / hreflang / OG；新路径记得加到 `src/app/sitemap.ts`
+- **KV 连接**：生产用 Vercel Marketplace KV（Upstash），SDK 是 `@upstash/redis`（**不要**装 `@vercel/kv`，已 deprecated）。`Redis.fromEnv()` 自动读 `KV_REST_API_URL` / `KV_REST_API_TOKEN`
+- **OG 图**: `public/og-image.jpg`（1200×630，≤ 200KB），由 `lib/seo.ts` 默认引用。替换时保持尺寸与路径
 
 ---
 

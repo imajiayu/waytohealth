@@ -1,16 +1,24 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { toLocale } from '@/i18n/config';
+import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import HeroSection from '@/components/home/HeroSection';
 import ProjectsSection from '@/components/home/ProjectsSection';
 import NewsSection from '@/components/home/NewsSection';
 import AboutSection from '@/components/home/AboutSection';
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = toLocale(await getLocale());
   const t = await getTranslations('metadata');
+  const title = t('homeTitle');
+  const description = t('homeDescription');
   return {
-    title: t('homeTitle'),
-    description: t('homeDescription'),
+    title,
+    description,
+    alternates: buildAlternates(locale, '/'),
+    openGraph: buildOpenGraph({ title, description, locale, path: '/' }),
+    twitter: buildTwitter({ title, description }),
   };
 }
 

@@ -1,12 +1,15 @@
 import { unstable_cache } from 'next/cache';
+import { fetchWithTimeout } from './fetchWithTimeout';
 
 // NBU（乌克兰国家银行）官方汇率 API — 公开接口，无需 key
 // 返回 1 UAH 折合多少 EUR（≈ 0.022）；失败返回 null
 async function fetchUahToEurRate(): Promise<number | null> {
   try {
-    const res = await fetch(
+    // 5s 超时：汇率接口若悬挂不该阻塞整条捐赠 panel 渲染
+    const res = await fetchWithTimeout(
       'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=EUR&json',
-      { cache: 'no-store' }
+      { cache: 'no-store' },
+      5000
     );
     if (!res.ok) return null;
     const data = (await res.json()) as Array<{ rate?: number }>;

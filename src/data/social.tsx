@@ -35,7 +35,7 @@ export function LinkedinIcon({ className }: { className?: string }) {
 export const SOCIAL_LINKS = [
   { name: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61573630085926&locale=ru_RU', icon: FacebookIcon },
   { name: 'Instagram', href: 'https://www.instagram.com/way_to_health_foundation?igsh=NndmbjM2bGtibnNl', icon: InstagramIcon },
-  { name: 'TikTok', href: 'https://www.tiktok.com/@way_to_health', icon: TikTokIcon },
+  { name: 'TikTok', href: 'https://www.tiktok.com/@way_to_health_foundation', icon: TikTokIcon },
   { name: 'LinkedIn', href: 'https://www.linkedin.com/company/way-to-health-ua/', icon: LinkedinIcon },
 ];
 

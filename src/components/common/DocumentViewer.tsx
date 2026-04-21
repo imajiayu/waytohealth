@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import { FileSpreadsheet, FileText, X, Download, Maximize2 } from 'lucide-react';
 
 export interface ViewerDocument {
@@ -52,7 +53,10 @@ function ExcelPreview({ url, errorMessage }: { url: string; errorMessage: string
 
         const parsed = wb.SheetNames.map((name) => {
           const ws = wb.Sheets[name];
-          const html = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const raw = XLSX.utils.sheet_to_html(ws, { editable: false });
+          // 防御性 sanitize：即便目前 xlsx 是本站受控资产，DOMPurify 保证任何 <script>
+          // 或事件处理器不会被注入到 dangerouslySetInnerHTML
+          const html = DOMPurify.sanitize(raw, { USE_PROFILES: { html: true } });
           return { name, html };
         });
 
@@ -106,9 +110,7 @@ function ExcelPreview({ url, errorMessage }: { url: string; errorMessage: string
         </div>
       )}
 
-      {/* 表格内容
-         安全说明：HTML 由 SheetJS 从本站 public/ 目录下的受控 XLSX 文件生成，
-         不接受用户上传。如果未来允许用户上传 Excel，必须在此处使用 DOMPurify 过滤。 */}
+      {/* 表格内容 — HTML 由 SheetJS 生成后经 DOMPurify sanitize，防御任何嵌入脚本 */}
       <div
         className="excel-preview overflow-auto"
         dangerouslySetInnerHTML={{ __html: sheets[activeSheet].html }}
@@ -236,6 +238,7 @@ export default function DocumentViewer({ documents, labels }: DocumentViewerProp
                 src={currentDoc.url}
                 className="h-full w-full border-0"
                 title={currentDoc.label}
+                sandbox="allow-same-origin allow-scripts allow-downloads allow-popups"
               />
             ) : (
               <ExcelPreview url={currentDoc.url} errorMessage={labels.loadError} />
