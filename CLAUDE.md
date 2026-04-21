@@ -45,6 +45,7 @@ npm run start    # 启动生产服务器
 | KV 限流 | @upstash/redis | Vercel Marketplace KV，admin 登录速率限制跨实例共享（`Redis.fromEnv()` 读 `KV_REST_API_*`） |
 | 数据库 | Neon Postgres (`@neondatabase/serverless`) | Vercel Marketplace 接入，存 news 表；serverless HTTP driver，无连接池管理 |
 | Admin 安全 | node:crypto HMAC cookie | HttpOnly 签名 cookie 承载 admin 会话，不走第三方库（见 `src/lib/adminSession.ts`） |
+| 事务邮件 | Resend (`resend`) | Admin 后台 `/admin/email`：手输收件人 + 模板渲染发送，模板注册表在 `src/lib/emailTemplates.ts`（server-only） |
 | XSS 过滤 | isomorphic-dompurify | DocumentViewer 的 xlsx HTML 走 DOMPurify 过滤再 dangerouslySetInnerHTML |
 | Focus trap | focus-trap-react | MobileMenuPanel / NewsLightbox 打开时锁键盘焦点在面板内 |
 
@@ -52,7 +53,6 @@ npm run start    # 启动生产服务器
 
 | 类型 | 技术 | 说明 |
 |------|------|------|
-| 邮件 | Resend | 捐赠通知邮件 |
 | 监控 | Sentry | 错误追踪 |
 | 分析 | Vercel Analytics | 流量分析 |
 
@@ -209,6 +209,45 @@ KV_REST_API_TOKEN=                # Upstash REST token
 
 ---
 
+## 邮件系统（Resend + 静态 HTML 模板）
+
+Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + 发送，走 Resend API。
+
+**架构刻意简单**：模板都是**静态 HTML 常量**，subject / html / text 三件套写死在 TS 文件里。**没有参数化、没有变量填充、没有运行时字符串拼接**。换一个内容 = 加一个新模板文件。这个决定是为了：
+1. 避免被当开放邮件发射器用（所有发件内容都已在代码 review 阶段审过）
+2. 完整保留设计师给的 HTML（乌克兰语排版 / `@import` 字体 / 内嵌 CSS / flexbox 布局）不被 escape 污染
+3. 零渲染逻辑 = 零注入面
+
+**模板注册表**（`src/lib/emailTemplates.ts`，`server-only`）：`TEMPLATES` 数组，每项 `{ id, name, description, locales, rendered: { subject, html, text } }`。当前内置：
+
+- `partnership-invite-ua` — 合作伙伴冷启动邀约信（乌克兰语），源文件 `src/lib/emailTemplates/partnershipInviteUa.ts`
+
+**加新模板的步骤**：
+1. 在 `src/lib/emailTemplates/<name>.ts` 导出三个常量：subject / html / text
+2. 在 `emailTemplates.ts` 的 `TEMPLATES` 数组追加一项
+3. 如 HTML 里有图片，用绝对 URL（`https://waytohealth.org.ua/email/xxx.png`），不要 base64 —— 内嵌 >100KB 会被 Gmail "Message clipped" 截断。图片放 `public/email/`，通过生产域名拉
+
+**发送流程**（`src/app/actions/email.ts`）：
+1. 所有 action 入口 `requireAdmin()`（admin cookie 会话）
+2. `parseRecipients(raw)` — 按换行（`\r?\n`）拆分，正则校验 RFC 结构，去重，单次上限 50（Resend 限制）。UI placeholder 与 hint 都是 "One address per line"，避免地址内 `+ . _` 被误切
+3. `renderEmail(templateId)` — 从 `BY_ID` map 取出常量三件套
+4. `resend.emails.send({ from, to, bcc, subject, html, text, replyTo? })` — `to` 固定填 `from` 地址（信封占位），真实收件人全部放 `bcc` 避免群发名单互相泄露（冷启动邀约场景刚需）；`replyTo` 单独再校验一次邮箱格式
+
+`previewEmailAction(templateId)` 只返回模板常量用于 UI 预览，不调 Resend。
+
+**UI**（`src/components/admin/EmailPanel.tsx`）：双栏布局，左侧表单（收件人 textarea / 模板下拉 / Advanced subject override + reply-to），右侧 iframe 预览（`sandbox="allow-same-origin"`）。
+
+**一个需要警惕的点**：`RESEND_FROM_EMAIL` 的域名必须已经在 Resend 控制台验证，否则发送 403。本地开发可用 Resend 提供的 `onboarding@resend.dev` 沙盒发件地址，但它只能发到开发者自己验证过的邮箱。
+
+### 邮件相关环境变量
+
+```env
+RESEND_API_KEY=                   # Resend dashboard → API Keys 生成；必需
+RESEND_FROM_EMAIL=                # 发件人，格式 "Way to Health <noreply@waytohealth.org.ua>"；域名必须在 Resend 验证通过
+```
+
+---
+
 ## 项目结构
 
 ```
@@ -219,7 +258,8 @@ src/
 │   ├── fonts.ts                 # 共享字体加载（Fixel / PT Serif / JetBrains Mono）
 │   ├── admin/                   # Admin 路由（不走 i18n，独立 HTML/body）
 │   │   ├── layout.tsx           # admin 自己的 <html><body>（英文）
-│   │   └── news/page.tsx        # News 管理后台
+│   │   ├── news/page.tsx        # News 管理后台
+│   │   └── email/page.tsx       # Email 发送后台（Resend）
 │   ├── api/
 │   │   ├── admin/{login,logout,me}/  # 签名 cookie 发放 / 清除 / 探活
 │   │   └── news/upload/              # Vercel Blob client upload handler
@@ -263,10 +303,14 @@ src/
 │   └── routing.ts               # next-intl 路由配置
 ├── app/actions/
 │   ├── donate.ts                # Stripe Checkout server action
-│   └── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
+│   ├── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
+│   └── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── stripe.ts                # Stripe 客户端单例
+│   ├── resend.ts                # Resend 客户端单例 + getFromAddress()
+│   ├── emailTemplates.ts        # 邮件模板注册表（server-only，纯静态 HTML，无变量）
+│   ├── emailTemplates/          # 每个模板单独一个 .ts，导出 subject / html / text 三常量
 │   ├── donations.ts             # 已筹金额查询（带缓存）
 │   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache）
 │   ├── db.ts                    # Neon Postgres 单例（`@neondatabase/serverless`）

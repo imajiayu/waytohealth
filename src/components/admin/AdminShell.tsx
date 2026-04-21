@@ -9,6 +9,7 @@ import { AdminAuthContext } from './AdminAuthContext';
 // 加新 tab：追加一行，路径指向 src/app/admin/<feature>/page.tsx
 const TABS = [
   { href: '/admin/news', label: 'News' },
+  { href: '/admin/email', label: 'Email' },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
