@@ -2,12 +2,9 @@
 
 import { del } from '@vercel/blob';
 import { revalidateTag } from 'next/cache';
-import { type NewsItem, type NewsIndex, type NewsIndexEntry } from '@/data/news';
-import { commitBatch, getFileText, type FileChange } from '@/lib/github';
+import { sql } from '@/lib/db';
+import { type NewsItem } from '@/data/news';
 import { requireAdmin } from '@/lib/adminSession';
-
-const INDEX_PATH = 'public/data/news/index.json';
-const ITEM_DIR = 'public/data/news/items';
 
 // 仅允许 Vercel Blob 主域：防止管理员接口被用来把外链写进前台 next/image
 const BLOB_URL_RE = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\//;
@@ -16,15 +13,11 @@ function isBlobUrl(u: string): boolean {
   return BLOB_URL_RE.test(u);
 }
 
-function toBase64Utf8(text: string): string {
-  return Buffer.from(text, 'utf-8').toString('base64');
-}
-
 function randomSuffix(): string {
   return Math.random().toString(36).slice(2, 6);
 }
 
-// 从 ISO 时间串生成 id；无效日期直接抛错，避免生成 "NaN-NaN-NaN-..." 文件名写入 git
+// 从 ISO 时间串生成 id；无效日期直接抛错，避免写入 "NaN-NaN-..." 这种脏 id
 function makeNewsId(publishedAt: string): string {
   const d = new Date(publishedAt);
   if (!Number.isFinite(d.getTime())) {
@@ -36,20 +29,22 @@ function makeNewsId(publishedAt: string): string {
   return `${dateStr}-${timeStr}-${randomSuffix()}`;
 }
 
-async function readIndex(): Promise<NewsIndex> {
-  const text = await getFileText(INDEX_PATH);
-  if (!text) return { items: [] };
-  try {
-    return JSON.parse(text) as NewsIndex;
-  } catch (err) {
-    // 不能静默返回空 index — 会让下一次 publish 用空数据覆盖，等同于批量删除
-    console.error('[news:readIndex] index.json parse failed', err);
-    throw new Error('index.json corrupted; abort to prevent data loss');
-  }
+interface NewsRow {
+  id: string;
+  published_at: Date;
+  title: { ua: string; en: string };
+  body: { ua: string; en: string };
+  images: string[];
 }
 
-function indexToBase64(index: NewsIndex): string {
-  return toBase64Utf8(JSON.stringify(index, null, 2) + '\n');
+function rowToItem(r: NewsRow): NewsItem {
+  return {
+    id: r.id,
+    published_at: r.published_at.toISOString(),
+    title: r.title,
+    body: r.body,
+    ...(r.images && r.images.length > 0 ? { images: r.images } : {}),
+  };
 }
 
 export interface PublishInput {
@@ -86,35 +81,18 @@ export async function publishNewsAction(
   }
 
   try {
-    const item: NewsItem = {
-      id,
-      published_at: input.published_at,
-      title: input.title,
-      body: input.body,
-      ...(input.imageUrls.length ? { images: input.imageUrls } : {}),
-    };
+    await sql`
+      INSERT INTO news (id, published_at, title, body, images)
+      VALUES (
+        ${id},
+        ${input.published_at}::timestamptz,
+        ${JSON.stringify(input.title)}::jsonb,
+        ${JSON.stringify(input.body)}::jsonb,
+        ${input.imageUrls}::text[]
+      )
+    `;
 
-    const index = await readIndex();
-    const entry: NewsIndexEntry = {
-      id,
-      published_at: input.published_at,
-      active: true,
-    };
-    const nextIndex: NewsIndex = {
-      items: [entry, ...index.items.filter((e) => e.id !== id)],
-    };
-
-    // 一次 commit：新 item JSON + 更新 index.json → 只触发 1 次 Vercel 部署
-    const changes: FileChange[] = [
-      {
-        path: `${ITEM_DIR}/${id}.json`,
-        contentBase64: toBase64Utf8(JSON.stringify(item, null, 2) + '\n'),
-      },
-      { path: INDEX_PATH, contentBase64: indexToBase64(nextIndex) },
-    ];
-    await commitBatch(changes, `news: publish ${id}`);
-
-    // Next.js 16 需要传 cacheLife profile；写操作要立即失效，所以 expire: 0
+    // 写操作要立即失效，Next.js 16 要求显式 cacheLife profile
     revalidateTag('news', { expire: 0 });
     return { ok: true, id };
   } catch (err) {
@@ -132,38 +110,24 @@ export async function deleteNewsAction(
   }
 
   try {
-    const itemText = await getFileText(`${ITEM_DIR}/${id}.json`);
-    let blobUrls: string[] = [];
-    if (itemText) {
-      try {
-        const parsed = JSON.parse(itemText) as NewsItem;
-        // 只清理真正由本服务上传到 Vercel Blob 的图；其他 URL 不动
-        blobUrls = (parsed.images ?? []).filter(isBlobUrl);
-      } catch {
-        /* ignore */
-      }
+    // 先查出要删的 blob urls；DELETE RETURNING 一条 SQL 拿到要清理的图片
+    const rows = (await sql`
+      DELETE FROM news WHERE id = ${id} RETURNING images
+    `) as { images: string[] }[];
+
+    if (rows.length === 0) {
+      return { ok: false, error: 'not found' };
     }
 
-    const index = await readIndex();
-    const nextIndex: NewsIndex = {
-      items: index.items.filter((e) => e.id !== id),
-    };
-
-    // 1) 先 commit GitHub（source-of-truth）；commit 失败则 blob 图片仍然在，不会造成"JSON 引用的图已经 404"
-    const changes: FileChange[] = [
-      { path: `${ITEM_DIR}/${id}.json`, contentBase64: null },
-      { path: INDEX_PATH, contentBase64: indexToBase64(nextIndex) },
-    ];
-    await commitBatch(changes, `news: unpublish ${id}`);
-
-    // Next.js 16 需要传 cacheLife profile；写操作要立即失效，所以 expire: 0
     revalidateTag('news', { expire: 0 });
 
-    // 2) commit 成功后才清理 Blob 图片；失败不回滚（JSON 已删）但记日志
+    // 只清理真正由本服务上传到 Vercel Blob 的图；其他 URL 不动
+    const blobUrls = (rows[0].images ?? []).filter(isBlobUrl);
     if (blobUrls.length > 0) {
       try {
         await del(blobUrls);
       } catch (err) {
+        // Blob 清理失败不回滚（DB 记录已删）—— 记日志后续 sweeper 可扫
         console.error('[news:delete] blob cleanup failed', {
           id,
           urls: blobUrls,
@@ -199,7 +163,9 @@ export async function cleanupBlobAction(
   }
 }
 
-export async function listNewsAction(): Promise<{ ok: true; items: NewsItem[] } | { ok: false; error: string }> {
+export async function listNewsAction(): Promise<
+  { ok: true; items: NewsItem[] } | { ok: false; error: string }
+> {
   try {
     await requireAdmin();
   } catch {
@@ -207,24 +173,12 @@ export async function listNewsAction(): Promise<{ ok: true; items: NewsItem[] } 
   }
 
   try {
-    const index = await readIndex();
-    const sorted = [...index.items].sort((a, b) =>
-      b.published_at.localeCompare(a.published_at)
-    );
-    // 并行拉取所有条目；单条失败/损坏跳过，保持列表顺序
-    const texts = await Promise.all(
-      sorted.map((entry) => getFileText(`${ITEM_DIR}/${entry.id}.json`))
-    );
-    const items: NewsItem[] = [];
-    for (const text of texts) {
-      if (!text) continue;
-      try {
-        items.push(JSON.parse(text) as NewsItem);
-      } catch {
-        /* skip broken */
-      }
-    }
-    return { ok: true, items };
+    const rows = (await sql`
+      SELECT id, published_at, title, body, images
+      FROM news
+      ORDER BY published_at DESC
+    `) as NewsRow[];
+    return { ok: true, items: rows.map(rowToItem) };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
   }

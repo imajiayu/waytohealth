@@ -68,13 +68,14 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   const messages = (await import(`../../../messages/${locale}.json`)).default;
   const jsonLd = organizationJsonLd(locale);
+  const t = await getTranslations({ locale, namespace: 'a11y' });
 
   return (
     <html lang={locale} className={`${fontVariables} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-body)] ambient-canvas">
         {/* 跳过导航 — 键盘用户可直接跳主内容 */}
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-ukraine-blue-700 focus:shadow-lg focus:ring-2 focus:ring-ukraine-gold-500">
-          {locale === 'ua' ? 'Перейти до вмісту' : 'Skip to content'}
+          {t('skipToContent')}
         </a>
         <script
           type="application/ld+json"

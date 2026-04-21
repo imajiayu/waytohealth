@@ -24,10 +24,6 @@ function resolveSrc(src: string): string {
   return `/data/news/images/${src}`;
 }
 
-function isRemote(src: string): boolean {
-  return /^https?:\/\//.test(src);
-}
-
 export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsLightboxProps) {
   const [index, setIndex] = useState(startIndex);
   const thumbRef = useRef<HTMLDivElement>(null);
@@ -143,7 +139,6 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
             sizes="(max-width: 640px) 92vw, 80vw"
             className="object-contain"
             loading="eager"
-            unoptimized={isRemote(images[index])}
           />
         </div>
       </div>
@@ -173,7 +168,6 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
                 alt=""
                 fill
                 sizes="48px"
-                unoptimized={isRemote(name)}
                 className="object-cover"
               />
             </button>

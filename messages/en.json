@@ -19,6 +19,9 @@
     "donationSuccessTitle": "Thank you for your donation — Way to Health",
     "donationSuccessDescription": "Your contribution supports the rehabilitation of those affected by war in Ukraine."
   },
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
   "hero": {
     "title": "WAY TO HEALTH",
     "foundationLabel": "Charity Foundation",

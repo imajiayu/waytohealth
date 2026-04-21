@@ -43,6 +43,7 @@ npm run start    # 启动生产服务器
 | 部署 | Vercel | 与 NGO_web 一致 |
 | 支付 | Stripe | 法币支付（UAH，Checkout Sessions） |
 | KV 限流 | @upstash/redis | Vercel Marketplace KV，admin 登录速率限制跨实例共享（`Redis.fromEnv()` 读 `KV_REST_API_*`） |
+| 数据库 | Neon Postgres (`@neondatabase/serverless`) | Vercel Marketplace 接入，存 news 表；serverless HTTP driver，无连接池管理 |
 | Admin 安全 | node:crypto HMAC cookie | HttpOnly 签名 cookie 承载 admin 会话，不走第三方库（见 `src/lib/adminSession.ts`） |
 | XSS 过滤 | isomorphic-dompurify | DocumentViewer 的 xlsx HTML 走 DOMPurify 过滤再 dangerouslySetInnerHTML |
 | Focus trap | focus-trap-react | MobileMenuPanel / NewsLightbox 打开时锁键盘焦点在面板内 |
@@ -144,13 +145,26 @@ NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID= # 基金会主 jar 的 sendId；项�
 
 ---
 
-## 新闻系统（GitHub + Vercel Blob，无数据库）
+## 新闻系统（Neon Postgres + Vercel Blob）
 
 News 页面是 Twitter 风格的双语时间线 (`/[locale]/news`)，配独立 admin 后台 (`/admin/news`)：
 
-**文案存储（GitHub）**：`public/data/news/index.json` + `items/{id}.json`。通过 **GitHub contents API** 直接 commit 到仓库；Vercel 收到 push 自动重建，~1 分钟后上线。
+**文案存储（Neon Postgres）**：单张表 `news`，走 `@neondatabase/serverless` 的 HTTP driver，server action 里 INSERT / DELETE 后立即 `revalidateTag('news')` 失效前端 60s 缓存 —— 无需等 Vercel 重建，秒级生效。Schema：
 
-**图片存储（Vercel Blob）**：admin 选图后，浏览器通过 `@vercel/blob/client` 的 `upload()` **直接上传到 Blob**（绕开 server action 4.5MB body 限制），拿到完整 URL 后写入 JSON 的 `images: string[]` 字段。前端 `next/image` 直接用 Blob URL 加载（已在 `next.config.ts` `images.remotePatterns` 里允许 `*.public.blob.vercel-storage.com`）。
+```sql
+CREATE TABLE news (
+  id           TEXT PRIMARY KEY,            -- YYYY-MM-DD-HHmm-xxxx
+  published_at TIMESTAMPTZ NOT NULL,
+  title        JSONB NOT NULL,              -- {"ua":"...","en":"..."}
+  body         JSONB NOT NULL,              -- {"ua":"...","en":"..."}
+  images       TEXT[] NOT NULL DEFAULT '{}' -- Vercel Blob URL 数组
+);
+CREATE INDEX idx_news_published ON news (published_at DESC);
+```
+
+读取 (`src/lib/news.ts`) 走 `unstable_cache(..., { revalidate: 60, tags: ['news'] })`；管理员写 (`src/app/actions/news.ts`) 走 `sql` tagged template，`published_at / title / body / images` 用 `::timestamptz / ::jsonb / ::text[]` 显式 cast。
+
+**图片存储（Vercel Blob）**：admin 选图后，浏览器通过 `@vercel/blob/client` 的 `upload()` **直接上传到 Blob**（绕开 server action 4.5MB body 限制），拿到完整 URL 后写入 DB `images` 列。前端 `next/image` 直接用 Blob URL 加载（已在 `next.config.ts` `images.remotePatterns` 里允许 `*.public.blob.vercel-storage.com`）。
 
 **Admin 认证流（HttpOnly 签名 cookie）**：
 1. 用户在 `/admin/*` 的登录表单提交密码 → `POST /api/admin/login`
@@ -163,11 +177,11 @@ News 页面是 Twitter 风格的双语时间线 (`/[locale]/news`)，配独立 a
 1. 客户端 `upload()` POST 到 `/api/news/upload`（不传密码，身份由 cookie 承载）
 2. `onBeforeGenerateToken` 调 `getSession()` 验 cookie；验 `pathname` 前缀为 `news/`；限 MIME 为 jpeg/png/webp；限 size ≤ 8MB
 3. 返回短时 upload token → 客户端拿 token 直传 Blob → 得到 URL
-4. 所有 URL 一起提交给 `publishNewsAction`（同样走 `requireAdmin()`）→ 仅 commit JSON 到 GitHub
+4. 所有 URL 一起提交给 `publishNewsAction`（同样走 `requireAdmin()`）→ INSERT 进 Neon + `revalidateTag('news', { expire: 0 })`
 
 **速率限制（@upstash/redis）**：`src/lib/adminRateLimit.ts` 用 `Redis.fromEnv()` 跨实例共享计数器。key: `admin:fail:{ip}`（ZSET 记失败时间戳，TTL = 窗口 + 60s）+ `admin:lock:{ip}`（String + TTL 30min）。15 分钟窗口 10 次失败触发 30 分钟锁定。KV 不可用时 fallback 到进程内 Map（开发环境 / 未接 KV 的部署）。
 
-**删除**：`deleteNewsAction` 先 `commitBatch` 更新 GitHub（source of truth），再调 `@vercel/blob` 的 `del(urls)` 清理 Blob；commit 失败则 blob 图不清理，保证"JSON 没引用的图"不会出现。
+**删除**：`deleteNewsAction` 一条 SQL `DELETE FROM news WHERE id = $1 RETURNING images` 拿到要清理的图，成功后 `revalidateTag('news')`，然后异步调 `@vercel/blob` 的 `del(urls)` 清理 Blob。Blob 清理失败不回滚（DB 已删），只记日志；极少数 orphan 图可由 sweeper 后续扫。
 
 **密码工具**：`node scripts/gen-admin-hash.mjs <password>` 一次性输出配对的 `ADMIN_PASSWORD_HASH` / `ADMIN_PASSWORD_SALT` / `ADMIN_COOKIE_SECRET` 三个 env var。改密码必须同时更新前两个；cookie secret 一般不需要轮换，除非怀疑泄露。
 
@@ -176,10 +190,8 @@ News 页面是 Twitter 风格的双语时间线 (`/[locale]/news`)，配独立 a
 ### 新闻相关环境变量
 
 ```env
-# GitHub commit（server action 用）
-GITHUB_TOKEN=github_pat_...       # Fine-grained PAT，Contents RW，限定本仓库
-GITHUB_REPO=owner/waytohealth     # owner/repo
-GITHUB_BRANCH=main
+# Neon Postgres（Vercel Marketplace 装 Neon 后自动注入一整套；我们只用 DATABASE_URL）
+DATABASE_URL=                     # postgres://...pooler.../neondb?sslmode=require
 
 # Vercel Blob（图片上传）
 BLOB_READ_WRITE_TOKEN=            # Vercel Blob store token（Vercel 自动注入于部署环境，本地需手动复制）
@@ -251,14 +263,14 @@ src/
 │   └── routing.ts               # next-intl 路由配置
 ├── app/actions/
 │   ├── donate.ts                # Stripe Checkout server action
-│   └── news.ts                  # News admin（要求 cookie session + GitHub commit）
+│   └── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── stripe.ts                # Stripe 客户端单例
 │   ├── donations.ts             # 已筹金额查询（带缓存）
-│   ├── news.ts                  # 新闻读取（镜像 data.ts）
-│   ├── github.ts                # GitHub contents API 封装（server-only，带 15s 超时）
-│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（github / NBU 等对外调用）
+│   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache）
+│   ├── db.ts                    # Neon Postgres 单例（`@neondatabase/serverless`）
+│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（NBU 等对外调用）
 │   ├── exchangeRate.ts          # NBU 汇率（带 5s 超时 + 1h 缓存）
 │   ├── seo.ts                   # SEO helper：canonical / hreflang / openGraph / twitter
 │   ├── adminAuth.ts             # 管理员密码 hash 校验（server-only）

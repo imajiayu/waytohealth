@@ -1,62 +1,60 @@
+import 'server-only';
 import { unstable_cache } from 'next/cache';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { type NewsItem, type NewsIndex } from '@/data/news';
-import { getFileText } from '@/lib/github';
+import { sql } from '@/lib/db';
+import { type NewsItem } from '@/data/news';
 
-const NEWS_DIR = path.join(process.cwd(), 'public', 'data', 'news');
-const INDEX_PATH_REMOTE = 'public/data/news/index.json';
-const ITEM_DIR_REMOTE = 'public/data/news/items';
+// DB 行到前端类型的映射；空 images 数组不序列化进对象（保持和旧 JSON 形状一致）
+interface NewsRow {
+  id: string;
+  published_at: Date;
+  title: { ua: string; en: string };
+  body: { ua: string; en: string };
+  images: string[];
+}
 
-// dev 环境下直接走 GitHub contents API 读最新 JSON —— admin 发布后无需 git pull
-// 生产环境读打包进 bundle 的本地文件，避免运行时每次都调 GitHub API
-const useGitHub =
-  process.env.NODE_ENV === 'development' &&
-  !!process.env.GITHUB_TOKEN &&
-  !!process.env.GITHUB_REPO;
+function rowToItem(r: NewsRow): NewsItem {
+  return {
+    id: r.id,
+    published_at: r.published_at.toISOString(),
+    title: r.title,
+    body: r.body,
+    ...(r.images && r.images.length > 0 ? { images: r.images } : {}),
+  };
+}
 
-// 跨请求缓存 10s；admin 写操作会调 revalidateTag('news') 主动失效
-export const getNewsIndex = unstable_cache(
-  async (): Promise<NewsIndex> => {
+// 跨请求缓存 60s；admin 写操作会调 revalidateTag('news') 主动失效
+export const getAllNews = unstable_cache(
+  async (): Promise<NewsItem[]> => {
     try {
-      if (useGitHub) {
-        const text = await getFileText(INDEX_PATH_REMOTE);
-        return text ? (JSON.parse(text) as NewsIndex) : { items: [] };
-      }
-      const raw = await fs.readFile(path.join(NEWS_DIR, 'index.json'), 'utf-8');
-      return JSON.parse(raw);
-    } catch {
-      return { items: [] };
+      const rows = (await sql`
+        SELECT id, published_at, title, body, images
+        FROM news
+        ORDER BY published_at DESC
+      `) as NewsRow[];
+      return rows.map(rowToItem);
+    } catch (err) {
+      console.error('[news:getAllNews]', err);
+      return [];
     }
   },
-  ['news-index'],
-  { revalidate: 10, tags: ['news'] }
+  ['news-all'],
+  { revalidate: 60, tags: ['news'] }
 );
 
 export const getNews = unstable_cache(
   async (id: string): Promise<NewsItem | null> => {
     try {
-      if (useGitHub) {
-        const text = await getFileText(`${ITEM_DIR_REMOTE}/${id}.json`);
-        return text ? (JSON.parse(text) as NewsItem) : null;
-      }
-      const raw = await fs.readFile(path.join(NEWS_DIR, 'items', `${id}.json`), 'utf-8');
-      return JSON.parse(raw);
-    } catch {
+      const rows = (await sql`
+        SELECT id, published_at, title, body, images
+        FROM news
+        WHERE id = ${id}
+      `) as NewsRow[];
+      return rows[0] ? rowToItem(rows[0]) : null;
+    } catch (err) {
+      console.error('[news:getNews]', err);
       return null;
     }
   },
   ['news-item'],
-  { revalidate: 10, tags: ['news'] }
+  { revalidate: 60, tags: ['news'] }
 );
-
-// 读取所有活跃新闻（按 published_at 倒序）
-export async function getAllNews(): Promise<NewsItem[]> {
-  const idx = await getNewsIndex();
-  const active = idx.items
-    .filter((e) => e.active)
-    .sort((a, b) => b.published_at.localeCompare(a.published_at));
-
-  const results = await Promise.all(active.map((e) => getNews(e.id)));
-  return results.filter((n): n is NewsItem => n !== null);
-}

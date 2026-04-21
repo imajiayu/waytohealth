@@ -41,18 +41,22 @@
   },
   {
     "id": "vataga",
-    "logo": "/images/partners/vataga.webp"
+    "logo": "/images/partners/vataga.webp",
+    "url": "https://www.instagram.com/vataga_dp/"
   },
   {
     "id": "hto-yakshcho-ne-my",
-    "logo": "/images/partners/hto-yakshcho-ne-my.webp"
+    "logo": "/images/partners/hto-yakshcho-ne-my.webp",
+    "url": "https://turbota.org.ua/"
   },
   {
     "id": "sunflower-scotland",
-    "logo": "/images/partners/sunflower-scotland.webp"
+    "logo": "/images/partners/sunflower-scotland.webp",
+    "url": "https://sunflowerscotland.co.uk/"
   },
   {
     "id": "logo-horizontal-2",
-    "logo": "/images/partners/logo-horizontal-2.webp"
+    "logo": "/images/partners/logo-horizontal-2.webp",
+    "url": "https://www.awarmheartfoundation.org/en/"
   }
 ]

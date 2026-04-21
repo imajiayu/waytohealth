@@ -61,8 +61,11 @@ function resolveImageUrl(src: string): string {
   return `/data/news/images/${src}`;
 }
 
-function isRemote(src: string): boolean {
-  return /^(https?:|blob:)/.test(src);
+// 只有 blob: (admin 预览的 ObjectURL) 需要绕过 next/image；
+// https: (Vercel Blob) 必须走优化管线，否则会直接加载 iPhone 原图（数 MB / 4000+ 像素宽），
+// 导致 news 列表滚动时反复解码大图而卡顿
+function isBlobUrl(src: string): boolean {
+  return src.startsWith('blob:');
 }
 
 function gridWrapperClass(n: number): string {
@@ -151,7 +154,7 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
                           alt={title || 'News image'}
                           fill
                           sizes="(max-width: 640px) 100vw, 560px"
-                          unoptimized={isRemote(src)}
+                          unoptimized={isBlobUrl(src)}
                           className={
                             preview
                               ? 'object-cover'

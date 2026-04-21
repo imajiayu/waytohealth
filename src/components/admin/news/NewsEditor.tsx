@@ -149,7 +149,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
 
       // 成功：释放 ObjectURL，返回 dashboard
       images.forEach((img) => URL.revokeObjectURL(img.previewUrl));
-      setSuccess(`Published as ${res.id}. Live in ~1 min after Vercel rebuilds.`);
+      setSuccess(`Published as ${res.id}.`);
       doneTimeoutRef.current = setTimeout(() => onDone(), 1200);
     } catch (err) {
       if (uploadedUrls.length > 0) {
