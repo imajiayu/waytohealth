@@ -57,7 +57,7 @@ export const PARTNERSHIP_INVITE_UA_HTML = `<!DOCTYPE html>
     align-items:center;
     gap:24px;
   }
-  .header img { width:114px; flex-shrink:0; }
+  .header img { width:136px; flex-shrink:0; }
   .header-text h1 {
     font-family:'Montserrat',sans-serif;
     font-size:18px; font-weight:700;
@@ -134,7 +134,7 @@ export const PARTNERSHIP_INVITE_UA_HTML = `<!DOCTYPE html>
 
   <!-- HEADER -->
   <div class="header">
-    <img src="https://waytohealth.org.ua/email/wth-logo.png" alt="Благодійний фонд «Шлях до здоров'я»" width="114">
+    <img src="https://waytohealth.org.ua/email/wth-logo.png" alt="Благодійний фонд «Шлях до здоров'я»" width="136">
     <div class="header-text">
       <h1>Благодійний фонд<br>«Шлях до здоров'я»</h1>
       <p>Повертаємо сили та надію постраждалим від війни</p>

@@ -238,7 +238,7 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 
 `previewEmailAction(templateId)` 只返回模板常量用于 UI 预览，不调 Resend。
 
-**UI**（`src/components/admin/EmailPanel.tsx`）：双栏布局，左侧表单（收件人 textarea / 模板下拉 / Advanced subject override + reply-to），右侧 iframe 预览（`sandbox="allow-same-origin"`）。
+**UI**（`src/components/admin/EmailPanel.tsx`）：双栏布局，左侧表单（收件人 textarea / 模板下拉 / Advanced subject override + reply-to），右侧 iframe 预览（`sandbox="allow-same-origin"`）。底部 `EmailHistory` 调 `listEmailHistoryAction` 拉 Resend `emails.list({ limit: 20 })` 显示最近发送记录（时间 / 主题 / 收件人 / `last_event` 状态），发送成功后通过 `refreshKey` bump 自动刷新。
 
 **一个需要警惕的点**：`RESEND_FROM_EMAIL` 的域名必须已经在 Resend 控制台验证，否则发送 403。本地开发可用 Resend 提供的 `onboarding@resend.dev` 沙盒发件地址，但它只能发到开发者自己验证过的邮箱。
 
@@ -307,7 +307,7 @@ src/
 ├── app/actions/
 │   ├── donate.ts                # Stripe Checkout server action
 │   ├── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
-│   └── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送）
+│   └── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送 + 历史拉取）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── stripe.ts                # Stripe 客户端单例

@@ -7,6 +7,7 @@ import {
   sendEmailAction,
 } from '@/app/actions/email';
 import type { EmailTemplateMeta, RenderedEmail } from '@/lib/emailTemplates';
+import EmailHistory from './EmailHistory';
 
 type SendResult =
   | { kind: 'success'; sent: number; resendId: string | null }
@@ -27,6 +28,7 @@ export default function EmailPanel() {
 
   const [sendBusy, setSendBusy] = useState(false);
   const [sendResult, setSendResult] = useState<SendResult>(null);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +98,7 @@ export default function EmailPanel() {
     }
     setSendResult({ kind: 'success', sent: res.sent, resendId: res.resendId });
     setPreview(res.rendered);
+    setHistoryRefreshKey((value) => value + 1);
   }
 
   const inputCls =
@@ -268,6 +271,8 @@ export default function EmailPanel() {
           )}
         </aside>
       </div>
+
+      <EmailHistory refreshKey={historyRefreshKey} />
     </div>
   );
 }

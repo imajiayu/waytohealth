@@ -1,5 +1,5 @@
 // Partnership invitation letter (English) - entire HTML as a static template, zero variables
-// Source file: WayToHealth_Email_v2.html; base64 logo has been externalized to public/email/wth-logo.png
+// Source file: WayToHealth_Email_v2.html; base64 logo has been externalized to public/email/wth-logo-en.png
 // Email clients can only fetch public URLs, so the image uses an absolute hardcoded https://waytohealth.org.ua/... URL
 // We do not use NEXT_PUBLIC_SITE_URL because in dev it is localhost:3000, which is unreachable for real recipients
 
@@ -57,7 +57,7 @@ export const PARTNERSHIP_INVITE_EN_HTML = `<!DOCTYPE html>
     align-items:center;
     gap:24px;
   }
-  .header img { width:114px; flex-shrink:0; }
+  .header img { width:136px; flex-shrink:0; }
   .header-text h1 {
     font-family:'Montserrat',sans-serif;
     font-size:18px; font-weight:700;
@@ -134,7 +134,7 @@ export const PARTNERSHIP_INVITE_EN_HTML = `<!DOCTYPE html>
 
   <!-- HEADER -->
   <div class="header">
-    <img src="https://waytohealth.org.ua/email/wth-logo.png" alt="Way to Health Charity Foundation" width="114">
+    <img src="https://waytohealth.org.ua/email/wth-logo-en.png" alt="Way to Health Charity Foundation" width="136">
     <div class="header-text">
       <h1>Way to Health<br>Charity Foundation</h1>
       <p>Restoring strength and hope to those affected by war</p>

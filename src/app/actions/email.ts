@@ -69,6 +69,75 @@ export interface SendInput {
   replyTo?: string;
 }
 
+export interface EmailHistoryItem {
+  id: string;
+  createdAt: string;
+  from: string;
+  to: string[];
+  bcc: string[];
+  cc: string[];
+  replyTo: string[];
+  subject: string;
+  lastEvent:
+    | 'bounced'
+    | 'canceled'
+    | 'clicked'
+    | 'complained'
+    | 'delivered'
+    | 'delivery_delayed'
+    | 'failed'
+    | 'opened'
+    | 'queued'
+    | 'scheduled'
+    | 'sent';
+  scheduledAt: string | null;
+}
+
+const EMAIL_HISTORY_LIMIT = 20;
+
+export async function listEmailHistoryAction(): Promise<
+  { ok: true; emails: EmailHistoryItem[]; hasMore: boolean } | { ok: false; error: string }
+> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: 'unauthorized' };
+  }
+
+  let resend: ReturnType<typeof getResend>;
+  try {
+    resend = getResend();
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'resend misconfigured' };
+  }
+
+  try {
+    const { data, error } = await resend.emails.list({ limit: EMAIL_HISTORY_LIMIT });
+    if (error) {
+      return { ok: false, error: error.message || 'Resend API error' };
+    }
+
+    return {
+      ok: true,
+      emails: (data?.data ?? []).map((email) => ({
+        id: email.id,
+        createdAt: email.created_at,
+        from: email.from,
+        to: email.to ?? [],
+        bcc: email.bcc ?? [],
+        cc: email.cc ?? [],
+        replyTo: email.reply_to ?? [],
+        subject: email.subject,
+        lastEvent: email.last_event,
+        scheduledAt: email.scheduled_at,
+      })),
+      hasMore: data?.has_more ?? false,
+    };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+  }
+}
+
 export async function sendEmailAction(
   input: SendInput
 ): Promise<
