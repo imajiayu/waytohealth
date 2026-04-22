@@ -36,10 +36,8 @@ function formatDate(value: string) {
   return DATE_FORMATTER.format(date);
 }
 
-function formatAddressList(values: string[]) {
-  if (values.length === 0) return '—';
-  if (values.length === 1) return values[0];
-  return `${values[0]} +${values.length - 1}`;
+function joinAddresses(values: string[]) {
+  return values.length > 0 ? values.join(', ') : '—';
 }
 
 export default function EmailHistory({ refreshKey }: { refreshKey: number }) {
@@ -110,7 +108,7 @@ export default function EmailHistory({ refreshKey }: { refreshKey: number }) {
             <colgroup>
               <col className="w-[8.5rem]" />
               <col />
-              <col className="w-[14rem]" />
+              <col className="w-[18rem]" />
               <col className="w-[7rem]" />
             </colgroup>
             <thead className="bg-gray-50">
@@ -141,12 +139,20 @@ export default function EmailHistory({ refreshKey }: { refreshKey: number }) {
                     </p>
                   </td>
                   <td className="px-3 py-2.5 text-gray-600">
-                    <div className="truncate" title={email.bcc.join(', ') || email.to.join(', ')}>
-                      {formatAddressList(email.bcc.length > 0 ? email.bcc : email.to)}
-                    </div>
+                    {(() => {
+                      const list = email.bcc.length > 0 ? email.bcc : email.to;
+                      if (list.length === 0) return <span className="text-gray-400">—</span>;
+                      return (
+                        <ul className="max-h-32 space-y-0.5 overflow-y-auto pr-1">
+                          {list.map((addr, idx) => (
+                            <li key={`${addr}-${idx}`} className="break-all">{addr}</li>
+                          ))}
+                        </ul>
+                      );
+                    })()}
                     {email.replyTo.length > 0 && (
-                      <p className="mt-1 truncate text-[11px] text-gray-500" title={email.replyTo.join(', ')}>
-                        Reply-To: {formatAddressList(email.replyTo)}
+                      <p className="mt-1 break-all text-[11px] text-gray-500" title={joinAddresses(email.replyTo)}>
+                        Reply-To: {joinAddresses(email.replyTo)}
                       </p>
                     )}
                   </td>
