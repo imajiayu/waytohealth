@@ -8,7 +8,7 @@ export const PARTNERSHIP_INVITE_UA_SUBJECT =
 
 // 纯文本 fallback：当收件人客户端不支持 HTML 或被 spam filter 取纯文本时用
 export const PARTNERSHIP_INVITE_UA_TEXT = `Благодійний фонд «Шлях до здоров'я»
-Рятуємо сили та надію від війни
+Повертаємо сили та надію постраждалим від війни
 
 Вітаю!
 
@@ -137,7 +137,7 @@ export const PARTNERSHIP_INVITE_UA_HTML = `<!DOCTYPE html>
     <img src="https://waytohealth.org.ua/email/wth-logo.png" alt="Благодійний фонд «Шлях до здоров'я»" width="114">
     <div class="header-text">
       <h1>Благодійний фонд<br>«Шлях до здоров'я»</h1>
-      <p>Рятуємо сили та надію від війни</p>
+      <p>Повертаємо сили та надію постраждалим від війни</p>
     </div>
   </div>
   <div class="strip"></div>

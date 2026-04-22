@@ -9,7 +9,9 @@ import {
 } from '@/app/actions/news';
 import NewsCard from '@/components/news/NewsCard';
 import { type Locale } from '@/i18n/config';
+import { type Tag } from '@/data/news';
 import ImageUploader from './ImageUploader';
+import TagInput from './TagInput';
 import { type ImageDraft, MAX_IMAGES_HARD } from './types';
 
 function toLocalInputValue(d: Date): string {
@@ -29,6 +31,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
   const [bodyUa, setBodyUa] = useState('');
   const [bodyEn, setBodyEn] = useState('');
   const [images, setImages] = useState<ImageDraft[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -136,6 +139,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
         title: { ua: titleUa.trim(), en: titleEn.trim() },
         body: { ua: bodyUa.trim(), en: bodyEn.trim() },
         imageUrls: uploadedUrls,
+        tags,
       };
       const res = await publishNewsAction(input);
 
@@ -202,6 +206,8 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
           <label className={labelCls}>Body (EN)</label>
           <textarea value={bodyEn} onChange={(e) => setBodyEn(e.target.value)} required rows={5} className={inputCls} />
         </div>
+
+        <TagInput value={tags} onChange={setTags} disabled={busy} />
 
         <ImageUploader
           images={images}
@@ -275,6 +281,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
               en: bodyEn || 'Body…',
             },
             images: images.map((img) => img.previewUrl),
+            ...(tags.length > 0 ? { tags } : {}),
           }}
         />
         <p className="mt-2 text-[11px] text-gray-400">

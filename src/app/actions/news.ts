@@ -3,7 +3,7 @@
 import { del } from '@vercel/blob';
 import { revalidateTag } from 'next/cache';
 import { sql } from '@/lib/db';
-import { type NewsItem } from '@/data/news';
+import { type NewsItem, type Tag } from '@/data/news';
 import { requireAdmin } from '@/lib/adminSession';
 
 // 仅允许 Vercel Blob 主域：防止管理员接口被用来把外链写进前台 next/image
@@ -11,6 +11,27 @@ const BLOB_URL_RE = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\//;
 
 function isBlobUrl(u: string): boolean {
   return BLOB_URL_RE.test(u);
+}
+
+const MAX_TAGS_PER_POST = 6;
+const MAX_TAG_LENGTH = 30;
+
+// 规范化管理员提交的 tag：trim、截长、去重（按 en.toLowerCase）、上限
+// 前端 TagInput 也做一次相同逻辑；这里是服务端兜底，防止绕过 UI
+function normalizeTags(raw: Tag[]): Tag[] {
+  const seen = new Set<string>();
+  const out: Tag[] = [];
+  for (const t of raw) {
+    const ua = (t?.ua ?? '').trim().slice(0, MAX_TAG_LENGTH);
+    const en = (t?.en ?? '').trim().slice(0, MAX_TAG_LENGTH);
+    if (!ua || !en) continue;
+    const key = en.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ ua, en });
+    if (out.length >= MAX_TAGS_PER_POST) break;
+  }
+  return out;
 }
 
 function randomSuffix(): string {
@@ -35,6 +56,7 @@ interface NewsRow {
   title: { ua: string; en: string };
   body: { ua: string; en: string };
   images: string[];
+  tags: Tag[];
 }
 
 function rowToItem(r: NewsRow): NewsItem {
@@ -44,6 +66,7 @@ function rowToItem(r: NewsRow): NewsItem {
     title: r.title,
     body: r.body,
     ...(r.images && r.images.length > 0 ? { images: r.images } : {}),
+    ...(r.tags && r.tags.length > 0 ? { tags: r.tags } : {}),
   };
 }
 
@@ -52,6 +75,7 @@ export interface PublishInput {
   title: { ua: string; en: string };
   body: { ua: string; en: string };
   imageUrls: string[]; // 客户端已上传到 Blob 后回传的 URL
+  tags?: Tag[];        // 可选，缺省视为无 tag
 }
 
 export async function publishNewsAction(
@@ -80,15 +104,18 @@ export async function publishNewsAction(
     return { ok: false, error: err instanceof Error ? err.message : 'invalid date' };
   }
 
+  const tags = normalizeTags(input.tags ?? []);
+
   try {
     await sql`
-      INSERT INTO news (id, published_at, title, body, images)
+      INSERT INTO news (id, published_at, title, body, images, tags)
       VALUES (
         ${id},
         ${input.published_at}::timestamptz,
         ${JSON.stringify(input.title)}::jsonb,
         ${JSON.stringify(input.body)}::jsonb,
-        ${input.imageUrls}::text[]
+        ${input.imageUrls}::text[],
+        ${JSON.stringify(tags)}::jsonb
       )
     `;
 
@@ -174,7 +201,7 @@ export async function listNewsAction(): Promise<
 
   try {
     const rows = (await sql`
-      SELECT id, published_at, title, body, images
+      SELECT id, published_at, title, body, images, tags
       FROM news
       ORDER BY published_at DESC
     `) as NewsRow[];

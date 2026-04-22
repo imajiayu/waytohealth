@@ -40,14 +40,18 @@
     "comingSoon": "Coming Soon"
   },
   "news": {
-    "eyebrow": "Dispatch feed",
     "intro": "Latest news, updates, and stories from the foundation.",
     "author": "Way to Health",
     "sectionTitle": "Latest updates",
     "viewAll": "View all news",
     "readOn": "Read on",
     "emptyEyebrow": "Quiet on the wire",
-    "empty": "No news yet. Stay tuned."
+    "empty": "No news yet. Stay tuned.",
+    "tags": {
+      "filterLabel": "Filter by topic",
+      "all": "All topics",
+      "emptyFilter": "No news in this topic yet."
+    }
   },
   "projects": {
     "title": "Support active projects",

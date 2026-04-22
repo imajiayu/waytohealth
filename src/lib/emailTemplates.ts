@@ -4,6 +4,11 @@ import {
   PARTNERSHIP_INVITE_UA_SUBJECT,
   PARTNERSHIP_INVITE_UA_TEXT,
 } from './emailTemplates/partnershipInviteUa';
+import {
+  PARTNERSHIP_INVITE_EN_HTML,
+  PARTNERSHIP_INVITE_EN_SUBJECT,
+  PARTNERSHIP_INVITE_EN_TEXT,
+} from './emailTemplates/partnershipInviteEn';
 
 // 邮件模板注册表：纯静态 HTML 模板。客户端只能选 id，不传任何变量。
 // 整封 subject/html/text 都是常量，渲染时原样返回 —— 不做任何字符串拼接或转义。
@@ -43,6 +48,17 @@ const TEMPLATES: EmailTemplate[] = [
       subject: PARTNERSHIP_INVITE_UA_SUBJECT,
       html: PARTNERSHIP_INVITE_UA_HTML,
       text: PARTNERSHIP_INVITE_UA_TEXT,
+    },
+  },
+  {
+    id: 'partnership-invite-en',
+    name: 'Partnership invite (EN)',
+    description: 'Cold-outreach letter to prospective partners (English).',
+    locales: ['en'],
+    rendered: {
+      subject: PARTNERSHIP_INVITE_EN_SUBJECT,
+      html: PARTNERSHIP_INVITE_EN_HTML,
+      text: PARTNERSHIP_INVITE_EN_TEXT,
     },
   },
 ];

@@ -1,15 +1,16 @@
 import 'server-only';
 import { unstable_cache } from 'next/cache';
 import { sql } from '@/lib/db';
-import { type NewsItem } from '@/data/news';
+import { type NewsItem, type Tag } from '@/data/news';
 
-// DB 行到前端类型的映射；空 images 数组不序列化进对象（保持和旧 JSON 形状一致）
+// DB 行到前端类型的映射；空 images / tags 数组不序列化进对象（保持和旧 JSON 形状一致）
 interface NewsRow {
   id: string;
   published_at: Date;
   title: { ua: string; en: string };
   body: { ua: string; en: string };
   images: string[];
+  tags: Tag[];
 }
 
 function rowToItem(r: NewsRow): NewsItem {
@@ -19,6 +20,7 @@ function rowToItem(r: NewsRow): NewsItem {
     title: r.title,
     body: r.body,
     ...(r.images && r.images.length > 0 ? { images: r.images } : {}),
+    ...(r.tags && r.tags.length > 0 ? { tags: r.tags } : {}),
   };
 }
 
@@ -27,7 +29,7 @@ export const getAllNews = unstable_cache(
   async (): Promise<NewsItem[]> => {
     try {
       const rows = (await sql`
-        SELECT id, published_at, title, body, images
+        SELECT id, published_at, title, body, images, tags
         FROM news
         ORDER BY published_at DESC
       `) as NewsRow[];
@@ -45,7 +47,7 @@ export const getNews = unstable_cache(
   async (id: string): Promise<NewsItem | null> => {
     try {
       const rows = (await sql`
-        SELECT id, published_at, title, body, images
+        SELECT id, published_at, title, body, images, tags
         FROM news
         WHERE id = ${id}
       `) as NewsRow[];

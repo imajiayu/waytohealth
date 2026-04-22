@@ -122,12 +122,30 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
             {/* 右侧内容 */}
             <div className="min-w-0 flex-1">
               {/* 署名 + 日期 */}
-              <div className="flex flex-wrap items-center gap-x-1.5 text-[14px] leading-snug sm:text-[15px]">
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 text-[14px] leading-snug sm:text-[15px]">
                 <span className="font-bold text-gray-900">{authorName}</span>
                 <span className="text-gray-400" aria-hidden>·</span>
                 <time dateTime={iso} className="text-gray-500">
                   {dateLabel}
                 </time>
+
+                {!compact && item.tags && item.tags.length > 0 && (
+                  <>
+                    {item.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag.en}
+                        className="rounded-full bg-ukraine-blue-50 px-2.5 py-0.5 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.15em] text-ukraine-blue-500"
+                      >
+                        {tag[locale]}
+                      </span>
+                    ))}
+                    {item.tags.length > 3 && (
+                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500">
+                        +{item.tags.length - 3}
+                      </span>
+                    )}
+                  </>
+                )}
               </div>
 
               {/* 标题（可选） */}

@@ -153,16 +153,19 @@ News 页面是 Twitter 风格的双语时间线 (`/[locale]/news`)，配独立 a
 
 ```sql
 CREATE TABLE news (
-  id           TEXT PRIMARY KEY,            -- YYYY-MM-DD-HHmm-xxxx
+  id           TEXT PRIMARY KEY,                   -- YYYY-MM-DD-HHmm-xxxx
   published_at TIMESTAMPTZ NOT NULL,
-  title        JSONB NOT NULL,              -- {"ua":"...","en":"..."}
-  body         JSONB NOT NULL,              -- {"ua":"...","en":"..."}
-  images       TEXT[] NOT NULL DEFAULT '{}' -- Vercel Blob URL 数组
+  title        JSONB NOT NULL,                     -- {"ua":"...","en":"..."}
+  body         JSONB NOT NULL,                     -- {"ua":"...","en":"..."}
+  images       TEXT[] NOT NULL DEFAULT '{}',       -- Vercel Blob URL 数组
+  tags         JSONB NOT NULL DEFAULT '[]'::jsonb  -- [{"ua":"...","en":"..."}, ...]
 );
 CREATE INDEX idx_news_published ON news (published_at DESC);
 ```
 
-读取 (`src/lib/news.ts`) 走 `unstable_cache(..., { revalidate: 60, tags: ['news'] })`；管理员写 (`src/app/actions/news.ts`) 走 `sql` tagged template，`published_at / title / body / images` 用 `::timestamptz / ::jsonb / ::text[]` 显式 cast。
+Tag 规范（`normalizeTags` in `src/app/actions/news.ts`）：单条新闻最多 6 个 tag，每个字段最长 30 字符，按 `en.toLowerCase()` 去重。前台 `/[locale]/news?tag=<en>` 过滤 —— en 字段稳定作 URL slug，语言切换时 filter 保留。
+
+读取 (`src/lib/news.ts`) 走 `unstable_cache(..., { revalidate: 60, tags: ['news'] })`；管理员写 (`src/app/actions/news.ts`) 走 `sql` tagged template，`published_at / title / body / images / tags` 用 `::timestamptz / ::jsonb / ::text[] / ::jsonb` 显式 cast。
 
 **图片存储（Vercel Blob）**：admin 选图后，浏览器通过 `@vercel/blob/client` 的 `upload()` **直接上传到 Blob**（绕开 server action 4.5MB body 限制），拿到完整 URL 后写入 DB `images` 列。前端 `next/image` 直接用 Blob URL 加载（已在 `next.config.ts` `images.remotePatterns` 里允许 `*.public.blob.vercel-storage.com`）。
 
