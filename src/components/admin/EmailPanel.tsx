@@ -5,12 +5,13 @@ import {
   listTemplatesAction,
   previewEmailAction,
   sendEmailAction,
+  type RecipientFailure,
 } from '@/app/actions/email';
 import type { EmailTemplateMeta, RenderedEmail } from '@/lib/emailTemplates';
 import EmailHistory from './EmailHistory';
 
 type SendResult =
-  | { kind: 'success'; sent: number; resendId: string | null }
+  | { kind: 'success'; sent: number; failed: number; failures: RecipientFailure[] }
   | { kind: 'error'; error: string }
   | null;
 
@@ -96,7 +97,12 @@ export default function EmailPanel() {
       setSendResult({ kind: 'error', error: res.error });
       return;
     }
-    setSendResult({ kind: 'success', sent: res.sent, resendId: res.resendId });
+    setSendResult({
+      kind: 'success',
+      sent: res.sent,
+      failed: res.failed,
+      failures: res.failures,
+    });
     setPreview(res.rendered);
     setHistoryRefreshKey((value) => value + 1);
   }
@@ -218,9 +224,26 @@ export default function EmailPanel() {
             </div>
           )}
           {sendResult?.kind === 'success' && (
-            <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-              Sent to {sendResult.sent} recipient{sendResult.sent === 1 ? '' : 's'}
-              {sendResult.resendId ? ` · Resend id ${sendResult.resendId}` : ''}
+            <div
+              className={`rounded-md border p-3 text-sm ${
+                sendResult.failed === 0
+                  ? 'border-green-200 bg-green-50 text-green-700'
+                  : 'border-amber-200 bg-amber-50 text-amber-800'
+              }`}
+            >
+              <div>
+                Sent to {sendResult.sent} recipient{sendResult.sent === 1 ? '' : 's'}
+                {sendResult.failed > 0 && ` · ${sendResult.failed} failed`}
+              </div>
+              {sendResult.failures.length > 0 && (
+                <ul className="mt-2 space-y-1 text-xs">
+                  {sendResult.failures.map((f) => (
+                    <li key={f.address} className="break-all">
+                      <span className="font-medium">{f.address}</span> — {f.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

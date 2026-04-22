@@ -93,7 +93,7 @@ export interface EmailHistoryItem {
   scheduledAt: string | null;
 }
 
-const EMAIL_HISTORY_LIMIT = 20;
+const EMAIL_HISTORY_LIMIT = 100;
 
 export async function listEmailHistoryAction(): Promise<
   { ok: true; emails: EmailHistoryItem[]; hasMore: boolean } | { ok: false; error: string }
@@ -138,10 +138,21 @@ export async function listEmailHistoryAction(): Promise<
   }
 }
 
+export interface RecipientFailure {
+  address: string;
+  message: string;
+}
+
 export async function sendEmailAction(
   input: SendInput
 ): Promise<
-  | { ok: true; sent: number; resendId: string | null; rendered: RenderedEmail }
+  | {
+      ok: true;
+      sent: number;
+      failed: number;
+      failures: RecipientFailure[];
+      rendered: RenderedEmail;
+    }
   | { ok: false; error: string }
 > {
   try {
@@ -175,26 +186,36 @@ export async function sendEmailAction(
   }
 
   try {
-    // 全员塞 bcc，to 用 from 地址占位
-    // 冷启动邀约信直接塞 to 会让互不认识的潜在伙伴互相看到名单
-    const { data, error } = await resend.emails.send({
+    // 每个收件人一封独立邮件（batch.send），to 是真实地址
+    // 旧的 to=from + bcc 群发会被 Gmail/Outlook 反垃圾启发命中（Mail-from = Rcpt-to），
+    // 实测整封 bounced。每封独立寄出，收件人本来就互不可见，隐私维度等价。
+    // permissive 模式下单封失败不阻塞其余成功投递，errors[].index 映射回 parsed.list 拿地址。
+    const messages = parsed.list.map((addr) => ({
       from,
-      to: from,
-      bcc: parsed.list,
+      to: [addr],
       subject: finalSubject,
       html: rendered.rendered.html,
       text: rendered.rendered.text,
       ...(input.replyTo ? { replyTo: input.replyTo } : {}),
-    });
+    }));
+
+    const { data, error } = await resend.batch.send(messages, { batchValidation: 'permissive' });
 
     if (error) {
       return { ok: false, error: error.message || 'Resend API error' };
     }
 
+    const successCount = data?.data?.length ?? 0;
+    const failures: RecipientFailure[] = (data?.errors ?? []).map((e) => ({
+      address: parsed.list[e.index] ?? `index ${e.index}`,
+      message: e.message,
+    }));
+
     return {
       ok: true,
-      sent: parsed.list.length,
-      resendId: data?.id ?? null,
+      sent: successCount,
+      failed: failures.length,
+      failures,
       rendered: { subject: finalSubject, html: rendered.rendered.html, text: rendered.rendered.text },
     };
   } catch (err) {

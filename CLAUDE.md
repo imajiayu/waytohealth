@@ -234,7 +234,7 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 1. 所有 action 入口 `requireAdmin()`（admin cookie 会话）
 2. `parseRecipients(raw)` — 按换行（`\r?\n`）拆分，正则校验 RFC 结构，去重，单次上限 50（Resend 限制）。UI placeholder 与 hint 都是 "One address per line"，避免地址内 `+ . _` 被误切
 3. `renderEmail(templateId)` — 从 `BY_ID` map 取出常量三件套
-4. `resend.emails.send({ from, to, bcc, subject, html, text, replyTo? })` — `to` 固定填 `from` 地址（信封占位），真实收件人全部放 `bcc` 避免群发名单互相泄露（冷启动邀约场景刚需）；`replyTo` 单独再校验一次邮箱格式
+4. `resend.batch.send(messages, { batchValidation: 'permissive' })` — 把收件人列表展开成 N 封独立邮件（每封 `to: [addr]`），单封触发反垃圾不影响其余成功投递。**不**用 `to=from + bcc` 群发：`Mail-from = Rcpt-to` 是经典垃圾邮件特征，Gmail/Outlook 实测整封 bounced。每封独立寄出本身就互不可见，等同 bcc 隐私维度。`permissive` 模式返回 `data.errors[].index`，按下标映射回原列表的邮箱地址组成 `failures: { address, message }[]` 回给前端展示；`replyTo` 单独再校验一次邮箱格式
 
 `previewEmailAction(templateId)` 只返回模板常量用于 UI 预览，不调 Resend。
 

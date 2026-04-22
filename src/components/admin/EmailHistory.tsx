@@ -67,7 +67,7 @@ export default function EmailHistory({ refreshKey }: { refreshKey: number }) {
         <div>
           <h2 className="text-base font-semibold text-gray-900">Send history</h2>
           <p className="mt-1 text-xs text-gray-500">
-            Latest 20 emails from Resend for this workspace.
+            Latest 100 emails from Resend for this workspace.
           </p>
         </div>
         <button
@@ -171,7 +171,7 @@ export default function EmailHistory({ refreshKey }: { refreshKey: number }) {
           </table>
           {result.hasMore && (
             <div className="border-t border-gray-200 bg-gray-50 px-3 py-2.5 text-xs text-gray-500">
-              Resend has more records than shown here. This panel currently displays the latest 20.
+              Resend has more records than shown here. This panel currently displays the latest 100.
             </div>
           )}
         </div>
