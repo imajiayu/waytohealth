@@ -15,9 +15,7 @@
     "newsTitle": "News — Way to Health",
     "newsDescription": "Latest news and updates from the Way to Health Charitable Foundation.",
     "merchTitle": "Merch — Way to Health",
-    "merchDescription": "Support the Way to Health Foundation by purchasing branded merchandise.",
-    "donationSuccessTitle": "Thank you for your donation — Way to Health",
-    "donationSuccessDescription": "Your contribution supports the rehabilitation of those affected by war in Ukraine."
+    "merchDescription": "Support the Way to Health Foundation by purchasing branded merchandise."
   },
   "a11y": {
     "skipToContent": "Skip to content"
@@ -472,10 +470,7 @@
   "projectDetail": {
     "raisedLabel": "Raised",
     "goalLabel": "Goal",
-    "selectAmount": "Select amount",
-    "customAmount": "Custom amount",
     "donateButton": "Support this project",
-    "donationError": "Error, please try again",
     "injuryTitle": "Injury Story",
     "recoveryTitle": "Recovery Path",
     "resultsTitle": "Results",
@@ -493,8 +488,7 @@
     "comingSoon": "Coming soon",
     "monobankHint": "Opens monobank jar page. Enter amount there.",
     "monobankUnavailable": "Jar for this project is not connected yet.",
-    "stripeHint": "Card · Apple Pay · Google Pay",
-    "rateSource": "NBU rate, refreshed hourly"
+    "stripeHint": "Card · Apple Pay · Google Pay"
   },
   "footer": {
     "terms": "Terms & Conditions",
@@ -511,15 +505,5 @@
     "foundationPage": "Foundation page",
     "legalEntity": "CO \"Way to Health Charity Foundation\" (EDRPOU Code 44947699)",
     "copyright": "© {year} Way to Health Charity Foundation. All rights reserved."
-  },
-  "donationSuccess": {
-    "title": "Thank you for your support!",
-    "subtitle": "Your donation has been successfully processed",
-    "amount": "Amount",
-    "project": "Project",
-    "backToProject": "Back to project",
-    "backToHome": "Back to home",
-    "genericTitle": "Thank you!",
-    "genericSubtitle": "Your contribution will help change lives for the better"
   }
 }

@@ -1,17 +1,17 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useInViewOnce } from '@/hooks/useInViewOnce';
-import AmountStep from './donation/AmountStep';
 import MethodStep from './donation/MethodStep';
 import StripeStep from './donation/StripeStep';
 import { useDonationFlow } from './donation/useDonationFlow';
+import { formatCurrency } from './donation/utils';
 
 interface DonationSidebarProps {
   goalAmount: number | null;
   raisedAmount: number;
   projectTitle: string;
   monobankJarSendId?: string;
-  eurRate: number | null;
 }
 
 export default function DonationSidebar({
@@ -19,9 +19,9 @@ export default function DonationSidebar({
   raisedAmount,
   projectTitle,
   monobankJarSendId,
-  eurRate,
 }: DonationSidebarProps) {
   const { ref, isVisible } = useInViewOnce<HTMLDivElement>();
+  const t = useTranslations('projectDetail');
   const flow = useDonationFlow();
 
   const progress = goalAmount
@@ -37,41 +37,65 @@ export default function DonationSidebar({
       <div className="h-1 gradient-brand-line" />
 
       <div className="p-5 sm:p-6">
-        {flow.view === 'amount' ? (
-          <AmountStep
-            key="amount"
-            goalAmount={goalAmount}
-            raisedAmount={raisedAmount}
-            progress={progress}
-            isVisible={isVisible}
-            animationClass={flow.animationClass}
-            selectedAmount={flow.selectedAmount}
-            customAmount={flow.customAmount}
-            isCustom={flow.isCustom}
-            currentAmount={flow.currentAmount}
-            onQuickSelect={flow.quickSelect}
-            onCustomInput={flow.customInput}
-            onCustomFocus={flow.customFocus}
-            onDonate={flow.goToMethod}
-          />
-        ) : flow.view === 'method' ? (
+        {/* ── 进度区（始终显示在顶部，视图切换不影响） ── */}
+        <div className="flex items-baseline justify-between">
+          <div>
+            <span className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-blue-400">
+              {t('raisedLabel')}
+            </span>
+            <div className="mt-0.5 font-[family-name:var(--font-data)] text-xl font-bold text-ukraine-blue-900 sm:text-2xl">
+              {formatCurrency(raisedAmount)}
+            </div>
+          </div>
+          {goalAmount && (
+            <div className="text-right">
+              <span className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.2em] text-ukraine-blue-400">
+                {t('goalLabel')}
+              </span>
+              <div className="mt-0.5 font-[family-name:var(--font-data)] text-base font-semibold text-ukraine-blue-600">
+                {formatCurrency(goalAmount)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 进度条 */}
+        {goalAmount && (
+          <div className="mt-4">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-ukraine-blue-50">
+              <div
+                className="gradient-brand-progress relative h-full rounded-full transition-all duration-1000 ease-out"
+                style={{
+                  width: isVisible ? `${Math.max(progress, 2)}%` : '0%',
+                  transitionDelay: '0.3s',
+                }}
+              >
+                <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-ukraine-blue-300 shadow-[0_0_12px_rgba(0,167,189,0.5)]" />
+              </div>
+            </div>
+            <div className="mt-1.5 text-right font-[family-name:var(--font-data)] text-[11px] text-ukraine-blue-400">
+              {Math.round(progress)}%
+            </div>
+          </div>
+        )}
+
+        {/* ── 分隔线 ── */}
+        <div className="my-5 h-px bg-ukraine-blue-100/60" />
+
+        {/* ── 视图切换：method ↔ stripe ── */}
+        {flow.view === 'method' ? (
           <MethodStep
             key="method"
             animationClass={flow.animationClass}
-            amount={Math.floor(flow.currentAmount)}
             projectTitle={projectTitle}
             monobankJarSendId={monobankJarSendId}
-            onBack={flow.back}
             onStripeSelect={flow.goToStripe}
-            error={flow.error}
           />
         ) : (
           <StripeStep
             key="stripe"
             animationClass={flow.animationClass}
-            amount={Math.floor(flow.currentAmount)}
             projectTitle={projectTitle}
-            eurRate={eurRate}
             onBack={flow.back}
           />
         )}

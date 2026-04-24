@@ -1,6 +1,5 @@
 import { getProject, getAllProjects } from '@/lib/data';
 import { getRaisedAmount } from '@/lib/donations';
-import { getUahToEurRate } from '@/lib/exchangeRate';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { notFound } from 'next/navigation';
@@ -81,11 +80,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const title = project.title[typedLocale];
   const detail = project.detail;
 
-  // 实时已筹金额 + UAH→EUR 汇率（Stripe 视图显示欧元换算参考）
-  const [raisedAmount, eurRate] = await Promise.all([
-    getRaisedAmount(projectId),
-    getUahToEurRate(),
-  ]);
+  // 实时已筹金额（来自 monobank jar）
+  const raisedAmount = await getRaisedAmount(projectId);
 
   // 文档查看器通用标签
   const t = await getTranslations('projectDetail');
@@ -104,7 +100,6 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
     raisedAmount,
     projectTitle: title,
     monobankJarSendId: project.monobankJarSendId,
-    eurRate,
   };
 
   return (

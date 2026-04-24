@@ -41,7 +41,7 @@ npm run start    # 启动生产服务器
 | 前端 | Next.js (App Router), TypeScript, Tailwind CSS | Next.js 16, React 19, Tailwind v4 |
 | 国际化 | next-intl | 支持 ua (乌克兰语) + en (英语) |
 | 部署 | Vercel | 与 NGO_web 一致 |
-| 支付 | Stripe | 法币支付（UAH，Checkout Sessions） |
+| 支付 | Stripe buy-button + monobank jar | 纯前端托管。Stripe：`<stripe-buy-button>` Web Component 嵌入（只用 publishable key，走 Stripe 托管 checkout；本站不持 secret / 不接 webhook / 不聚合 Stripe 金额）。monobank：外跳 `send.monobank.ua/jar/{sendId}` |
 | KV 限流 | @upstash/redis | Vercel Marketplace KV，admin 登录速率限制跨实例共享（`Redis.fromEnv()` 读 `KV_REST_API_*`） |
 | 数据库 | Neon Postgres (`@neondatabase/serverless`) | Vercel Marketplace 接入，存 news 表；serverless HTTP driver，无连接池管理 |
 | Admin 安全 | node:crypto HMAC cookie | HttpOnly 签名 cookie 承载 admin 会话，不走第三方库（见 `src/lib/adminSession.ts`） |
@@ -72,45 +72,40 @@ npm run start    # 启动生产服务器
 
 ---
 
-## 支付方案（Stripe + monobank jar，无数据库）
+## 支付方案（Stripe buy-button + monobank jar，无数据库、无 webhook）
 
-项目**不使用数据库**。捐赠记录由 Stripe + monobank jar 分别托管，两路通过各自 API 读取聚合。
+项目**不使用数据库**、**不接 webhook**、**不持有 Stripe secret key**。捐赠通过 Stripe buy-button 和 monobank jar 两条独立通道收款，只有 monobank 能读到金额（`/personal/client-info`），Stripe 侧我们不聚合。
 
 ### 核心流程
 
-DonationSidebar 是一个**双视图状态机**，两步都在同一 panel 里完成（没有蒙版、没有浮窗），靠 `view: 'amount' | 'method'` + `direction: 'forward' | 'backward'` 驱动 `animate-panel-forward` / `animate-panel-backward` 入场过渡。
+DonationSidebar 是一个**双视图状态机**（method ↔ stripe），顶部进度区（raised / goal / %）常驻，不随视图切换。`direction: 'forward' | 'backward'` 驱动 `animate-panel-forward` / `animate-panel-backward` 入场过渡。
 
 ```
-Step 1 · amount 视图
-  进度条 + 快选金额 + 自定义金额 + 捐赠按钮
-    ↓ 点击捐赠 → setView('method'), direction='forward'
-Step 2 · method 视图
-  ← Back      02/02
-  金额徽章（金额 · 项目名）
-    ├─ monobank 按钮
+Step 1 · method 视图（默认）
+  进度条（raised / goal）
+  ─ 分隔线 ─
+  "Choose payment method" + 项目徽章
+    ├─ monobank 按钮 <a href>
     │     项目 data.json 配了 monobankJarSendId → send.monobank.ua/jar/{项目 sendId}
     │     否则 fallback 到 NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID
     │     都没 → 按钮灰态 "Coming soon"
-    │     （新 tab 打开；用户在 monobank 页面重新输入金额）
+    │     （新 tab 打开；用户在 monobank 页面输入金额）
     │
-    └─ stripe 按钮 → createCheckoutSession (src/app/actions/donate.ts)
-            - 校验 projectId（必须在 PROJECTS 常量中）
-            - 校验金额（UAH，1 ~ 999999 正整数）
-            - 创建 Stripe Checkout Session（mode: payment，currency: uah）
-            - metadata 写入 { project_id }（PaymentIntent 也同步写入）
-            → 重定向到 Stripe 托管支付页
-            → 成功回 /[locale]/donation-success?session_id=...
-            → 取消回项目详情页
+    └─ stripe 按钮 → setView('stripe'), direction='forward'
+Step 2 · stripe 视图
+  ← Back      02/02
+  Stripe logo + 项目徽章
+  <stripe-buy-button> Web Component 嵌入
+    - 加载 https://js.stripe.com/v3/buy-button.js (afterInteractive)
+    - buy-button-id + publishable-key 写死在 src/components/projects/donation/utils.ts
+    - 用户点按钮 → Stripe 托管 checkout 页付款（我们不收回调）
 ```
 
 ### 已筹金额展示
 
-`src/lib/donations.ts` 的 `getRaisedAmount(projectId)` 同时聚合两路数据：
+`src/lib/donations.ts` 的 `getRaisedAmount(projectId)` 只聚合 **monobank jar**：`src/lib/monobank.ts` 调 `/personal/client-info`（`X-Token: MONOBANK_TOKEN`）拉所有 jar，`unstable_cache` 60s 缓存（正好匹配官方"1 次/60s"限流），按 `sendId` 匹配 `project.monobankJarSendId` 取 `balance / 100`。
 
-1. **Stripe** — `stripe.paymentIntents.search` 按 `status:'succeeded' AND metadata['project_id']:'N'`，`unstable_cache` 60s revalidate
-2. **monobank jar** — `src/lib/monobank.ts` 调 `/personal/client-info`（`X-Token: MONOBANK_TOKEN`）拉所有 jar，`unstable_cache` 60s 缓存（正好匹配官方"1 次/60s"限流），按 `sendId` 匹配 `project.monobankJarSendId` 取 `balance / 100`
-
-任一数据源失败单独降级为 0，不阻塞渲染。每个项目在 `data.json` 里通过可选字段 `monobankJarSendId` 绑定自己的 jar。
+Stripe 付款不计入 `raised_amount`（无 webhook / 无 secret key，查不到），这是刻意权衡。任一环节失败降级为 0，不阻塞渲染。
 
 ### 项目/商品数据
 
@@ -122,25 +117,23 @@ Step 2 · method 视图
 
 ### 有意省略的能力
 
-下面这些能力在纯 Stripe 架构下**不提供**，如未来需要再引入数据库：
+下面这些能力**不提供**，如未来需要再引入数据库 / webhook：
 - 捐赠者留言 / 公开捐赠墙
 - Admin 后台（订单列表、状态机、发货跟踪）
 - 月捐（订阅）
 - 商品购买的收货地址、快递单号
-- Webhook 回调（当前架构不需要，Stripe Search 即数据源）
+- 支付成功页（没有 webhook 就没有可靠成功信号）
+- Stripe 金额聚合到 raised_amount
 - 邮件通知（Resend 未接入）
 
 ### 环境变量
 
 ```env
-STRIPE_SECRET_KEY=
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
 MONOBANK_TOKEN=                          # 基金会账户的 monobank personal token（api.monobank.ua 自助生成）
 NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID= # 基金会主 jar 的 sendId；项目无 monobankJarSendId 时 fallback 到这个
 ```
 
-- `NEXT_PUBLIC_SITE_URL` 用于拼接 Checkout 的 `success_url` / `cancel_url`
-- `MONOBANK_TOKEN` 缺失时进度条只显示 Stripe 那部分，不报错
+- `MONOBANK_TOKEN` 缺失时 `getRaisedAmount` 返回 0，不报错
 - `NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID` 让支付方式面板里的 monobank 按钮始终可点（项目自己的 sendId 缺失时跳 fallback jar）；两者都缺失时 monobank 按钮显示 "Coming soon" 灰态
 
 ---
@@ -303,7 +296,6 @@ src/
 │       ├── page.tsx             # 首页
 │       ├── about/               # 关于我们
 │       ├── projects/            # 项目详情（/projects?id=N）
-│       ├── donation-success/    # 捐赠成功页（Stripe 回调）
 │       ├── merch/               # 周边商品
 │       ├── news/                # 新闻动态（Twitter 风格双语时间线）
 │       ├── partners/            # 合作伙伴
@@ -335,12 +327,10 @@ src/
 │   ├── request.ts               # next-intl 请求配置
 │   └── routing.ts               # next-intl 路由配置
 ├── app/actions/
-│   ├── donate.ts                # Stripe Checkout server action
 │   ├── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
 │   └── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送 + 历史拉取）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
-│   ├── stripe.ts                # Stripe 客户端单例
 │   ├── resend.ts                # Resend 客户端单例（server-only），re-export emailFrom 的工具
 │   ├── emailFrom.ts             # 发件人常量：display name / 域名 / 前缀白名单 / buildFromAddress（client-safe）
 │   ├── emailTemplates.ts        # 邮件模板注册表（server-only，纯静态 HTML，无变量）
@@ -348,8 +338,7 @@ src/
 │   ├── donations.ts             # 已筹金额查询（带缓存）
 │   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache）
 │   ├── db.ts                    # Neon Postgres 单例（`@neondatabase/serverless`）
-│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（NBU 等对外调用）
-│   ├── exchangeRate.ts          # NBU 汇率（带 5s 超时 + 1h 缓存）
+│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（monobank 等对外调用）
 │   ├── seo.ts                   # SEO helper：canonical / hreflang / openGraph / twitter
 │   ├── adminAuth.ts             # 管理员密码 hash 校验（server-only）
 │   ├── adminSession.ts          # HMAC-SHA256 签名 cookie 会话发放/验证/清除

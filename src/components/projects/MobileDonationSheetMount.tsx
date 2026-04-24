@@ -11,7 +11,6 @@ interface MobileDonationSheetMountProps {
   raisedAmount: number;
   projectTitle: string;
   monobankJarSendId?: string;
-  eurRate: number | null;
 }
 
 const MQ = '(max-width: 1023.98px)'; // Tailwind lg 断点以下

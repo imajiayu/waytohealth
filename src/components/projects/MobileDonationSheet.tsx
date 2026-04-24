@@ -9,7 +9,6 @@ interface MobileDonationSheetProps {
   raisedAmount: number;
   projectTitle: string;
   monobankJarSendId?: string;
-  eurRate: number | null;
 }
 
 export default function MobileDonationSheet({
@@ -17,7 +16,6 @@ export default function MobileDonationSheet({
   raisedAmount,
   projectTitle,
   monobankJarSendId,
-  eurRate,
 }: MobileDonationSheetProps) {
   const t = useTranslations('projectDetail');
 
@@ -32,7 +30,6 @@ export default function MobileDonationSheet({
           raisedAmount={raisedAmount}
           projectTitle={projectTitle}
           monobankJarSendId={monobankJarSendId}
-          eurRate={eurRate}
         />
       </div>
     </BottomSheet>

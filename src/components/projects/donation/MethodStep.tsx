@@ -1,28 +1,21 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import { formatCurrency } from './utils';
 
 interface MethodStepProps {
   animationClass: string;
-  amount: number;
   projectTitle: string;
   monobankJarSendId?: string;
-  onBack: () => void;
   onStripeSelect: () => void;
-  error: string;
 }
 
 export default function MethodStep({
   animationClass,
-  amount,
   projectTitle,
   monobankJarSendId,
-  onBack,
   onStripeSelect,
-  error,
 }: MethodStepProps) {
   const t = useTranslations('projectDetail');
 
@@ -35,42 +28,15 @@ export default function MethodStep({
 
   return (
     <div className={animationClass}>
-      {/* ── 顶部：返回 + 步骤序号 ── */}
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="group -ml-1 flex cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 font-[family-name:var(--font-data)] text-[11px] font-semibold uppercase tracking-[0.2em] text-ukraine-blue-500 transition-colors hover:text-ukraine-blue-700"
-        >
-          <ArrowLeft
-            className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5"
-            strokeWidth={2.5}
-          />
-          {t('back')}
-        </button>
-        <span className="font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.25em] text-ukraine-blue-300">
-          02 / 03
-        </span>
-      </div>
-
       {/* ── 标题 ── */}
-      <h3 className="mt-4 text-lg font-semibold leading-tight text-ukraine-blue-900 sm:text-xl">
+      <h3 className="text-lg font-semibold leading-tight text-ukraine-blue-900 sm:text-xl">
         {t('selectPaymentMethod')}
       </h3>
 
-      {/* ── 金额徽章 ── */}
+      {/* ── 项目徽章 ── */}
       <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-ukraine-blue-100 bg-ukraine-blue-50/60 px-3 py-1.5">
-        <span className="font-[family-name:var(--font-data)] text-sm font-bold text-ukraine-blue-700">
-          {formatCurrency(amount)}
-        </span>
-        <span className="h-1 w-1 shrink-0 rounded-full bg-ukraine-blue-300" />
         <span className="truncate text-xs text-ukraine-blue-600">{projectTitle}</span>
       </div>
-
-      {/* ── 错误提示 ── */}
-      {error && (
-        <p className="mt-3 text-sm text-red-500">{error}</p>
-      )}
 
       {/* ── 支付方式列表 ── */}
       <div className="mt-5 space-y-2.5">

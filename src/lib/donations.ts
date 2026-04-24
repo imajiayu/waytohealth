@@ -1,56 +1,14 @@
-import { unstable_cache } from 'next/cache';
-import { getStripe } from './stripe';
 import { getAllJarBalances } from './monobank';
 import { getProject } from './data';
 
-// 从 Stripe 查询某个项目的已筹金额（UAH）
-async function fetchStripeRaisedAmount(projectId: number): Promise<number> {
-  try {
-    const stripe = getStripe();
-    let totalKopiykas = 0;
-    let hasMore = true;
-    let nextPage: string | undefined;
-
-    while (hasMore) {
-      const result = await stripe.paymentIntents.search({
-        query: `status:'succeeded' AND metadata['project_id']:'${projectId}'`,
-        limit: 100,
-        ...(nextPage ? { page: nextPage } : {}),
-      });
-
-      for (const pi of result.data) {
-        totalKopiykas += pi.amount;
-      }
-
-      hasMore = result.has_more;
-      nextPage = result.next_page ?? undefined;
-    }
-
-    // 转换为 UAH（1 UAH = 100 копійок）
-    return Math.floor(totalKopiykas / 100);
-  } catch {
-    // Stripe 调用失败时（如无 key）返回 0，不阻塞渲染
-    return 0;
-  }
-}
-
-const getStripeRaisedCached = unstable_cache(
-  fetchStripeRaisedAmount,
-  ['raised-amount-stripe'],
-  { revalidate: 60 }
-);
-
-// 项目已筹金额 = Stripe 聚合 + monobank jar balance（任一失败降级为 0）
-// 三路完全并行：Stripe 聚合、项目元数据、monobank jar map —— 冷路径下省一次串行 RTT
+// 项目已筹金额 = monobank jar balance（无 webhook / 无 Stripe 聚合；monobank jar 是唯一 tracked 渠道）
+// 任一失败降级为 0，不阻塞渲染
 export async function getRaisedAmount(projectId: number): Promise<number> {
-  const [stripeAmount, project, jars] = await Promise.all([
-    getStripeRaisedCached(projectId),
+  const [project, jars] = await Promise.all([
     getProject(projectId).catch(() => null),
     getAllJarBalances().catch(() => new Map<string, number>()),
   ]);
 
   const sendId = project?.monobankJarSendId;
-  const jarAmount = sendId ? jars.get(sendId) ?? 0 : 0;
-
-  return stripeAmount + jarAmount;
+  return sendId ? jars.get(sendId) ?? 0 : 0;
 }

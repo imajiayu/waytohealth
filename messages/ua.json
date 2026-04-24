@@ -15,9 +15,7 @@
     "newsTitle": "Новини — Шлях до здоров'я",
     "newsDescription": "Останні новини та оновлення від Благодійного фонду «Шлях до здоров'я».",
     "merchTitle": "Мерч — Шлях до здоров'я",
-    "merchDescription": "Підтримайте фонд «Шлях до здоров'я», придбавши брендований мерч.",
-    "donationSuccessTitle": "Дякуємо за ваш внесок — Шлях до здоров'я",
-    "donationSuccessDescription": "Ваш благодійний внесок підтримує реабілітацію постраждалих від війни в Україні."
+    "merchDescription": "Підтримайте фонд «Шлях до здоров'я», придбавши брендований мерч."
   },
   "a11y": {
     "skipToContent": "Перейти до вмісту"
@@ -472,10 +470,7 @@
   "projectDetail": {
     "raisedLabel": "Зібрано",
     "goalLabel": "Ціль",
-    "selectAmount": "Оберіть суму",
-    "customAmount": "Інша сума",
     "donateButton": "Підтримати проєкт",
-    "donationError": "Помилка, спробуйте ще раз",
     "injuryTitle": "Історія поранення",
     "recoveryTitle": "Шлях відновлення",
     "resultsTitle": "Результати",
@@ -493,8 +488,7 @@
     "comingSoon": "Незабаром",
     "monobankHint": "Відкриється сторінка банки. Введіть суму там.",
     "monobankUnavailable": "Банку для цього проєкту ще не підключено.",
-    "stripeHint": "Картка · Apple Pay · Google Pay",
-    "rateSource": "Курс НБУ, оновлюється щогодини"
+    "stripeHint": "Картка · Apple Pay · Google Pay"
   },
   "footer": {
     "terms": "Умови та положення",
@@ -511,15 +505,5 @@
     "foundationPage": "Сторінка фонду",
     "legalEntity": "БО «Благодійний фонд «Шлях до здоров'я»» (код ЄДРПОУ 44947699)",
     "copyright": "© {year} Way to Health Charity Foundation. Всі права захищені."
-  },
-  "donationSuccess": {
-    "title": "Дякуємо за вашу підтримку!",
-    "subtitle": "Вашу пожертву успішно оброблено",
-    "amount": "Сума",
-    "project": "Проєкт",
-    "backToProject": "Повернутися до проєкту",
-    "backToHome": "На головну",
-    "genericTitle": "Дякуємо!",
-    "genericSubtitle": "Ваш внесок допоможе змінити життя на краще"
   }
 }
