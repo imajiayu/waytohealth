@@ -47,7 +47,6 @@
     "empty": "No news yet. Stay tuned.",
     "tags": {
       "filterLabel": "Filter by topic",
-      "all": "All topics",
       "emptyFilter": "No news in this topic yet."
     }
   },
@@ -489,6 +488,152 @@
     "monobankHint": "Opens monobank jar page. Enter amount there.",
     "monobankUnavailable": "Jar for this project is not connected yet.",
     "stripeHint": "Card · Apple Pay · Google Pay"
+  },
+  "forms": {
+    "requestAssistance": {
+      "meta": {
+        "title": "Request Assistance — Way to Health",
+        "description": "Fill out the form to request assistance from the Way to Health Charitable Foundation."
+      },
+      "title": "Request Assistance",
+      "intro": "Please fill out this form to request assistance from the Way to Health Charitable Foundation.",
+      "submit": "Send request",
+      "submitting": "Sending…",
+      "errors": {
+        "invalid": "Please check the required fields.",
+        "rateLimited": "Too many requests from your IP address. Please try again later.",
+        "server": "An error occurred while sending. Please try again."
+      },
+      "fields": {
+        "fullName": { "label": "Your full name" },
+        "phone": { "label": "Contact phone number", "placeholder": "+380…" },
+        "email": { "label": "Email", "placeholder": "name@example.com" },
+        "city": { "label": "City of residence" },
+        "applicant": {
+          "label": "Who is applying",
+          "options": {
+            "self": "I am applying personally",
+            "relative": "A relative or close person",
+            "representative": "A representative (volunteer, social worker, etc.)"
+          }
+        },
+        "assistance": {
+          "label": "What kind of assistance do you need?",
+          "options": {
+            "physical": "Physical rehabilitation",
+            "psychological": "Psychological support",
+            "medical": "Medical equipment",
+            "transport": "Transport / transfer",
+            "other": "Other"
+          }
+        },
+        "description": { "label": "Briefly describe your request" },
+        "consent": { "label": "I consent to the processing of personal data" },
+        "referral": {
+          "label": "How did you hear about our foundation?",
+          "options": {
+            "social": "Social media (Instagram / Facebook, TikTok)",
+            "google": "Google search",
+            "acquaintance": "From friends / relatives",
+            "media": "Media (news, articles, TV)",
+            "events": "Public events / activities",
+            "other": "Other"
+          }
+        }
+      },
+      "success": {
+        "title": "Thank you for your request",
+        "body": "Your request has been submitted successfully. We will get in touch with you shortly.",
+        "back": "Back to home"
+      }
+    },
+    "partnership": {
+      "meta": {
+        "title": "Partnership — Way to Health",
+        "description": "Fill out the form to partner with the Way to Health Charitable Foundation."
+      },
+      "title": "Partner with Way to Health",
+      "intro": "Thank you for your interest in partnering with our foundation! Please fill out a short form — it will help us better understand your request and propose the most effective form of partnership.",
+      "submit": "Send",
+      "submitting": "Sending…",
+      "errors": {
+        "invalid": "Please check the required fields.",
+        "rateLimited": "Too many requests from your IP address. Please try again later.",
+        "server": "An error occurred while sending. Please try again."
+      },
+      "fields": {
+        "orgName": { "label": "Organization / company name" },
+        "contactName": { "label": "Contact person's full name" },
+        "position": { "label": "Position" },
+        "phone": { "label": "Contact phone number", "placeholder": "+380…" },
+        "email": { "label": "Email", "placeholder": "name@example.com" },
+        "location": { "label": "City / country" },
+        "orgType": {
+          "label": "Type of organization",
+          "placeholder": "Select…",
+          "options": {
+            "business": "Business / company",
+            "charity": "Charity / foundation",
+            "international": "International organization",
+            "government": "Government institution",
+            "volunteer": "Initiative group / volunteers",
+            "other": "Other"
+          }
+        },
+        "website": { "label": "Website / social media link" },
+        "supportWay": {
+          "label": "How would you like to support our foundation?",
+          "options": {
+            "financial": "Financial support",
+            "joint-projects": "Joint projects",
+            "information": "Information support",
+            "goods": "Providing goods / equipment",
+            "services": "Providing services (pro bono)",
+            "other": "Other"
+          }
+        },
+        "interests": {
+          "label": "Which areas of assistance interest you most?",
+          "hint": "You can select several options",
+          "options": {
+            "inpatient": "Opening of an inpatient department",
+            "physical": "Physical rehabilitation of war victims",
+            "psychological": "Psychological support",
+            "humanitarian": "Humanitarian aid",
+            "innovation": "Innovative solutions",
+            "equipment": "Medical equipment",
+            "transport": "Specialized transport (ambulances)",
+            "other": "Other"
+          }
+        },
+        "hasIdea": {
+          "label": "Do you already have an idea or proposal for cooperation?",
+          "options": {
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        "ideaDescription": { "label": "If yes, please describe your vision", "optionalSuffix": "(optional)" },
+        "consent": { "label": "I consent to the processing of the information provided for communication and partnership development." },
+        "referral": {
+          "label": "How did you hear about our foundation?",
+          "placeholder": "Select…",
+          "options": {
+            "social": "Social media (Instagram / Facebook, TikTok)",
+            "google": "Google search",
+            "colleagues": "From colleagues",
+            "media": "Media (news, articles, TV)",
+            "events": "Public events / activities",
+            "other": "Other"
+          }
+        }
+      },
+      "success": {
+        "title": "Thank you for your request",
+        "body": "We've received your application and will contact you shortly.",
+        "back": "Back to home"
+      }
+    }
   },
   "footer": {
     "terms": "Terms & Conditions",

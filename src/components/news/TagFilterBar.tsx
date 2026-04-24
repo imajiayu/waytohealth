@@ -11,9 +11,7 @@ interface TagFilterBarProps {
   tags: TagWithCount[];
   activeTag: string | null;   // 当前 ?tag= 的 en 值（小写），null = 全部
   locale: Locale;
-  allLabel: string;           // "Усі теми" / "All topics"
   filterLabel: string;        // "Фільтр за темою" / "Filter by topic"
-  totalCount: number;         // 全集合数量
 }
 
 // 胶囊样式：和移动端 chips + 卡片上的 tag 三处保持视觉一致
@@ -34,9 +32,7 @@ export default function TagFilterBar({
   tags,
   activeTag,
   locale,
-  allLabel,
   filterLabel,
-  totalCount,
 }: TagFilterBarProps) {
   if (tags.length === 0) return null;
 
@@ -72,12 +68,11 @@ export default function TagFilterBar({
           </span>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {renderPill('/news', allLabel, totalCount, activeTag === null)}
           {tags.map((tag) => {
             const key = tag.en.toLowerCase();
             const isActive = activeTag === key;
             return renderPill(
-              `/news?tag=${encodeURIComponent(key)}`,
+              isActive ? '/news' : `/news?tag=${encodeURIComponent(key)}`,
               tag[locale],
               tag.count,
               isActive,
@@ -95,13 +90,12 @@ export default function TagFilterBar({
             {filterLabel}
           </span>
         </div>
-        <div className="hide-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6">
-          {renderPill('/news', allLabel, totalCount, activeTag === null)}
+        <div className="mt-4 flex flex-wrap gap-2">
           {tags.map((tag) => {
             const key = tag.en.toLowerCase();
             const isActive = activeTag === key;
             return renderPill(
-              `/news?tag=${encodeURIComponent(key)}`,
+              isActive ? '/news' : `/news?tag=${encodeURIComponent(key)}`,
               tag[locale],
               tag.count,
               isActive,

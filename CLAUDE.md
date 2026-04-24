@@ -273,6 +273,42 @@ FORWARD_TO_EMAIL=                 # Inbound 邮件转发目标 Gmail，见上文
 
 ---
 
+## 表单系统（Request Assistance / Partnership）
+
+两张从原 Google Form 搬过来的前台表单 —— `/[locale]/request-assistance` 和 `/[locale]/partnership`。提交落到 Neon Postgres，admin 后台 `/admin/requests`、`/admin/partnerships` 只读查看。两张表单刻意不发邮件、不发通知（避免多入口维护），基金会团队每周登 admin 翻。
+
+**Schema（需在 Neon console 一次性执行）**：
+
+```sql
+CREATE TABLE assistance_requests (
+  id           TEXT PRIMARY KEY,              -- ar-YYYY-MM-DD-HHmm-xxxx
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  locale       TEXT NOT NULL,                 -- 'ua' | 'en'
+  data         JSONB NOT NULL                 -- AssistanceRequestData
+);
+CREATE INDEX idx_assistance_submitted ON assistance_requests (submitted_at DESC);
+
+CREATE TABLE partnership_requests (
+  id           TEXT PRIMARY KEY,              -- pr-YYYY-MM-DD-HHmm-xxxx
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  locale       TEXT NOT NULL,
+  data         JSONB NOT NULL                 -- PartnershipRequestData
+);
+CREATE INDEX idx_partnership_submitted ON partnership_requests (submitted_at DESC);
+```
+
+**刻意保持简单**：
+- 所有字段的合法值集合（applicant / assistance / referral / orgType / supportWay / interests / hasIdea）都在 `src/data/requests.ts` 以 `readonly string[] + as const + (typeof X)[number]` 模式定义，action 侧用 `enumValue` / `enumArray` 白名单过滤，admin 侧直接按 union 类型渲染 label 字典
+- 问题文本（题干 / 选项文案）**不**进 DB，全走 `messages/{locale}.json` `forms.*` 命名空间
+- 表单页 `generateMetadata` 设 `robots: { index: false, follow: true }`、成功页设 `{ index: false, follow: false }`；两张前台路径**不加入 `sitemap.ts`**，这两条是刻意决定
+- Admin 页面（`/admin/requests` · `/admin/partnerships`）不走 i18n，英文硬编码，和 `/admin/news` 同一模式
+
+**限流**：`src/lib/formRateLimit.ts` 每 IP 每 60 分钟 8 次提交。用 Upstash Redis `INCR` + 首次 `EXPIRE` 原子计数；Redis 不可用降级到进程内 Map（`STATE_CAP=2000` 做 LRU 兜底）。**IP 提取走 `x-real-ip` 优先**（Vercel 平台不可伪造），`x-forwarded-for` 仅非 Vercel 环境兜底 —— 和 `src/lib/adminAuth.ts` 同步，避免攻击者塞伪造 XFF 头绕过限流。
+
+**迁移工具**：`scripts/migrate-requests.mjs` 读本地 `.env` 里的 `DATABASE_URL`，把 JSON 导出批量回填进表（dev/prod 环境迁移或从旧 Google Form 批导时使用）。
+
+---
+
 ## 项目结构
 
 ```
@@ -284,7 +320,9 @@ src/
 │   ├── admin/                   # Admin 路由（不走 i18n，独立 HTML/body）
 │   │   ├── layout.tsx           # admin 自己的 <html><body>（英文）
 │   │   ├── news/page.tsx        # News 管理后台
-│   │   └── email/page.tsx       # Email 发送后台（Resend）
+│   │   ├── email/page.tsx       # Email 发送后台（Resend）
+│   │   ├── requests/page.tsx    # Assistance 申请列表（只读）
+│   │   └── partnerships/page.tsx # Partnership 申请列表（只读）
 │   ├── api/
 │   │   ├── admin/{login,logout,me}/  # 签名 cookie 发放 / 清除 / 探活
 │   │   ├── news/upload/              # Vercel Blob client upload handler
@@ -301,7 +339,9 @@ src/
 │       ├── partners/            # 合作伙伴
 │       ├── terms/               # 条款与条件
 │       ├── privacy/             # 隐私政策
-│       └── public-agreements/   # 公共协议（捐赠公开要约）
+│       ├── public-agreements/   # 公共协议（捐赠公开要约）
+│       ├── request-assistance/  # 申请帮助表单（+ /success 页）
+│       └── partnership/         # 合作伙伴申请表单（+ /success 页）
 ├── components/
 │   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentAccordion）
 │   ├── common/                  # 通用 UI 组件（BottomSheet, DocumentViewer）
@@ -310,7 +350,8 @@ src/
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
 │   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney）
 │   ├── news/                    # 新闻组件（NewsCard, NewsLightbox, HomeDispatchCard, HomeDispatchCtaCard）
-│   ├── admin/                   # Admin 后台组件（news 编辑器、图片上传等）
+│   ├── admin/                   # Admin 后台组件（news 编辑器、AssistanceRequestsPanel、PartnershipRequestsPanel 等）
+│   ├── forms/                   # 表单原子（fields.tsx / PartnershipForm / RequestAssistanceForm）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
 │   ├── useAutoScroll.ts         # 横向自动滚动 hook
@@ -321,14 +362,16 @@ src/
 │   ├── partners.json            # 合作伙伴原始数据
 │   ├── partners.ts              # 合作伙伴类型定义 + 类型化导出
 │   ├── projects.ts              # 项目类型定义
-│   └── news.ts                  # 新闻类型定义
+│   ├── news.ts                  # 新闻类型定义
+│   └── requests.ts              # Assistance/Partnership 表单字段类型 + 枚举白名单
 ├── i18n/
 │   ├── config.ts                # 语言配置（locales, defaultLocale）
 │   ├── request.ts               # next-intl 请求配置
 │   └── routing.ts               # next-intl 路由配置
 ├── app/actions/
 │   ├── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
-│   └── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送 + 历史拉取）
+│   ├── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送 + 历史拉取）
+│   └── requests.ts              # Request/Partnership 提交（公开）+ admin 读取（需 cookie）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── resend.ts                # Resend 客户端单例（server-only），re-export emailFrom 的工具
@@ -342,7 +385,9 @@ src/
 │   ├── seo.ts                   # SEO helper：canonical / hreflang / openGraph / twitter
 │   ├── adminAuth.ts             # 管理员密码 hash 校验（server-only）
 │   ├── adminSession.ts          # HMAC-SHA256 签名 cookie 会话发放/验证/清除
-│   └── adminRateLimit.ts        # 管理员登录 IP 速率限制（@upstash/redis，fallback 进程内 Map）
+│   ├── adminRateLimit.ts        # 管理员登录 IP 速率限制（@upstash/redis，fallback 进程内 Map）
+│   ├── formRateLimit.ts         # 前台表单 IP 速率限制（每 IP 每小时 8 次）
+│   └── requests.ts              # Assistance/Partnership 表 INSERT / SELECT（Neon Postgres）
 └── proxy.ts                     # i18n 路由中间件（Next.js 16 起用 proxy.ts 替代 middleware.ts）
 messages/
 ├── ua.json                      # 乌克兰语翻译

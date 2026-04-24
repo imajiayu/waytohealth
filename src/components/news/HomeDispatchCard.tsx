@@ -49,7 +49,7 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
             src={resolveImg(cover)}
             alt=""
             fill
-            sizes="(max-width: 640px) 86vw, 340px"
+            sizes="(max-width: 640px) 62vw, 340px"
             unoptimized={isRemote(cover)}
             className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]"
           />

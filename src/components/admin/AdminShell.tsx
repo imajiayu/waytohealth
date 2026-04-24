@@ -10,6 +10,8 @@ import { AdminAuthContext } from './AdminAuthContext';
 const TABS = [
   { href: '/admin/news', label: 'News' },
   { href: '/admin/email', label: 'Email' },
+  { href: '/admin/requests', label: 'Requests' },
+  { href: '/admin/partnerships', label: 'Partnerships' },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

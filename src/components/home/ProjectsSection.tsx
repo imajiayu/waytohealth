@@ -1,14 +1,18 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { getAllProjects } from '@/lib/data';
 import { getRaisedAmount } from '@/lib/donations';
+import { toLocale } from '@/i18n/config';
 import ProjectCard from '@/components/projects/ProjectCard';
+import MobileProjectSwitcher from '@/components/home/MobileProjectSwitcher';
 
 export default async function ProjectsSection() {
-  const [t, tNav, rawProjects] = await Promise.all([
+  const [t, tNav, rawProjects, rawLocale] = await Promise.all([
     getTranslations('projects'),
     getTranslations('navigation'),
     getAllProjects(),
+    getLocale(),
   ]);
+  const locale = toLocale(rawLocale);
 
   // 并行查询每个项目的实时已筹金额
   const projects = await Promise.all(
@@ -45,8 +49,30 @@ export default async function ProjectsSection() {
           <div className="mt-3 accent-line" />
         </div>
 
-        {/* 主项目卡片网格 — 大卡片 3 列 */}
-        <div className="mt-2 grid gap-5 sm:mt-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+        {/* 移动端：缩略图导航 + 单张当前卡片（折叠纵向高度，不用滚很长） */}
+        <div className="mt-4 sm:hidden">
+          <MobileProjectSwitcher
+            thumbs={mainProjects.map((p) => ({
+              id: p.id,
+              cover: p.cover,
+              title: p.title[locale],
+            }))}
+          >
+            {mainProjects.map((project, i) => (
+              <ProjectCard
+                key={project.id}
+                id={project.id}
+                data={project}
+                cover={project.cover}
+                index={i}
+                skipFadeIn
+              />
+            ))}
+          </MobileProjectSwitcher>
+        </div>
+
+        {/* 桌面端：大卡片 3 列网格 */}
+        <div className="mt-3 hidden gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {mainProjects.map((project, i) => (
             <ProjectCard
               key={project.id}
@@ -69,7 +95,7 @@ export default async function ProjectsSection() {
             </div>
 
             {/* 紧凑卡片 5 列 */}
-            <div className="mt-2 grid gap-3 grid-cols-2 sm:mt-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+            <div className="mt-2 grid gap-3 grid-cols-3 sm:mt-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5 lg:gap-5">
               {otherProjects.map((project, i) => (
                 <ProjectCard
                   key={project.id}

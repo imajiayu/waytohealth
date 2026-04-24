@@ -207,19 +207,25 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
               return (
                 <section className="mt-10 sm:mt-12">
                   {images.length <= 3 ? (
-                    /* 单行：≤3 张图，等宽竖图 */
-                    <div className="flex items-stretch gap-2.5 sm:gap-3">
+                    /* ≤3 张图：mobile 2 列网格（1 张单列、3 张末图跨 2 列）；sm+ 等宽并排 */
+                    <div
+                      className={`${
+                        images.length === 1 ? 'grid grid-cols-1' : 'grid grid-cols-2'
+                      } gap-2.5 sm:flex sm:items-stretch sm:gap-3`}
+                    >
                       {images.map((img, i) => (
                         <div
                           key={i}
-                          className={`relative flex-1 overflow-hidden rounded-xl ${aspectClass}`}
+                          className={`relative overflow-hidden rounded-xl ${aspectClass} sm:flex-1${
+                            images.length === 3 && i === 2 ? ' col-span-2 sm:col-span-1' : ''
+                          }`}
                         >
                           <Image
                             src={`/data/projects/${projectId}/${img}`}
                             alt={`${title} ${i + 1}`}
                             fill
                             className="object-cover"
-                            sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 28vw, 220px"
                           />
                         </div>
                       ))}

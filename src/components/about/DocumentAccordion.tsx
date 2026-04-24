@@ -54,26 +54,26 @@ function DocumentRow({
       <button
         type="button"
         onClick={onToggle}
-        className={`group flex w-full cursor-pointer items-center gap-4 px-5 py-5 text-left transition-colors duration-200 md:px-6 ${
+        className={`group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 text-left transition-colors duration-200 sm:gap-4 md:px-6 md:py-5 ${
           isOpen
             ? 'bg-ukraine-blue-50/50'
             : 'hover:bg-ukraine-gold-50/40'
         }`}
       >
         {/* 编号 */}
-        <span className="font-[family-name:var(--font-data)] text-sm font-semibold tabular-nums text-ukraine-gold-600">
+        <span className="font-[family-name:var(--font-data)] text-xs font-semibold tabular-nums text-ukraine-gold-600 sm:text-sm">
           {id}
         </span>
 
         {/* 标题 */}
         <span className="min-w-0 flex-1">
-          <span className={`block font-[family-name:var(--font-display)] text-base font-semibold leading-snug tracking-tight transition-colors duration-200 sm:text-lg ${
+          <span className={`block font-[family-name:var(--font-display)] text-[14px] font-semibold leading-snug tracking-tight transition-colors duration-200 sm:text-lg ${
             isOpen ? 'text-ukraine-blue-700' : 'text-ukraine-blue-900 group-hover:text-ukraine-blue-700'
           }`}>
             {doc.title}
           </span>
           {/* 移动端元信息 */}
-          <span className="mt-1 block font-[family-name:var(--font-data)] text-[10px] uppercase tracking-[0.2em] text-ukraine-blue-400 md:hidden">
+          <span className="mt-0.5 block font-[family-name:var(--font-data)] text-[9px] uppercase tracking-[0.2em] text-ukraine-blue-400 md:hidden">
             PDF · {doc.size}
           </span>
         </span>
@@ -89,12 +89,12 @@ function DocumentRow({
         </span>
 
         {/* 展开箭头 */}
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
+        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300 sm:h-8 sm:w-8 ${
           isOpen
             ? 'border-ukraine-blue-300 bg-ukraine-blue-500 text-white'
             : 'border-ukraine-blue-200 text-ukraine-blue-400 group-hover:border-ukraine-gold-500 group-hover:text-ukraine-gold-600'
         }`}>
-          <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 sm:h-4 sm:w-4 ${isOpen ? 'rotate-180' : ''}`} />
         </span>
       </button>
 
@@ -104,7 +104,7 @@ function DocumentRow({
         style={{ maxHeight: isOpen ? `${contentHeight}px` : '0px' }}
       >
         <div ref={contentRef}>
-          <div className="px-5 pb-5 md:px-6 md:pb-6">
+          <div className="px-4 pb-4 md:px-6 md:pb-6">
             <div className="overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white shadow-[0_2px_12px_rgba(0,108,178,0.06)]">
               {/* 工具栏 */}
               <div className="flex items-center justify-between border-b border-ukraine-blue-100/60 bg-ukraine-blue-50/30 px-4 py-2">
@@ -148,7 +148,7 @@ function DocumentRow({
               </div>
 
               {/* PDF 预览 */}
-              <div className={`transition-all duration-300 ${fullscreen ? 'h-[85vh]' : 'h-[500px] sm:h-[600px]'}`}>
+              <div className={`transition-all duration-300 ${fullscreen ? 'h-[85vh]' : 'h-[380px] sm:h-[600px]'}`}>
                 <iframe
                   src={doc.href}
                   className="h-full w-full border-0"
@@ -169,11 +169,11 @@ export default function DocumentAccordion({ documents, labels }: Props) {
 
   return (
     <section>
-      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-ukraine-blue-900 sm:text-3xl">
+      <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-ukraine-blue-900 sm:text-3xl">
         {labels.title}
       </h2>
 
-      <div className="mt-6 overflow-hidden rounded-[6px] border border-ukraine-blue-100 bg-white/60 backdrop-blur-sm">
+      <div className="mt-4 overflow-hidden rounded-[6px] border border-ukraine-blue-100 bg-white/60 backdrop-blur-sm sm:mt-6">
         {/* 表头 — 桌面端 */}
         <div className="hidden items-center gap-4 border-b border-ukraine-blue-100 bg-ukraine-blue-50/40 px-6 py-3 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.22em] text-ukraine-blue-600 md:flex">
           <span className="w-8">№</span>

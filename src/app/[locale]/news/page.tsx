@@ -64,18 +64,20 @@ export default async function NewsPage({ searchParams }: PageProps) {
     <div className="container-page section-y">
       <ScrollToHash />
       <header className="mx-auto max-w-5xl">
-        <h1 className="font-[family-name:var(--font-display)] text-4xl font-bold leading-[1] tracking-[-0.02em] text-ukraine-blue-600 sm:text-5xl">
+        <h1 className="font-[family-name:var(--font-display)] text-[32px] font-bold leading-[1.05] tracking-[-0.02em] text-ukraine-blue-600 sm:text-5xl sm:leading-[1]">
           {tNav('news')}
         </h1>
 
-        <p className="mt-5 max-w-xl text-[14px] leading-relaxed text-gray-500 sm:text-[15px]">
+        <p className="mt-3 text-[14px] leading-relaxed text-gray-500 sm:mt-5 sm:max-w-xl sm:text-[15px]">
           {tNews('intro')}
         </p>
       </header>
 
       <div
-        className={`mx-auto mt-8 max-w-5xl gap-x-12 gap-y-6 sm:mt-10 ${
-          hasAnyTags ? 'grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-x-16' : ''
+        className={`mx-auto mt-4 max-w-5xl gap-y-5 sm:mt-8 sm:gap-y-6 ${
+          hasAnyTags
+            ? 'flex flex-col lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-x-16'
+            : ''
         }`}
       >
         {/* 左：sticky rail（桌面） / 顶部 chips（移动）— 组件内部响应式切换 */}
@@ -83,13 +85,11 @@ export default async function NewsPage({ searchParams }: PageProps) {
           tags={allTags}
           activeTag={activeTagInUnion ? activeTag : null}
           locale={locale}
-          allLabel={tNews('tags.all')}
           filterLabel={tNews('tags.filterLabel')}
-          totalCount={items.length}
         />
 
         {/* 右：feed 主列，保留 Twitter 风宽度 */}
-        <section className={`${hasAnyTags ? '' : 'mx-auto'} max-w-2xl space-y-4 sm:space-y-5`}>
+        <section className="mx-auto w-full max-w-2xl space-y-4 sm:space-y-5">
           {items.length === 0 ? (
             <EmptyState eyebrow={tNews('emptyEyebrow')} message={tNews('empty')} />
           ) : showEmptyFilter ? (

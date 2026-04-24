@@ -1,30 +1,17 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
 import Image from 'next/image';
 import { ArrowRight, Handshake, HeartHandshake } from 'lucide-react';
 import { useAutoScroll } from '@/hooks/useAutoScroll';
 import { partners } from '@/data/partners';
 import { cn } from '@/lib/utils';
-import { type Locale, toLocale } from '@/i18n/config';
-
-/* 外部表单链接（按语言区分） */
-const requestAssistanceUrls: Record<Locale, string> = {
-  en: 'https://forms.gle/7LdHNmNjXaKVm9iB7',
-  ua: 'https://forms.gle/pQFJSMuNcuX3qRpG6',
-};
-
-const becomePartnerUrls: Record<Locale, string> = {
-  en: 'https://forms.gle/soCZHjFvM5deNdos5',
-  ua: 'https://forms.gle/Fo7YY6XKMByinCWEA',
-};
+import { Link } from '@/i18n/navigation';
 
 /* ── 自动+手动滚动的 Partners 条（嵌入渐变色块内） ──────────── */
 
 export default function PartnersStrip() {
   const t = useTranslations('partners');
-  const locale = toLocale(useLocale());
   const scrollRef = useAutoScroll<HTMLDivElement>();
 
   return (
@@ -32,11 +19,9 @@ export default function PartnersStrip() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-6 md:gap-8">
         {/* CTA 按钮组 — 移动端和桌面端都竖排堆叠（避免乌克兰语长词在横排时溢出） */}
         <div className="flex flex-col gap-2.5 sm:flex-shrink-0 sm:justify-center sm:gap-3">
-          {/* 主 CTA: Request Assistance — 白底实心，跳转外部 Google Form */}
-          <a
-            href={requestAssistanceUrls[locale]}
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* 主 CTA: Request Assistance — 白底实心，跳转站内表单页 */}
+          <Link
+            href="/request-assistance"
             className="group inline-flex items-center justify-between gap-3
                        rounded-full bg-white px-5 py-3
                        text-[0.8rem] font-bold tracking-[0.12em] text-ukraine-blue-600 uppercase
@@ -55,13 +40,11 @@ export default function PartnersStrip() {
               className="h-4 w-4 shrink-0 transition-transform duration-300
                          group-hover:translate-x-1 sm:h-[18px] sm:w-[18px]"
             />
-          </a>
+          </Link>
 
-          {/* 次 CTA: Become a Partner — 玻璃感 outline，跳转外部 Google Form */}
-          <a
-            href={becomePartnerUrls[locale]}
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* 次 CTA: Become a Partner — 玻璃感 outline，跳转站内表单页 */}
+          <Link
+            href="/partnership"
             className="group inline-flex items-center justify-between gap-3
                        rounded-full bg-white/10 px-5 py-3 backdrop-blur-sm
                        text-[0.8rem] font-semibold tracking-[0.12em] text-white/85 uppercase
@@ -78,7 +61,7 @@ export default function PartnersStrip() {
               className="h-4 w-4 shrink-0 transition-transform duration-300
                          group-hover:translate-x-1 sm:h-[18px] sm:w-[18px]"
             />
-          </a>
+          </Link>
         </div>
 
         {/* 垂直分隔线 — 仅桌面端可见 */}

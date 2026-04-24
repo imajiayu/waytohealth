@@ -80,7 +80,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
         }}
       >
       <div
-        className={`fixed top-0 right-0 z-[100] h-full w-[min(380px,85vw)]
+        className={`fixed top-0 right-0 z-[100] h-full w-[min(340px,78vw)] sm:w-[min(380px,85vw)]
                    bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.08)]
                    transition-transform duration-[400ms] ease-[cubic-bezier(0.32,0.72,0,1)]
                    flex flex-col overflow-hidden
@@ -93,7 +93,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
         <div className="h-[2px] gradient-brand-line" />
 
         {/* 菜单项 */}
-        <nav className="px-8 pt-6 flex-1">
+        <nav className="px-6 sm:px-8 pt-4 sm:pt-6 flex-1">
           <ul>
             {MENU_ITEMS.map((item, i) => {
               // scrollTo 项不显示 active；projects 用前缀匹配
@@ -103,7 +103,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                 <li key={item.key}>
                   {isActive ? (
                     <span
-                      className={`block w-full text-left py-[14px] text-[20px]
+                      className={`block w-full text-left py-2.5 sm:py-[14px] text-[16px] sm:text-[20px]
                                  font-[family-name:var(--font-display)] font-medium tracking-wide
                                  text-ukraine-gold-500
                                  transition-[opacity,transform] duration-300
@@ -117,7 +117,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                     <button
                       type="button"
                       onClick={() => handleItemClick(item)}
-                      className={`w-full text-left py-[14px] text-[20px]
+                      className={`w-full text-left py-2.5 sm:py-[14px] text-[16px] sm:text-[20px]
                                  font-[family-name:var(--font-display)] font-medium tracking-wide
                                  text-ukraine-blue-800 hover:text-ukraine-gold-500
                                  transition-[opacity,transform,color] duration-300 cursor-pointer
@@ -139,30 +139,30 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
 
         {/* 底部：品牌签名区 */}
         <div className="mt-auto">
-          <div className="bg-gradient-to-t from-ukraine-blue-50/50 to-transparent px-8 pt-5 pb-8">
+          <div className="bg-gradient-to-t from-ukraine-blue-50/50 to-transparent px-6 sm:px-8 pt-4 sm:pt-5 pb-5 sm:pb-8">
             {/* 联系信息 */}
             <div
-              className={`space-y-2.5 mb-5 transition-[opacity,transform] duration-300
+              className={`space-y-2 sm:space-y-2.5 mb-4 sm:mb-5 transition-[opacity,transform] duration-300
                          ${open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
               style={{ transitionDelay: open ? `${80 + MENU_ITEMS.length * 50 + 30}ms` : '0ms' }}
             >
               <a
                 href={`mailto:${CONTACT.email}`}
-                className="flex items-center gap-3 text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
+                className="flex items-center gap-2.5 sm:gap-3 text-[12px] sm:text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
               >
-                <span className="w-7 h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
+                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
                                  group-hover:bg-ukraine-blue-100 transition-colors">
-                  <Mail className="w-3.5 h-3.5 text-ukraine-blue-400" />
+                  <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-ukraine-blue-400" />
                 </span>
                 <span className="truncate">{CONTACT.email}</span>
               </a>
               <a
                 href={`tel:${CONTACT.phoneTel}`}
-                className="flex items-center gap-3 text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
+                className="flex items-center gap-2.5 sm:gap-3 text-[12px] sm:text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
               >
-                <span className="w-7 h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
+                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
                                  group-hover:bg-ukraine-blue-100 transition-colors">
-                  <Phone className="w-3.5 h-3.5 text-ukraine-blue-400" />
+                  <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-ukraine-blue-400" />
                 </span>
                 <span className="font-[family-name:var(--font-data)] tracking-wide">{CONTACT.phoneDisplay}</span>
               </a>
@@ -170,7 +170,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
 
             {/* 社交媒体 */}
             <div
-              className={`flex items-center gap-2.5 mb-6 transition-[opacity,transform] duration-300
+              className={`flex items-center gap-2 sm:gap-2.5 mb-4 sm:mb-6 transition-[opacity,transform] duration-300
                          ${open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
               style={{ transitionDelay: open ? `${80 + MENU_ITEMS.length * 50 + 80}ms` : '0ms' }}
             >
@@ -181,19 +181,19 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={name}
-                  className="w-9 h-9 rounded-full border border-ukraine-blue-200/60 flex items-center justify-center
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-ukraine-blue-200/60 flex items-center justify-center
                              text-ukraine-blue-400 hover:bg-ukraine-blue-500 hover:text-white
                              hover:border-ukraine-blue-500 hover:shadow-[0_2px_8px_rgba(0,108,178,0.25)]
                              transition-all duration-200"
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </a>
               ))}
             </div>
 
             {/* 金色菱形分隔 */}
             <div
-              className={`flex items-center gap-2 mb-4 transition-[opacity,transform] duration-300
+              className={`flex items-center gap-2 mb-3 sm:mb-4 transition-[opacity,transform] duration-300
                          ${open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
               style={{ transitionDelay: open ? `${80 + MENU_ITEMS.length * 50 + 120}ms` : '0ms' }}
             >
@@ -213,7 +213,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                 alt={locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health'}
                 width={locale === 'ua' ? 826 : 539}
                 height={locale === 'ua' ? 165 : 104}
-                className="h-6 w-auto opacity-70"
+                className="h-5 sm:h-6 w-auto opacity-70"
               />
             </div>
           </div>

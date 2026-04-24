@@ -50,7 +50,6 @@ function formatFeedDateTime(iso: string, locale: Locale): string {
   const timePart = new Intl.DateTimeFormat(tag, {
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit',
   }).format(d);
   return `${datePart} · ${timePart}`;
 }
@@ -141,14 +140,14 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
               : 'relative rounded-2xl border border-gray-200/70 bg-white transition-all duration-300 hover:border-gray-300/70 hover:shadow-[0_14px_36px_-18px_rgba(0,108,178,0.18)]'
           }
         >
-          <div className="flex gap-3 p-4 sm:gap-3.5 sm:p-5">
+          <div className="flex gap-2.5 p-3.5 sm:gap-3.5 sm:p-5">
             {/* Favicon 头像 */}
-            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-white ring-1 ring-gray-200/80">
+            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full bg-white ring-1 ring-gray-200/80 sm:h-10 sm:w-10">
               <Image
                 src="/favicon.svg"
                 alt=""
                 fill
-                sizes="40px"
+                sizes="(max-width: 640px) 36px, 40px"
                 className="object-contain p-[3px]"
               />
             </div>
@@ -156,41 +155,42 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
             {/* 右侧内容 */}
             <div className="min-w-0 flex-1">
               {/* 署名 + 日期 */}
-              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 text-[14px] leading-snug sm:text-[15px]">
-                <span className="font-bold text-gray-900">{authorName}</span>
-                <span className="text-gray-400" aria-hidden>·</span>
-                <time dateTime={iso} className="text-gray-500">
+              <div className="flex min-w-0 items-center gap-x-1.5 text-[13.5px] leading-snug sm:text-[15px]">
+                <span className="truncate font-bold text-gray-900">{authorName}</span>
+                <span className="shrink-0 text-gray-400" aria-hidden>·</span>
+                <time dateTime={iso} className="shrink-0 whitespace-nowrap text-gray-500">
                   {dateLabel}
                 </time>
-
-                {!compact && item.tags && item.tags.length > 0 && (
-                  <>
-                    {item.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag.en}
-                        className="rounded-full bg-ukraine-blue-50 px-2.5 py-0.5 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.15em] text-ukraine-blue-500"
-                      >
-                        {tag[locale]}
-                      </span>
-                    ))}
-                    {item.tags.length > 3 && (
-                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-500">
-                        +{item.tags.length - 3}
-                      </span>
-                    )}
-                  </>
-                )}
               </div>
+
+              {/* Tags — 独立一行，避免在窄屏上被挤进作者行 */}
+              {!compact && item.tags && item.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-1.5 sm:gap-2">
+                  {item.tags.slice(0, 3).map((tag) => (
+                    <span
+                      key={tag.en}
+                      className="rounded-full bg-ukraine-blue-50 px-2 py-0.5 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.12em] text-ukraine-blue-500 sm:px-2.5 sm:tracking-[0.15em]"
+                    >
+                      {tag[locale]}
+                    </span>
+                  ))}
+                  {item.tags.length > 3 && (
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 sm:px-2.5 sm:tracking-[0.15em]">
+                      +{item.tags.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* 标题（可选） */}
               {title && (
-                <h2 className={`mt-0.5 text-[15px] font-semibold leading-snug tracking-[-0.005em] text-gray-900 sm:text-[16px] ${compact ? 'line-clamp-1' : ''}`}>
+                <h2 className={`mt-2 text-[15px] font-semibold leading-snug tracking-[-0.005em] text-gray-900 sm:mt-1.5 sm:text-[16px] ${compact ? 'line-clamp-1' : ''}`}>
                   {title}
                 </h2>
               )}
 
               {/* 正文 */}
-              <p className={`mt-0.5 whitespace-pre-wrap text-[15px] leading-[1.45] text-gray-800 ${compact ? 'line-clamp-3' : ''}`}>
+              <p className={`mt-1 whitespace-pre-wrap text-[15px] leading-[1.45] text-gray-800 sm:mt-0.5 ${compact ? 'line-clamp-3' : ''}`}>
                 {linkifyBody(body)}
               </p>
 

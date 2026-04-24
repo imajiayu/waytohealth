@@ -102,7 +102,7 @@ export default function AchievementsCarousel() {
           <div className="mt-2 accent-line" />
         </div>
 
-        <div className="flex gap-1.5 sm:gap-2">
+        <div className="hidden gap-1.5 sm:flex sm:gap-2">
           <button
             type="button"
             onClick={() => scroll('left')}

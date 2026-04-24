@@ -74,7 +74,7 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
       onClick={onClose}
     >
       {/* 计数器（左上角） */}
-      <div className="pointer-events-none absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 font-[family-name:var(--font-data)] text-[11px] uppercase tracking-[0.18em] text-white/70 backdrop-blur-sm">
+      <div className="pointer-events-none absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-[family-name:var(--font-data)] text-[10px] uppercase tracking-[0.18em] text-white/70 backdrop-blur-sm sm:left-5 sm:top-5 sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px]">
         <span className="text-ukraine-gold-300">{pad2(index + 1)}</span>
         <span className="text-white/30">/</span>
         <span>{pad2(images.length)}</span>
@@ -88,7 +88,7 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
           e.stopPropagation();
           onClose();
         }}
-        className="absolute right-5 top-5 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10 hover:text-white"
+        className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10 hover:text-white sm:right-5 sm:top-5 sm:h-11 sm:w-11"
       >
         <X className="h-5 w-5" strokeWidth={1.5} />
       </button>
@@ -102,9 +102,9 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
             e.stopPropagation();
             go(-1);
           }}
-          className="group absolute left-2 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10 hover:text-white sm:left-6"
+          className="group absolute left-2 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10 hover:text-white sm:left-6 sm:h-14 sm:w-14"
         >
-          <ChevronLeft className="h-6 w-6 transition-transform group-hover:-translate-x-0.5" strokeWidth={1.5} />
+          <ChevronLeft className="h-5 w-5 transition-transform group-hover:-translate-x-0.5 sm:h-6 sm:w-6" strokeWidth={1.5} />
         </button>
       )}
 
@@ -117,15 +117,15 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
             e.stopPropagation();
             go(1);
           }}
-          className="group absolute right-2 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10 hover:text-white sm:right-6"
+          className="group absolute right-2 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10 hover:text-white sm:right-6 sm:h-14 sm:w-14"
         >
-          <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-0.5" strokeWidth={1.5} />
+          <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5 sm:h-6 sm:w-6" strokeWidth={1.5} />
         </button>
       )}
 
       {/* 主图容器 — 限定在计数器/缩略图之间的区域，空白区域能穿透到背景关闭 */}
       <div
-        className="pointer-events-none absolute inset-x-4 top-20 bottom-28 flex items-center justify-center sm:inset-x-20"
+        className="pointer-events-none absolute inset-x-14 top-14 bottom-20 flex items-center justify-center sm:inset-x-20 sm:top-20 sm:bottom-28"
       >
         <div
           className="pointer-events-auto relative h-full w-full max-w-5xl"
@@ -147,7 +147,7 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
       {images.length > 1 && (
         <div
           ref={thumbRef}
-          className="hide-scrollbar absolute bottom-5 left-1/2 z-20 flex max-w-[92vw] -translate-x-1/2 gap-2 overflow-x-auto rounded-full border border-white/10 bg-black/30 p-2 backdrop-blur-md"
+          className="hide-scrollbar absolute bottom-3 left-1/2 z-20 flex max-w-[92vw] -translate-x-1/2 gap-1.5 overflow-x-auto rounded-full border border-white/10 bg-black/30 p-1.5 backdrop-blur-md sm:bottom-5 sm:gap-2 sm:p-2"
           onClick={stop}
         >
           {images.map((name, i) => (
@@ -157,7 +157,7 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
               data-thumb={i}
               onClick={() => setIndex(i)}
               aria-label={`View image ${i + 1}`}
-              className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-md transition ${
+              className={`relative h-9 w-9 shrink-0 overflow-hidden rounded-md transition sm:h-12 sm:w-12 ${
                 i === index
                   ? 'opacity-100 ring-2 ring-ukraine-gold-500'
                   : 'opacity-55 hover:opacity-90'
@@ -167,7 +167,7 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
                 src={resolveSrc(name)}
                 alt=""
                 fill
-                sizes="48px"
+                sizes="(max-width: 640px) 36px, 48px"
                 className="object-cover"
               />
             </button>
