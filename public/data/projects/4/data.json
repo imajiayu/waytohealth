@@ -11,6 +11,7 @@
   "raised_amount": 0,
   "currency": "UAH",
   "tags": ["prosthetics", "rehabilitation"],
+  "monobankJarSendId": "3KUPatuzY2",
   "detail": {
     "subtitle": {
       "ua": "Повний цикл відновлення після ампутацій",

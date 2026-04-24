@@ -1,7 +1,13 @@
 'use server';
 
 import { requireAdmin } from '@/lib/adminSession';
-import { getResend, getFromAddress } from '@/lib/resend';
+import {
+  getResend,
+  buildFromAddress,
+  isFromPrefix,
+  DEFAULT_FROM_PREFIX,
+  type FromPrefix,
+} from '@/lib/resend';
 import {
   listTemplates,
   renderEmail,
@@ -66,6 +72,7 @@ export interface SendInput {
   to: string; // 原始字符串，服务端解析
   templateId: string;
   subject: string; // 必填，UI 以模板默认主题 pre-fill
+  fromPrefix?: FromPrefix; // 发件人本地部分；未给 / 非法则回落到默认
   replyTo?: string;
 }
 
@@ -176,11 +183,17 @@ export async function sendEmailAction(
   const rendered = renderEmail(input.templateId);
   if (!rendered.ok) return rendered;
 
+  // 非白名单前缀直接拒绝；未传则回落到默认
+  if (input.fromPrefix !== undefined && !isFromPrefix(input.fromPrefix)) {
+    return { ok: false, error: `Invalid from prefix: ${String(input.fromPrefix)}` };
+  }
+  const prefix: FromPrefix = input.fromPrefix ?? DEFAULT_FROM_PREFIX;
+
   let resend: ReturnType<typeof getResend>;
   let from: string;
   try {
     resend = getResend();
-    from = getFromAddress();
+    from = buildFromAddress(prefix);
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'resend misconfigured' };
   }

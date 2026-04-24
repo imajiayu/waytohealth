@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import sanitizeHtml from 'sanitize-html';
 import type { Attachment } from 'resend';
-import { getResend, getFromAddress } from '@/lib/resend';
+import { getResend, buildFromAddress } from '@/lib/resend';
 import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 
 export const runtime = 'nodejs';
@@ -355,7 +355,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await resend.emails.send({
-      from: getFromAddress(),
+      from: buildFromAddress(),
       to: forwardTo,
       replyTo: safeReplyTo,
       subject: `${FORWARDED_PREFIX} ${subject}`,

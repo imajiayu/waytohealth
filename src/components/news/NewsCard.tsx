@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { type Locale } from '@/i18n/config';
@@ -61,11 +61,45 @@ function resolveImageUrl(src: string): string {
   return `/data/news/images/${src}`;
 }
 
-// 只有 blob: (admin 预览的 ObjectURL) 需要绕过 next/image；
-// https: (Vercel Blob) 必须走优化管线，否则会直接加载 iPhone 原图（数 MB / 4000+ 像素宽），
-// 导致 news 列表滚动时反复解码大图而卡顿
+// blob: (admin 预览的 ObjectURL) 必须绕过 next/image；
+// https: (Vercel Blob) 在前台 feed 里必须走优化管线，否则会直接加载 iPhone 原图
+// （数 MB / 4000+ 像素宽），导致列表滚动反复解码大图而卡顿。
+// 注：admin preview (preview=true) 场景下也会整体 unoptimized —— 见 Image 的 unoptimized 表达式，
+// 那里 OR 上 preview，理由是预览只渲染一条，避开 dev 环境 /_next/image 对远程 Blob URL 的超时
 function isBlobUrl(src: string): boolean {
   return src.startsWith('blob:');
+}
+
+// 把正文里的 http/https URL 渲染成可点击的 <a>，其它片段保持原样（包括 \n，交给 whitespace-pre-wrap）
+// 尾随的句读（.,;:!?) 等）不算入 URL，避免把句号吞进链接
+function linkifyBody(text: string): ReactNode[] {
+  const matches = Array.from(text.matchAll(/https?:\/\/[^\s<>"']+/g));
+  if (matches.length === 0) return [text];
+  const out: ReactNode[] = [];
+  let cursor = 0;
+  matches.forEach((m, i) => {
+    const start = m.index ?? 0;
+    let url = m[0];
+    const trail = url.match(/[.,;:!?)\]}>'"]+$/);
+    const trailing = trail ? trail[0] : '';
+    if (trailing) url = url.slice(0, -trailing.length);
+    if (start > cursor) out.push(text.slice(cursor, start));
+    out.push(
+      <a
+        key={`lnk-${i}`}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="break-words text-ukraine-blue-600 underline decoration-ukraine-blue-600/40 underline-offset-2 hover:decoration-ukraine-blue-600"
+      >
+        {url}
+      </a>,
+    );
+    if (trailing) out.push(trailing);
+    cursor = start + m[0].length;
+  });
+  if (cursor < text.length) out.push(text.slice(cursor));
+  return out;
 }
 
 function gridWrapperClass(n: number): string {
@@ -157,7 +191,7 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
 
               {/* 正文 */}
               <p className={`mt-0.5 whitespace-pre-wrap text-[15px] leading-[1.45] text-gray-800 ${compact ? 'line-clamp-3' : ''}`}>
-                {body}
+                {linkifyBody(body)}
               </p>
 
               {/* 图片网格 */}
@@ -172,7 +206,7 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
                           alt={title || 'News image'}
                           fill
                           sizes="(max-width: 640px) 100vw, 560px"
-                          unoptimized={isBlobUrl(src)}
+                          unoptimized={isBlobUrl(src) || preview}
                           className={
                             preview
                               ? 'object-cover'

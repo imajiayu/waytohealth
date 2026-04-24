@@ -5,11 +5,13 @@ import { upload } from '@vercel/blob/client';
 import {
   cleanupBlobAction,
   publishNewsAction,
+  updateNewsAction,
   type PublishInput,
+  type UpdateInput,
 } from '@/app/actions/news';
 import NewsCard from '@/components/news/NewsCard';
 import { type Locale } from '@/i18n/config';
-import { type Tag } from '@/data/news';
+import { type NewsItem, type Tag } from '@/data/news';
 import ImageUploader from './ImageUploader';
 import TagInput from './TagInput';
 import { type ImageDraft, MAX_IMAGES_HARD } from './types';
@@ -19,37 +21,59 @@ function toLocalInputValue(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-interface NewsEditorProps {
-  onDone: () => void;
-  onCancel: () => void;
-}
+type NewsEditorProps =
+  | {
+      mode?: 'create';
+      initialItem?: undefined;
+      onDone: () => void;
+      onCancel: () => void;
+    }
+  | {
+      mode: 'edit';
+      initialItem: NewsItem;
+      onDone: () => void;
+      onCancel: () => void;
+    };
 
-export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
-  const [publishedAt, setPublishedAt] = useState(toLocalInputValue(new Date()));
-  const [titleUa, setTitleUa] = useState('');
-  const [titleEn, setTitleEn] = useState('');
-  const [bodyUa, setBodyUa] = useState('');
-  const [bodyEn, setBodyEn] = useState('');
-  const [images, setImages] = useState<ImageDraft[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
+export default function NewsEditor(props: NewsEditorProps) {
+  const mode = props.mode ?? 'create';
+  const initial = props.mode === 'edit' ? props.initialItem : null;
+  const { onDone, onCancel } = props;
+
+  const [publishedAt, setPublishedAt] = useState(
+    initial ? toLocalInputValue(new Date(initial.published_at)) : toLocalInputValue(new Date())
+  );
+  const [titleUa, setTitleUa] = useState(initial?.title.ua ?? '');
+  const [titleEn, setTitleEn] = useState(initial?.title.en ?? '');
+  const [bodyUa, setBodyUa] = useState(initial?.body.ua ?? '');
+  const [bodyEn, setBodyEn] = useState(initial?.body.en ?? '');
+  const [images, setImages] = useState<ImageDraft[]>(() =>
+    (initial?.images ?? []).map((url, i) => ({
+      kind: 'existing' as const,
+      id: `existing-${i}-${url}`,
+      url,
+    }))
+  );
+  const [tags, setTags] = useState<Tag[]>(initial?.tags ?? []);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [previewLocale, setPreviewLocale] = useState<Locale>('ua');
 
-  // 卸载时释放所有残留 ObjectURL（Cancel 路径）
+  // 卸载时只释放 'new' draft 的 ObjectURL；existing 的是持久 Blob URL，不能 revoke
   const imagesRef = useRef<ImageDraft[]>([]);
   useEffect(() => {
     imagesRef.current = images;
   }, [images]);
   useEffect(() => {
     return () => {
-      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+      imagesRef.current.forEach((img) => {
+        if (img.kind === 'new') URL.revokeObjectURL(img.previewUrl);
+      });
     };
   }, []);
 
-  // 成功后延迟跳转；组件卸载必须清掉 timeout 否则会 setState on dead tree
   const doneTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     return () => {
@@ -68,6 +92,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
     }
 
     const drafts: ImageDraft[] = incoming.map((file) => ({
+      kind: 'new',
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name: file.name,
       file,
@@ -80,7 +105,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
   function removeImage(id: string) {
     setImages((cur) => {
       const target = cur.find((img) => img.id === id);
-      if (target) URL.revokeObjectURL(target.previewUrl);
+      if (target && target.kind === 'new') URL.revokeObjectURL(target.previewUrl);
       return cur.filter((img) => img.id !== id);
     });
   }
@@ -90,7 +115,6 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
     setError(null);
     setSuccess(null);
 
-    // 提交前校验发布时间；datetime-local 可能被清空导致 new Date('') → Invalid Date
     const publishedDate = new Date(publishedAt);
     if (!Number.isFinite(publishedDate.getTime())) {
       setError('Invalid publish time. Please pick a valid date/time.');
@@ -99,33 +123,39 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
 
     setBusy(true);
 
-    const uploadedUrls: string[] = [];
+    // 发布失败时只需回滚"本次新传的"图，不能碰原有 existing 的 URL
+    const newlyUploadedUrls: string[] = [];
+    const urlByDraftId = new Map<string, string>();
 
     try {
-      // 1. 并行上传所有图到 Blob（身份由 cookie 承载，upload route 自己读 session）
-      if (images.length > 0) {
-        setUploadProgress({ current: 0, total: images.length });
+      // 1. 只上传新增的 file draft；existing 的 URL 直接保留
+      const newDrafts = images.filter((img): img is Extract<ImageDraft, { kind: 'new' }> => img.kind === 'new');
+      if (newDrafts.length > 0) {
+        setUploadProgress({ current: 0, total: newDrafts.length });
         let completed = 0;
         const results = await Promise.allSettled(
-          images.map(async (img) => {
+          newDrafts.map(async (img) => {
             const blob = await upload(`news/${img.name}`, img.file, {
               access: 'public',
               handleUploadUrl: '/api/news/upload',
             });
             completed++;
-            setUploadProgress({ current: completed, total: images.length });
-            return blob.url;
+            setUploadProgress({ current: completed, total: newDrafts.length });
+            return { draftId: img.id, url: blob.url };
           })
         );
 
         for (const r of results) {
-          if (r.status === 'fulfilled') uploadedUrls.push(r.value);
+          if (r.status === 'fulfilled') {
+            urlByDraftId.set(r.value.draftId, r.value.url);
+            newlyUploadedUrls.push(r.value.url);
+          }
         }
 
         const firstFail = results.find((r) => r.status === 'rejected');
         if (firstFail) {
-          if (uploadedUrls.length > 0) {
-            await cleanupBlobAction(uploadedUrls).catch(() => {});
+          if (newlyUploadedUrls.length > 0) {
+            await cleanupBlobAction(newlyUploadedUrls).catch(() => {});
           }
           const reason = (firstFail as PromiseRejectedResult).reason;
           setError(`Upload failed: ${reason instanceof Error ? reason.message : 'unknown'}`);
@@ -133,33 +163,62 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
         }
       }
 
-      // 2. 提交 JSON
-      const input: PublishInput = {
-        published_at: publishedDate.toISOString(),
-        title: { ua: titleUa.trim(), en: titleEn.trim() },
-        body: { ua: bodyUa.trim(), en: bodyEn.trim() },
-        imageUrls: uploadedUrls,
-        tags,
-      };
-      const res = await publishNewsAction(input);
+      // 按草稿顺序拼最终 imageUrls（existing 原 URL + 新上传的 URL）
+      const finalUrls = images
+        .map((img) => (img.kind === 'existing' ? img.url : urlByDraftId.get(img.id) ?? ''))
+        .filter(Boolean);
 
-      if (!res.ok) {
-        if (uploadedUrls.length > 0) {
-          await cleanupBlobAction(uploadedUrls).catch(() => {});
+      // 2. 调 action
+      if (mode === 'edit' && initial) {
+        const input: UpdateInput = {
+          id: initial.id,
+          published_at: publishedDate.toISOString(),
+          title: { ua: titleUa.trim(), en: titleEn.trim() },
+          body: { ua: bodyUa.trim(), en: bodyEn.trim() },
+          imageUrls: finalUrls,
+          tags,
+        };
+        const res = await updateNewsAction(input);
+        if (!res.ok) {
+          if (newlyUploadedUrls.length > 0) {
+            await cleanupBlobAction(newlyUploadedUrls).catch(() => {});
+          }
+          setError(res.error);
+          return;
         }
-        setError(res.error);
-        return;
+        // 成功：释放新上传图的 ObjectURL
+        images.forEach((img) => {
+          if (img.kind === 'new') URL.revokeObjectURL(img.previewUrl);
+        });
+        setSuccess(`Updated ${initial.id}.`);
+        doneTimeoutRef.current = setTimeout(() => onDone(), 1000);
+      } else {
+        const input: PublishInput = {
+          published_at: publishedDate.toISOString(),
+          title: { ua: titleUa.trim(), en: titleEn.trim() },
+          body: { ua: bodyUa.trim(), en: bodyEn.trim() },
+          imageUrls: finalUrls,
+          tags,
+        };
+        const res = await publishNewsAction(input);
+        if (!res.ok) {
+          if (newlyUploadedUrls.length > 0) {
+            await cleanupBlobAction(newlyUploadedUrls).catch(() => {});
+          }
+          setError(res.error);
+          return;
+        }
+        images.forEach((img) => {
+          if (img.kind === 'new') URL.revokeObjectURL(img.previewUrl);
+        });
+        setSuccess(`Published as ${res.id}.`);
+        doneTimeoutRef.current = setTimeout(() => onDone(), 1200);
       }
-
-      // 成功：释放 ObjectURL，返回 dashboard
-      images.forEach((img) => URL.revokeObjectURL(img.previewUrl));
-      setSuccess(`Published as ${res.id}.`);
-      doneTimeoutRef.current = setTimeout(() => onDone(), 1200);
     } catch (err) {
-      if (uploadedUrls.length > 0) {
-        await cleanupBlobAction(uploadedUrls).catch(() => {});
+      if (newlyUploadedUrls.length > 0) {
+        await cleanupBlobAction(newlyUploadedUrls).catch(() => {});
       }
-      setError(err instanceof Error ? err.message : 'Publish failed.');
+      setError(err instanceof Error ? err.message : 'Submit failed.');
     } finally {
       setBusy(false);
       setUploadProgress({ current: 0, total: 0 });
@@ -173,6 +232,16 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
     const d = new Date(publishedAt);
     return Number.isFinite(d.getTime()) ? d.toISOString() : new Date().toISOString();
   })();
+
+  const submitLabel = busy
+    ? uploadProgress.total > 0 && uploadProgress.current < uploadProgress.total
+      ? `Uploading ${uploadProgress.current}/${uploadProgress.total}…`
+      : mode === 'edit'
+        ? 'Saving…'
+        : 'Publishing…'
+    : mode === 'edit'
+      ? 'Save changes'
+      : 'Publish';
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -199,7 +268,10 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
         </div>
 
         <div>
-          <label className={labelCls}>Body (UA)</label>
+          <div className="flex items-baseline justify-between gap-2">
+            <label className={labelCls}>Body (UA)</label>
+            <span className="text-[11px] text-gray-400">URLs starting with http(s):// become clickable links automatically</span>
+          </div>
           <textarea value={bodyUa} onChange={(e) => setBodyUa(e.target.value)} required rows={5} className={inputCls} />
         </div>
         <div>
@@ -237,11 +309,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
             disabled={busy}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {busy
-              ? uploadProgress.total > 0 && uploadProgress.current < uploadProgress.total
-                ? `Uploading ${uploadProgress.current}/${uploadProgress.total}…`
-                : 'Publishing…'
-              : 'Publish'}
+            {submitLabel}
           </button>
         </div>
       </form>
@@ -270,7 +338,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
           locale={previewLocale}
           preview
           item={{
-            id: 'preview',
+            id: initial?.id ?? 'preview',
             published_at: previewIso,
             title: {
               ua: titleUa || 'Заголовок',
@@ -280,7 +348,7 @@ export default function NewsEditor({ onDone, onCancel }: NewsEditorProps) {
               ua: bodyUa || 'Текст…',
               en: bodyEn || 'Body…',
             },
-            images: images.map((img) => img.previewUrl),
+            images: images.map((img) => (img.kind === 'existing' ? img.url : img.previewUrl)),
             ...(tags.length > 0 ? { tags } : {}),
           }}
         />

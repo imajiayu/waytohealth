@@ -5,6 +5,7 @@ import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { getAllNews } from '@/lib/news';
 import { type Tag } from '@/data/news';
 import NewsCard from '@/components/news/NewsCard';
+import ScrollToHash from '@/components/news/ScrollToHash';
 import TagFilterBar, { type TagWithCount } from '@/components/news/TagFilterBar';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -61,6 +62,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
   // 两栏 grid 的断点：lg 以上双栏，以下回到单列 + 顶部 chips
   return (
     <div className="container-page section-y">
+      <ScrollToHash />
       <header className="mx-auto max-w-5xl">
         <h1 className="font-[family-name:var(--font-display)] text-4xl font-bold leading-[1] tracking-[-0.02em] text-ukraine-blue-600 sm:text-5xl">
           {tNav('news')}
@@ -94,7 +96,9 @@ export default async function NewsPage({ searchParams }: PageProps) {
             <EmptyState eyebrow={tNews('emptyEyebrow')} message={tNews('tags.emptyFilter')} />
           ) : (
             filtered.map((item) => (
-              <NewsCard key={item.id} item={item} locale={locale} />
+              <div key={item.id} id={`news-${item.id}`} className="scroll-mt-24">
+                <NewsCard item={item} locale={locale} />
+              </div>
             ))
           )}
         </section>

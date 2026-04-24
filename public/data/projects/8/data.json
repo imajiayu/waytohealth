@@ -11,6 +11,7 @@
   "raised_amount": 0,
   "currency": "UAH",
   "tags": ["ambulance", "emergency"],
+  "monobankJarSendId": "AeAimcRLhk",
   "detail": {
     "subtitle": {
       "ua": "Передаємо карети швидкої допомоги туди, де вони потрібні найбільше",

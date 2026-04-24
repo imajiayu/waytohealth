@@ -38,7 +38,7 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
 
   return (
     <Link
-      href="/news"
+      href={`/news#news-${item.id}`}
       aria-label={title || 'Dispatch'}
       className="group relative flex h-full flex-col overflow-hidden rounded-[20px] border border-gray-200/60 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all duration-500 hover:-translate-y-0.5 hover:border-gray-300/70 hover:shadow-[0_10px_24px_-12px_rgba(0,108,178,0.25)]"
     >

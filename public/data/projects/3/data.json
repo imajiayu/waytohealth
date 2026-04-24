@@ -11,6 +11,7 @@
   "raised_amount": 0,
   "currency": "UAH",
   "tags": ["recovery", "social"],
+  "monobankJarSendId": "2YtnPKXmev",
   "detail": {
     "subtitle": {
       "ua": "Геймінг терапія для психологічного відновлення ветеранів",

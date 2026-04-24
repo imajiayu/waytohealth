@@ -127,6 +127,92 @@ export async function publishNewsAction(
   }
 }
 
+export interface UpdateInput {
+  id: string;
+  published_at: string;
+  title: { ua: string; en: string };
+  body: { ua: string; en: string };
+  imageUrls: string[];
+  tags?: Tag[];
+}
+
+export async function updateNewsAction(
+  input: UpdateInput
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: 'unauthorized' };
+  }
+
+  if (!input.id) return { ok: false, error: 'id required' };
+  if (!input.title.ua.trim() || !input.title.en.trim()) {
+    return { ok: false, error: 'title required' };
+  }
+  if (!input.body.ua.trim() || !input.body.en.trim()) {
+    return { ok: false, error: 'body required' };
+  }
+  if (!input.imageUrls.every(isBlobUrl)) {
+    return { ok: false, error: 'invalid image url' };
+  }
+
+  const publishedDate = new Date(input.published_at);
+  if (!Number.isFinite(publishedDate.getTime())) {
+    return { ok: false, error: 'invalid published_at' };
+  }
+
+  const tags = normalizeTags(input.tags ?? []);
+
+  try {
+    // 两步：先拿旧 images（用于后续清理差集），再 UPDATE
+    // Neon HTTP driver 每次 sql tagged template 独立请求，没有事务；
+    // 但新建后 id 唯一、无并发写入，这里先 SELECT 后 UPDATE 在实际使用中足够
+    const oldRows = (await sql`
+      SELECT images FROM news WHERE id = ${input.id}
+    `) as { images: string[] }[];
+
+    if (oldRows.length === 0) {
+      return { ok: false, error: 'not found' };
+    }
+    const oldImages = oldRows[0].images ?? [];
+
+    await sql`
+      UPDATE news SET
+        published_at = ${input.published_at}::timestamptz,
+        title = ${JSON.stringify(input.title)}::jsonb,
+        body = ${JSON.stringify(input.body)}::jsonb,
+        images = ${input.imageUrls}::text[],
+        tags = ${JSON.stringify(tags)}::jsonb
+      WHERE id = ${input.id}
+    `;
+
+    revalidateTag('news', { expire: 0 });
+
+    // 清理被移除的 Blob 图（仅 Blob 域名）
+    const newSet = new Set(input.imageUrls);
+    const removed = oldImages.filter((u) => isBlobUrl(u) && !newSet.has(u));
+    if (removed.length > 0) {
+      try {
+        await del(removed);
+      } catch (err) {
+        console.error('[news:update] blob cleanup failed', {
+          id: input.id,
+          urls: removed,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('[news:update] failed', {
+      id: input.id,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+  }
+}
+
 export async function deleteNewsAction(
   id: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {

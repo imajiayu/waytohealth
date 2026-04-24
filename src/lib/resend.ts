@@ -1,6 +1,16 @@
 import 'server-only';
 import { Resend } from 'resend';
 
+export {
+  FROM_DISPLAY_NAME,
+  FROM_DOMAIN,
+  FROM_PREFIXES,
+  DEFAULT_FROM_PREFIX,
+  isFromPrefix,
+  buildFromAddress,
+  type FromPrefix,
+} from './emailFrom';
+
 let cached: Resend | null = null;
 
 export function getResend(): Resend {
@@ -12,12 +22,4 @@ export function getResend(): Resend {
     cached = new Resend(key);
   }
   return cached;
-}
-
-export function getFromAddress(): string {
-  const from = process.env.RESEND_FROM_EMAIL;
-  if (!from) {
-    throw new Error('RESEND_FROM_EMAIL is not set');
-  }
-  return from;
 }

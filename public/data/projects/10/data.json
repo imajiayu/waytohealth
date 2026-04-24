@@ -11,6 +11,7 @@
   "raised_amount": 0,
   "currency": "UAH",
   "tags": ["transport", "accessibility"],
+  "monobankJarSendId": "3JxRKXyq5d",
   "detail": {
     "subtitle": {
       "ua": "Забезпечуємо перевезення маломобільних людей до місць відновлення",

@@ -4,8 +4,12 @@ import { useEffect, useState } from 'react';
 import { type NewsItem } from '@/data/news';
 import { deleteNewsAction, listNewsAction } from '@/app/actions/news';
 
-// admin dashboard：列出所有新闻 + 内联删除。身份由 server cookie 承载，不需要 pw prop。
-export default function NewsList() {
+interface NewsListProps {
+  onEdit?: (item: NewsItem) => void;
+}
+
+// admin dashboard：列出所有新闻 + 内联删除/编辑。身份由 server cookie 承载，不需要 pw prop。
+export default function NewsList({ onEdit }: NewsListProps = {}) {
   const [items, setItems] = useState<NewsItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -85,14 +89,26 @@ export default function NewsList() {
                   <td className="hidden max-w-xs truncate px-4 py-2.5 text-sm text-gray-500 md:table-cell">{it.title.ua}</td>
                   <td className="px-4 py-2.5 text-sm text-gray-500">{it.images?.length ?? 0}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-right">
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(it.id)}
-                      disabled={deletingId === it.id}
-                      className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
-                    >
-                      {deletingId === it.id ? 'Deleting…' : 'Delete'}
-                    </button>
+                    <div className="inline-flex items-center gap-3">
+                      {onEdit && (
+                        <button
+                          type="button"
+                          onClick={() => onEdit(it)}
+                          disabled={deletingId === it.id}
+                          className="text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(it.id)}
+                        disabled={deletingId === it.id}
+                        className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                      >
+                        {deletingId === it.id ? 'Deleting…' : 'Delete'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

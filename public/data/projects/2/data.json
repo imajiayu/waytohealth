@@ -11,6 +11,7 @@
   "raised_amount": 0,
   "currency": "UAH",
   "tags": ["rehabilitation", "veterans"],
+  "monobankJarSendId": "9w2MYhp752",
   "detail": {
     "subtitle": {
       "ua": "Відновлення захисників та захисниць після травм",

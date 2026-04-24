@@ -50,21 +50,30 @@ export default function ImageUploader({
       />
       {images.length > 0 && (
         <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
-          {images.map((img, i) => (
-            <div key={img.id} className="group relative aspect-square overflow-hidden rounded border border-gray-200 bg-gray-50">
-              <Image src={img.previewUrl} alt={img.name} fill sizes="20vw" unoptimized className="object-cover" />
-              <div className="pointer-events-none absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                {i + 1}
+          {images.map((img, i) => {
+            const src = img.kind === 'existing' ? img.url : img.previewUrl;
+            const alt = img.kind === 'existing' ? `image ${i + 1}` : img.name;
+            return (
+              <div key={img.id} className="group relative aspect-square overflow-hidden rounded border border-gray-200 bg-gray-50">
+                <Image src={src} alt={alt} fill sizes="20vw" unoptimized className="object-cover" />
+                <div className="pointer-events-none absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                  {i + 1}
+                </div>
+                {img.kind === 'new' && (
+                  <div className="pointer-events-none absolute left-1 bottom-1 rounded bg-emerald-600/90 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    new
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onRemove(img.id)}
+                  className="absolute right-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100"
+                >
+                  remove
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => onRemove(img.id)}
-                className="absolute right-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100"
-              >
-                remove
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

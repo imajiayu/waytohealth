@@ -238,9 +238,9 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 
 `previewEmailAction(templateId)` 只返回模板常量用于 UI 预览，不调 Resend。
 
-**UI**（`src/components/admin/EmailPanel.tsx`）：双栏布局，左侧表单（收件人 textarea / 模板下拉 / Advanced subject override + reply-to），右侧 iframe 预览（`sandbox="allow-same-origin"`）。底部 `EmailHistory` 调 `listEmailHistoryAction` 拉 Resend `emails.list({ limit: 20 })` 显示最近发送记录（时间 / 主题 / 收件人 / `last_event` 状态），发送成功后通过 `refreshKey` bump 自动刷新。
+**UI**（`src/components/admin/EmailPanel.tsx`）：双栏布局，左侧表单（收件人 textarea / 模板下拉 / From 前缀下拉 / Advanced subject override + reply-to），右侧 iframe 预览（`sandbox="allow-same-origin"`）。底部 `EmailHistory` 调 `listEmailHistoryAction` 拉 Resend `emails.list({ limit: 100 })` 显示最近发送记录（时间 / 主题 / 收件人 / `last_event` 状态），发送成功后通过 `refreshKey` bump 自动刷新。
 
-**一个需要警惕的点**：`RESEND_FROM_EMAIL` 的域名必须已经在 Resend 控制台验证，否则发送 403。本地开发可用 Resend 提供的 `onboarding@resend.dev` 沙盒发件地址，但它只能发到开发者自己验证过的邮箱。
+**发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'support', 'news', 'noreply']`，admin UI 下拉选择（默认 `noreply`），`buildFromAddress(prefix)` 拼成完整 from 串。故意不开"任意前缀"：写死能发的地址集合 = 发件内容已在 code review 阶段审过，和静态 HTML 模板是同一套"不接受运行时输入"的护栏。所有可选前缀的本地邮箱（`info@` / `support@` / `news@` / `noreply@`）域名必须已经在 Resend 控制台验证通过，否则 send 会 403。Inbound webhook 转发默认走 `noreply`。
 
 ### Inbound 邮件转发（catch-all → Gmail）
 
@@ -256,7 +256,7 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 5. **附件完整转发（含 inline CID）**：`detail.attachments` 只有 metadata，对每项再调 `receiving.attachments.get({ emailId, id })` 拿 `download_url`，下载 → base64 → 以 `{ filename, content, contentType, contentId }` 形式附到出站 send。`contentId` 保留让原 `<img src="cid:xxx">` 引用在 Gmail 里正常渲染为行内图。Promise.all 并行下载，单附件失败（超时 / 404 / metadata 不完整）只丢该附件，不阻塞其他附件和正文转发。累计附件超 30MB（Resend 40MB 硬限的保险线）就丢弃尾部剩余附件
 6. **`replyTo` 要校验邮箱格式**：Resend `from` 字段理论上可能带展示名或异常字符，不是合法单邮箱就不设 `replyTo`；否则 Resend API 会 400
 7. **subject 单行化 + 截断**：入站 subject 可能带 `\r\n`（header 注入）或极长字符串，统一 `sanitizeHeader(subject, 200)`
-8. **发件人固定为自己域名**（`getFromAddress()`），原发件人地址渲染在正文顶部 meta 块里（From / To / Cc / Subject / Date）。不要用 `from: <原发件人>` —— 会 DMARC fail + 被 Gmail 判为伪造
+8. **发件人固定为自己域名**（`buildFromAddress()`，默认前缀 `noreply`），原发件人地址渲染在正文顶部 meta 块里（From / To / Cc / Subject / Date）。不要用 `from: <原发件人>` —— 会 DMARC fail + 被 Gmail 判为伪造
 9. **断转发回环（四层）**：(a) 发件人域名是 `waytohealth.org.ua` 或其子域直接跳过（最可靠，兜 bounce / auto-reply 绕回）；(b) subject 已带 `[Forwarded]` 前缀跳过（人类可读信号）；(c) 原邮件 `headers` 含 `X-Forwarded-By: waytohealth.org.ua` 跳过——我们自己出站 send 时会打这个标，即便对方把完整 header 回流也能识别；(d) 出站 subject 必带 `[Forwarded]` 前缀 + headers 必带 `X-Forwarded-By`，构成下一次入站的识别依据
 
 **所需环境变量**：
@@ -272,10 +272,11 @@ FORWARD_TO_EMAIL=                 # 转发目标 Gmail，如 waytohealthua@gmail
 
 ```env
 RESEND_API_KEY=                   # Resend dashboard → API Keys 生成；必需
-RESEND_FROM_EMAIL=                # 发件人，格式 "Way to Health <noreply@waytohealth.org.ua>"；域名必须在 Resend 验证通过
 RESEND_WEBHOOK_SECRET=            # Inbound 邮件 webhook 签名密钥，见上文 Inbound 小节
 FORWARD_TO_EMAIL=                 # Inbound 邮件转发目标 Gmail，见上文 Inbound 小节
 ```
+
+> 发件人地址不走 env —— display name / 域名 / 可用前缀都在 `src/lib/emailFrom.ts` 定义。admin 发信时从白名单下拉选前缀。
 
 ---
 
@@ -340,7 +341,8 @@ src/
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── stripe.ts                # Stripe 客户端单例
-│   ├── resend.ts                # Resend 客户端单例 + getFromAddress()
+│   ├── resend.ts                # Resend 客户端单例（server-only），re-export emailFrom 的工具
+│   ├── emailFrom.ts             # 发件人常量：display name / 域名 / 前缀白名单 / buildFromAddress（client-safe）
 │   ├── emailTemplates.ts        # 邮件模板注册表（server-only，纯静态 HTML，无变量）
 │   ├── emailTemplates/          # 每个模板单独一个 .ts，导出 subject / html / text 三常量
 │   ├── donations.ts             # 已筹金额查询（带缓存）

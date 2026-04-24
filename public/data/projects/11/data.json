@@ -11,6 +11,7 @@
   "raised_amount": 0,
   "currency": "UAH",
   "tags": ["emergency-aid", "humanitarian"],
+  "monobankJarSendId": "3FME6VqbFP",
   "detail": {
     "subtitle": {
       "ua": "Підтримуємо в перші години після обстрілів",

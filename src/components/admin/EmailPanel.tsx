@@ -8,6 +8,14 @@ import {
   type RecipientFailure,
 } from '@/app/actions/email';
 import type { EmailTemplateMeta, RenderedEmail } from '@/lib/emailTemplates';
+import {
+  FROM_PREFIXES,
+  DEFAULT_FROM_PREFIX,
+  FROM_DISPLAY_NAME,
+  FROM_DOMAIN,
+  isFromPrefix,
+  type FromPrefix,
+} from '@/lib/emailFrom';
 import EmailHistory from './EmailHistory';
 
 type SendResult =
@@ -23,6 +31,7 @@ export default function EmailPanel() {
   const [to, setTo] = useState('');
   const [replyTo, setReplyTo] = useState('');
   const [subject, setSubject] = useState('');
+  const [fromPrefix, setFromPrefix] = useState<FromPrefix>(DEFAULT_FROM_PREFIX);
 
   const [preview, setPreview] = useState<RenderedEmail | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -89,6 +98,7 @@ export default function EmailPanel() {
       to,
       templateId,
       subject: subject.trim(),
+      fromPrefix,
       ...(replyTo.trim() ? { replyTo: replyTo.trim() } : {}),
     });
 
@@ -183,6 +193,34 @@ export default function EmailPanel() {
           </div>
 
           <div>
+            <label htmlFor="email-from-prefix" className={labelCls}>
+              From
+            </label>
+            <div className="mt-1 flex items-center gap-1 rounded-md border border-gray-300 px-3 py-2 text-sm font-mono">
+              <span className="text-gray-500">{FROM_DISPLAY_NAME} &lt;</span>
+              <select
+                id="email-from-prefix"
+                value={fromPrefix}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (isFromPrefix(v)) setFromPrefix(v);
+                }}
+                className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              >
+                {FROM_PREFIXES.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+              <span className="text-gray-500">@{FROM_DOMAIN}&gt;</span>
+            </div>
+            <p className="mt-1 text-xs text-gray-400">
+              Pick the sender local part. Domain and display name are fixed.
+            </p>
+          </div>
+
+          <div>
             <label htmlFor="email-subject" className={labelCls}>
               Subject <span className="text-red-500">*</span>
             </label>
@@ -213,8 +251,9 @@ export default function EmailPanel() {
               className={inputCls}
             />
             <p className="mt-1 text-xs text-gray-400">
-              Where recipient replies will go. Leave blank to route to the From address ({' '}
-              <code>noreply@</code> — replies will be dropped).
+              Where recipient replies will go. Leave blank to route to the From address
+              {' '}
+              (<code>{fromPrefix}@</code>).
             </p>
           </div>
 
