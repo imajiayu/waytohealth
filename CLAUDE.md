@@ -242,11 +242,39 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 
 **一个需要警惕的点**：`RESEND_FROM_EMAIL` 的域名必须已经在 Resend 控制台验证，否则发送 403。本地开发可用 Resend 提供的 `onboarding@resend.dev` 沙盒发件地址，但它只能发到开发者自己验证过的邮箱。
 
+### Inbound 邮件转发（catch-all → Gmail）
+
+任何发到 `*@waytohealth.org.ua` 的邮件都会被 Resend Inbound 接收后调 webhook，由 `src/app/api/webhooks/resend-inbound/route.ts` 转发到 `FORWARD_TO_EMAIL` 指定的 Gmail。
+
+**链路**：DNS 根域 MX → `inbound-smtp.eu-west-1.amazonaws.com`（Resend 控制台 Domains 详情页底部 Enable Receiving 后 UI 给） → Resend 收到后 POST 到 `/api/webhooks/resend-inbound`（事件类型 `email.received`）→ svix 签名校验通过后，用 `resend.emails.send()` 原样转发到目标 Gmail。
+
+**路由关键点**：
+1. `runtime = 'nodejs'` + `maxDuration = 60`：svix 校验依赖 Node crypto，Edge runtime 会炸；带附件的大邮件串行走 Resend API 可能超过默认 timeout，保守拉到 60s
+2. **只处理 `email.received`** 事件，其他事件类型 200 OK 跳过（为将来 Resend 扩事件类型留余地）
+3. **反查正文**：webhook payload 只给 metadata，必须调 `resend.emails.receiving.get(emailId)` 拉 `html / text / headers / attachments[]`
+4. **入站 HTML 经 sanitize-html**（不是 DOMPurify —— jsdom 在 Vercel serverless 起不来）：白名单保留表格 / 内嵌 style / `<img src="cid:…">` 等样式承载标签，剥所有 `on*` handler、`script/iframe/form/meta/style/object/embed` 等，`<a>` 强制 `target=_blank rel=noopener noreferrer`
+5. **附件完整转发（含 inline CID）**：`detail.attachments` 只有 metadata，对每项再调 `receiving.attachments.get({ emailId, id })` 拿 `download_url`，下载 → base64 → 以 `{ filename, content, contentType, contentId }` 形式附到出站 send。`contentId` 保留让原 `<img src="cid:xxx">` 引用在 Gmail 里正常渲染为行内图。Promise.all 并行下载，单附件失败（超时 / 404 / metadata 不完整）只丢该附件，不阻塞其他附件和正文转发。累计附件超 30MB（Resend 40MB 硬限的保险线）就丢弃尾部剩余附件
+6. **`replyTo` 要校验邮箱格式**：Resend `from` 字段理论上可能带展示名或异常字符，不是合法单邮箱就不设 `replyTo`；否则 Resend API 会 400
+7. **subject 单行化 + 截断**：入站 subject 可能带 `\r\n`（header 注入）或极长字符串，统一 `sanitizeHeader(subject, 200)`
+8. **发件人固定为自己域名**（`getFromAddress()`），原发件人地址渲染在正文顶部 meta 块里（From / To / Cc / Subject / Date）。不要用 `from: <原发件人>` —— 会 DMARC fail + 被 Gmail 判为伪造
+9. **断转发回环（四层）**：(a) 发件人域名是 `waytohealth.org.ua` 或其子域直接跳过（最可靠，兜 bounce / auto-reply 绕回）；(b) subject 已带 `[Forwarded]` 前缀跳过（人类可读信号）；(c) 原邮件 `headers` 含 `X-Forwarded-By: waytohealth.org.ua` 跳过——我们自己出站 send 时会打这个标，即便对方把完整 header 回流也能识别；(d) 出站 subject 必带 `[Forwarded]` 前缀 + headers 必带 `X-Forwarded-By`，构成下一次入站的识别依据
+
+**所需环境变量**：
+
+```env
+RESEND_WEBHOOK_SECRET=            # Resend 控制台 Webhooks → Add Webhook 勾 email.received 后给的 whsec_... Signing Secret；仅显示一次
+FORWARD_TO_EMAIL=                 # 转发目标 Gmail，如 waytohealthua@gmail.com
+```
+
+两个 env var 任一缺失 route 返回 500 `Webhook not configured`。签名校验失败 401、payload 结构异常 400、Resend 转发失败 502、其他异常 500 —— Resend 会按状态码自动重试。
+
 ### 邮件相关环境变量
 
 ```env
 RESEND_API_KEY=                   # Resend dashboard → API Keys 生成；必需
 RESEND_FROM_EMAIL=                # 发件人，格式 "Way to Health <noreply@waytohealth.org.ua>"；域名必须在 Resend 验证通过
+RESEND_WEBHOOK_SECRET=            # Inbound 邮件 webhook 签名密钥，见上文 Inbound 小节
+FORWARD_TO_EMAIL=                 # Inbound 邮件转发目标 Gmail，见上文 Inbound 小节
 ```
 
 ---
@@ -265,7 +293,8 @@ src/
 │   │   └── email/page.tsx       # Email 发送后台（Resend）
 │   ├── api/
 │   │   ├── admin/{login,logout,me}/  # 签名 cookie 发放 / 清除 / 探活
-│   │   └── news/upload/              # Vercel Blob client upload handler
+│   │   ├── news/upload/              # Vercel Blob client upload handler
+│   │   └── webhooks/resend-inbound/  # Resend Inbound webhook：catch-all 邮件转发到 Gmail
 │   ├── sitemap.ts               # 11 项目 × 2 locale + 静态页
 │   ├── robots.ts                # 允许 / ，禁 /admin /api
 │   └── [locale]/                # 国际化路由（前台）
