@@ -4,7 +4,9 @@ import { getSession } from '@/lib/adminSession';
 
 // 单张上传上限 8MB；前端侧有软限制提示，这里是服务端硬限制
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
-const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+// 客户端会把所有图统一转码成 webp（见 src/components/admin/news/imageTransform.ts），
+// 服务端只接 webp，相当于双层护栏：意外绕过客户端转码（curl 直传等）也进不来
+const ALLOWED_MIME = ['image/webp'];
 
 export async function POST(request: Request): Promise<NextResponse> {
   let body: HandleUploadBody;

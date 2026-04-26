@@ -24,7 +24,7 @@
 
 ```bash
 npm install
-npm run dev      # 启动开发服务器 (http://localhost:3000)
+npm run dev      # 开发服务器（绑 0.0.0.0:3000 局域网可访问；3s 后自动开浏览器 tab）
 npm run build    # 生产构建
 npm run lint     # ESLint 检查
 npm run start    # 启动生产服务器
@@ -78,28 +78,10 @@ npm run start    # 启动生产服务器
 
 ### 核心流程
 
-DonationSidebar 是一个**双视图状态机**（method ↔ stripe），顶部进度区（raised / goal / %）常驻，不随视图切换。`direction: 'forward' | 'backward'` 驱动 `animate-panel-forward` / `animate-panel-backward` 入场过渡。
+DonationSidebar 是 method ↔ stripe **双视图状态机**，顶部进度区（raised / goal / %）常驻不随视图切换；`direction: 'forward' | 'backward'` 驱动 `animate-panel-forward` / `animate-panel-backward` 过渡。
 
-```
-Step 1 · method 视图（默认）
-  进度条（raised / goal）
-  ─ 分隔线 ─
-  "Choose payment method" + 项目徽章
-    ├─ monobank 按钮 <a href>
-    │     项目 data.json 配了 monobankJarSendId → send.monobank.ua/jar/{项目 sendId}
-    │     否则 fallback 到 NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID
-    │     都没 → 按钮灰态 "Coming soon"
-    │     （新 tab 打开；用户在 monobank 页面输入金额）
-    │
-    └─ stripe 按钮 → setView('stripe'), direction='forward'
-Step 2 · stripe 视图
-  ← Back      02/02
-  Stripe logo + 项目徽章
-  <stripe-buy-button> Web Component 嵌入
-    - 加载 https://js.stripe.com/v3/buy-button.js (afterInteractive)
-    - buy-button-id + publishable-key 写死在 src/components/projects/donation/utils.ts
-    - 用户点按钮 → Stripe 托管 checkout 页付款（我们不收回调）
-```
+- **method 视图** 放 monobank / stripe 两个按钮。monobank 按钮是纯 `<a href>` 跳 `send.monobank.ua/jar/{sendId}`（新 tab 里用户自己输金额）：优先用项目 `data.json` 的 `monobankJarSendId`，缺失退 `NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID`，都没就灰态 "Coming soon"。
+- **stripe 视图** 嵌入 `<stripe-buy-button>` Web Component，`buy-button-id` + `publishable-key` 写死在 `src/components/projects/donation/utils.ts`；`https://js.stripe.com/v3/buy-button.js` 用 `afterInteractive` 加载。用户点按钮跳 Stripe 托管 checkout，本站**不收回调**。
 
 ### 已筹金额展示
 
@@ -160,20 +142,11 @@ Tag 规范（`normalizeTags` in `src/app/actions/news.ts`）：单条新闻最�
 
 读取 (`src/lib/news.ts`) 走 `unstable_cache(..., { revalidate: 60, tags: ['news'] })`；管理员写 (`src/app/actions/news.ts`) 走 `sql` tagged template，`published_at / title / body / images / tags` 用 `::timestamptz / ::jsonb / ::text[] / ::jsonb` 显式 cast。
 
-**图片存储（Vercel Blob）**：admin 选图后，浏览器通过 `@vercel/blob/client` 的 `upload()` **直接上传到 Blob**（绕开 server action 4.5MB body 限制），拿到完整 URL 后写入 DB `images` 列。前端 `next/image` 直接用 Blob URL 加载（已在 `next.config.ts` `images.remotePatterns` 里允许 `*.public.blob.vercel-storage.com`）。
+**图片存储（Vercel Blob）**：admin 选图后，浏览器先用 canvas 转码成 webp（最长边 ≤ 2400px，质量 0.85，HEIC/HEIF 直接拒绝；见 `src/components/admin/news/imageTransform.ts`），再通过 `@vercel/blob/client` 的 `upload()` **直接上传到 Blob**（绕开 server action 4.5MB body 限制），拿到完整 URL 后写入 DB `images` 列。前端 `next/image` 直接用 Blob URL 加载（已在 `next.config.ts` `images.remotePatterns` 里允许 `*.public.blob.vercel-storage.com`）。客户端转码失败（极少数浏览器 / 损坏图）会在选图阶段就把错误聚合给 admin，不会带病走到上传。
 
-**Admin 认证流（HttpOnly 签名 cookie）**：
-1. 用户在 `/admin/*` 的登录表单提交密码 → `POST /api/admin/login`
-2. `verifyAdminPassword(pw)`（`src/lib/adminAuth.ts`）— SHA-256(pw+SALT) 常数时间比对 `ADMIN_PASSWORD_HASH`，同时按 IP 走 `rateLimit()`
-3. 通过 → `issueSession()` 发一张 HttpOnly + Secure + SameSite=Strict 的 cookie `wth_admin`，值为 `base64url(payload).base64url(HMAC-SHA256(ADMIN_COOKIE_SECRET, payload))`，8 小时滑动过期
-4. 后续所有 server action 和 `/api/news/upload` 调 `requireAdmin()`（`src/lib/adminSession.ts`）读 cookie + 验签；失败抛 `unauthorized`
-5. `/api/admin/logout` 清 cookie；`/api/admin/me` 供前端探活
+**Admin 认证**：`POST /api/admin/login` 调 `verifyAdminPassword`（SHA-256(pw+SALT) 常数时间比对 + IP 限流），通过后 `issueSession()` 发 HttpOnly + Secure + SameSite=Strict 的 `wth_admin` cookie（HMAC-SHA256 签名，8h 滑动过期）。所有 admin server action / API route **必须 `await requireAdmin()`** 读 cookie + 验签，失败抛 `unauthorized`。配套路由：`/api/admin/logout` 清 cookie，`/api/admin/me` 供前端探活。
 
-**Blob client upload 流程**：
-1. 客户端 `upload()` POST 到 `/api/news/upload`（不传密码，身份由 cookie 承载）
-2. `onBeforeGenerateToken` 调 `getSession()` 验 cookie；验 `pathname` 前缀为 `news/`；限 MIME 为 jpeg/png/webp；限 size ≤ 8MB
-3. 返回短时 upload token → 客户端拿 token 直传 Blob → 得到 URL
-4. 所有 URL 一起提交给 `publishNewsAction`（同样走 `requireAdmin()`）→ INSERT 进 Neon + `revalidateTag('news', { expire: 0 })`
+**Blob client upload**：客户端 `upload()` → `/api/news/upload`（`onBeforeGenerateToken` 验 cookie + `pathname` 前缀 `news/` + MIME 白名单**仅 webp**（客户端转码后必为 webp，curl 直传等绕过路径作为双层护栏挡掉）+ size ≤ 8MB）→ 拿短时 token 直传 Blob → 得到 URL 提交给 `publishNewsAction` INSERT + `revalidateTag('news', { expire: 0 })`。绕开了 server action 4.5MB body 限制。
 
 **速率限制（@upstash/redis）**：`src/lib/adminRateLimit.ts` 用 `Redis.fromEnv()` 跨实例共享计数器。key: `admin:fail:{ip}`（ZSET 记失败时间戳，TTL = 窗口 + 60s）+ `admin:lock:{ip}`（String + TTL 30min）。15 分钟窗口 10 次失败触发 30 分钟锁定。KV 不可用时 fallback 到进程内 Map（开发环境 / 未接 KV 的部署）。
 
@@ -223,15 +196,9 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 2. 在 `emailTemplates.ts` 的 `TEMPLATES` 数组追加一项
 3. 如 HTML 里有图片，用绝对 URL（`https://waytohealth.org.ua/email/xxx.png`），不要 base64 —— 内嵌 >100KB 会被 Gmail "Message clipped" 截断。图片放 `public/email/`，通过生产域名拉
 
-**发送流程**（`src/app/actions/email.ts`）：
-1. 所有 action 入口 `requireAdmin()`（admin cookie 会话）
-2. `parseRecipients(raw)` — 按换行（`\r?\n`）拆分，正则校验 RFC 结构，去重，单次上限 50（Resend 限制）。UI placeholder 与 hint 都是 "One address per line"，避免地址内 `+ . _` 被误切
-3. `renderEmail(templateId)` — 从 `BY_ID` map 取出常量三件套
-4. `resend.batch.send(messages, { batchValidation: 'permissive' })` — 把收件人列表展开成 N 封独立邮件（每封 `to: [addr]`），单封触发反垃圾不影响其余成功投递。**不**用 `to=from + bcc` 群发：`Mail-from = Rcpt-to` 是经典垃圾邮件特征，Gmail/Outlook 实测整封 bounced。每封独立寄出本身就互不可见，等同 bcc 隐私维度。`permissive` 模式返回 `data.errors[].index`，按下标映射回原列表的邮箱地址组成 `failures: { address, message }[]` 回给前端展示；`replyTo` 单独再校验一次邮箱格式
+**发送流程**（`src/app/actions/email.ts`）：`requireAdmin()` → `parseRecipients`（换行拆分 + RFC 正则 + 去重，单次上限 50）→ 取模板常量 → `resend.batch.send(messages, { batchValidation: 'permissive' })` 把收件人展开成 N 封独立邮件（每封 `to: [addr]`），单封被反垃圾拦截不影响其余。`permissive` 返回 `data.errors[].index`，按下标映射成 `failures: { address, message }[]` 回给前端。**不用 `to=from + bcc` 群发** —— `Mail-from = Rcpt-to` 是经典垃圾邮件特征，实测 Gmail/Outlook 整封 bounced；独立寄出天然等同 bcc 隐私维度。`previewEmailAction` 只返常量不调 Resend。
 
-`previewEmailAction(templateId)` 只返回模板常量用于 UI 预览，不调 Resend。
-
-**UI**（`src/components/admin/EmailPanel.tsx`）：双栏布局，左侧表单（收件人 textarea / 模板下拉 / From 前缀下拉 / Advanced subject override + reply-to），右侧 iframe 预览（`sandbox="allow-same-origin"`）。底部 `EmailHistory` 调 `listEmailHistoryAction` 拉 Resend `emails.list({ limit: 100 })` 显示最近发送记录（时间 / 主题 / 收件人 / `last_event` 状态），发送成功后通过 `refreshKey` bump 自动刷新。
+**UI**（`src/components/admin/EmailPanel.tsx`）：左栏表单（收件人 textarea / 模板下拉 / From 前缀下拉 / Advanced subject override + reply-to）+ 右栏 iframe 预览（`sandbox="allow-same-origin"`）。底部 `EmailHistory` 拉 Resend `emails.list({ limit: 100 })`，发送成功后 `refreshKey` bump 自动刷新。
 
 **发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'support', 'news', 'noreply']`，admin UI 下拉选择（默认 `noreply`），`buildFromAddress(prefix)` 拼成完整 from 串。故意不开"任意前缀"：写死能发的地址集合 = 发件内容已在 code review 阶段审过，和静态 HTML 模板是同一套"不接受运行时输入"的护栏。所有可选前缀的本地邮箱（`info@` / `support@` / `news@` / `noreply@`）域名必须已经在 Resend 控制台验证通过，否则 send 会 403。Inbound webhook 转发默认走 `noreply`。
 
@@ -241,16 +208,16 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 
 **链路**：DNS 根域 MX → `inbound-smtp.eu-west-1.amazonaws.com`（Resend 控制台 Domains 详情页底部 Enable Receiving 后 UI 给） → Resend 收到后 POST 到 `/api/webhooks/resend-inbound`（事件类型 `email.received`）→ svix 签名校验通过后，用 `resend.emails.send()` 原样转发到目标 Gmail。
 
-**路由关键点**：
-1. `runtime = 'nodejs'` + `maxDuration = 60`：svix 校验依赖 Node crypto，Edge runtime 会炸；带附件的大邮件串行走 Resend API 可能超过默认 timeout，保守拉到 60s
-2. **只处理 `email.received`** 事件，其他事件类型 200 OK 跳过（为将来 Resend 扩事件类型留余地）
-3. **反查正文**：webhook payload 只给 metadata，必须调 `resend.emails.receiving.get(emailId)` 拉 `html / text / headers / attachments[]`
-4. **入站 HTML 经 sanitize-html**（不是 DOMPurify —— jsdom 在 Vercel serverless 起不来）：白名单保留表格 / 内嵌 style / `<img src="cid:…">` 等样式承载标签，剥所有 `on*` handler、`script/iframe/form/meta/style/object/embed` 等，`<a>` 强制 `target=_blank rel=noopener noreferrer`
-5. **附件完整转发（含 inline CID）**：`detail.attachments` 只有 metadata，对每项再调 `receiving.attachments.get({ emailId, id })` 拿 `download_url`，下载 → base64 → 以 `{ filename, content, contentType, contentId }` 形式附到出站 send。`contentId` 保留让原 `<img src="cid:xxx">` 引用在 Gmail 里正常渲染为行内图。Promise.all 并行下载，单附件失败（超时 / 404 / metadata 不完整）只丢该附件，不阻塞其他附件和正文转发。累计附件超 30MB（Resend 40MB 硬限的保险线）就丢弃尾部剩余附件
-6. **`replyTo` 要校验邮箱格式**：Resend `from` 字段理论上可能带展示名或异常字符，不是合法单邮箱就不设 `replyTo`；否则 Resend API 会 400
-7. **subject 单行化 + 截断**：入站 subject 可能带 `\r\n`（header 注入）或极长字符串，统一 `sanitizeHeader(subject, 200)`
-8. **发件人固定为自己域名**（`buildFromAddress()`，默认前缀 `noreply`），原发件人地址渲染在正文顶部 meta 块里（From / To / Cc / Subject / Date）。不要用 `from: <原发件人>` —— 会 DMARC fail + 被 Gmail 判为伪造
-9. **断转发回环（四层）**：(a) 发件人域名是 `waytohealth.org.ua` 或其子域直接跳过（最可靠，兜 bounce / auto-reply 绕回）；(b) subject 已带 `[Forwarded]` 前缀跳过（人类可读信号）；(c) 原邮件 `headers` 含 `X-Forwarded-By: waytohealth.org.ua` 跳过——我们自己出站 send 时会打这个标，即便对方把完整 header 回流也能识别；(d) 出站 subject 必带 `[Forwarded]` 前缀 + headers 必带 `X-Forwarded-By`，构成下一次入站的识别依据
+**关键约束（非自明部分）**：
+
+- **`runtime = 'nodejs'` + `maxDuration = 60`** — svix 校验依赖 Node crypto（Edge 起不来）；带附件大邮件走串行 Resend API 会超默认 timeout
+- **HTML 走 `sanitize-html`（不是 DOMPurify）** —— jsdom 在 Vercel serverless 起不来。白名单保留表格 / 内嵌 style / `<img src="cid:…">`，剥 `on*` / `script/iframe/form/meta/style/object/embed`，`<a>` 强制 `target=_blank rel=noopener noreferrer`
+- **发件人必须固定为自己域名**（`buildFromAddress()` 默认 `noreply`），原发件人放正文 meta 块里。用 `from: <原发件人>` 会 DMARC fail 被 Gmail 判伪造
+- **subject 必须 `sanitizeHeader(subject, 200)`** —— 入站可能带 `\r\n`（header 注入）或极长字符串
+- **`replyTo` 要校验邮箱格式** —— Resend 原 `from` 可能带展示名或异常字符，非合法邮箱就不设，否则 Resend API 400
+- **附件单独再调 `receiving.attachments.get()`** 拿 `download_url`（attachments metadata 不够）→ 下载 base64 → 带 `contentId` 附给出站，让 `<img src="cid:xxx">` 在 Gmail 继续渲染。`Promise.all` 并行，单附件失败只丢自己；累计 >30MB（Resend 40MB 硬限保险线）丢尾部
+- **防转发回环（四层）**：(a) 发件人域名是 `waytohealth.org.ua` 子域直接跳过；(b) subject 已带 `[Forwarded]` 前缀跳过；(c) 原 headers 含 `X-Forwarded-By: waytohealth.org.ua` 跳过；(d) 出站必打 `[Forwarded]` + `X-Forwarded-By` —— 前三条是识别层，最后一条是下一次入站的标记源
+- 只处理 `email.received` 事件，其他类型 200 OK 跳过（为 Resend 扩事件留空间）
 
 **所需环境变量**：
 
@@ -493,7 +460,7 @@ const t = useTranslations('namespace')
 
 ---
 
-## 注意��项 (Gotchas)
+## 注意事项 (Gotchas)
 
 - **Tailwind v4**: 使用 CSS-first 配置（`@import "tailwindcss"`），不再有 `tailwind.config.js`。自定义主题通过 `globals.css` 中的 `@theme` 定义
 - **Next.js 16 异步 API**: `cookies()`、`headers()`、`params`、`searchParams` 都需要 `await`
@@ -503,6 +470,7 @@ const t = useTranslations('namespace')
 - **SEO metadata**: 新页 `generateMetadata` 走 `src/lib/seo.ts` 的 `buildAlternates` / `buildOpenGraph` / `buildTwitter` helper，不要手写 canonical / hreflang / OG；新路径记得加到 `src/app/sitemap.ts`
 - **KV 连接**：生产用 Vercel Marketplace KV（Upstash），SDK 是 `@upstash/redis`（**不要**装 `@vercel/kv`，已 deprecated）。`Redis.fromEnv()` 自动读 `KV_REST_API_URL` / `KV_REST_API_TOKEN`
 - **OG 图**: `public/og-image.jpg`（1200×630，≤ 200KB），由 `lib/seo.ts` 默认引用。替换时保持尺寸与路径
+- **客户端 IP 提取**：限流 / 审计类场景读 IP 一律走 `x-real-ip`（Vercel 不可伪造）优先、`x-forwarded-for` 最左值兜底。**不要**把 XFF 当主源 —— 客户端可伪造 `X-Forwarded-For` 旋转 key 绕开计数。参考 `src/lib/adminAuth.ts` / `src/app/actions/requests.ts` 的 `getClientIp`
 
 ---
 

@@ -52,14 +52,27 @@ export default async function AboutSection() {
       <div className="dot-matrix-blue pointer-events-none absolute right-[5%] top-16 hidden h-40 w-40 opacity-[0.22] lg:block" />
 
       <div className="container-page relative">
-        {/* 区域标签 + 标题 */}
+        {/* 区域标签 + 标题 + CTA(桌面右对齐, 移动折行) */}
         <div>
-          <span className="font-[family-name:var(--font-data)] text-xs font-medium uppercase tracking-[0.2em] text-ukraine-blue-400">
-            {tNav('about')}
-          </span>
-          <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
-            {t('title')}
-          </h2>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+            <div>
+              <span className="font-[family-name:var(--font-data)] text-xs font-medium uppercase tracking-[0.2em] text-ukraine-blue-400">
+                {tNav('about')}
+              </span>
+              <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
+                {t('title')}
+              </h2>
+            </div>
+            <Link
+              href="/about"
+              className="group inline-flex w-fit items-center gap-2 rounded-full border-2 border-ukraine-blue-500 px-5 py-2 text-sm font-semibold text-ukraine-blue-600 transition-all duration-300 hover:bg-ukraine-blue-500 hover:text-white hover:shadow-lg hover:shadow-ukraine-blue-200/50 sm:px-6 sm:py-2.5"
+            >
+              {t('cta')}
+              <svg viewBox="0 0 16 16" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </div>
           <div className="mt-3 accent-line" />
         </div>
 
@@ -141,19 +154,6 @@ export default async function AboutSection() {
 
         {/* 已完成项目横滑 */}
         <AchievementsCarousel />
-
-        {/* CTA */}
-        <div className="mt-10 flex sm:mt-12">
-          <Link
-            href="/about"
-            className="inline-flex items-center gap-2 rounded-full border-2 border-ukraine-blue-500 px-6 py-2.5 text-sm font-semibold text-ukraine-blue-600 transition-all duration-300 hover:bg-ukraine-blue-500 hover:text-white hover:shadow-lg hover:shadow-ukraine-blue-200/50 sm:px-7 sm:py-3"
-          >
-            {t('cta')}
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
-        </div>
       </div>
     </section>
   );

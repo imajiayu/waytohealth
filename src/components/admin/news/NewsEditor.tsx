@@ -15,6 +15,7 @@ import { type NewsItem, type Tag } from '@/data/news';
 import ImageUploader from './ImageUploader';
 import TagInput from './TagInput';
 import { type ImageDraft, MAX_IMAGES_HARD } from './types';
+import { transcodeToWebp } from './imageTransform';
 
 function toLocalInputValue(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -59,6 +60,7 @@ export default function NewsEditor(props: NewsEditorProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [transcoding, setTranscoding] = useState(false);
   const [previewLocale, setPreviewLocale] = useState<Locale>('ua');
 
   // 卸载时只释放 'new' draft 的 ObjectURL；existing 的是持久 Blob URL，不能 revoke
@@ -66,8 +68,12 @@ export default function NewsEditor(props: NewsEditorProps) {
   useEffect(() => {
     imagesRef.current = images;
   }, [images]);
+  // 给转码异步流程一个 "组件还活着吗" 的信号：转码 promise 完成时若已卸载，
+  // 直接 revoke 新创建的 URL，避免它们漏过 imagesRef cleanup
+  const mountedRef = useRef(true);
   useEffect(() => {
     return () => {
+      mountedRef.current = false;
       imagesRef.current.forEach((img) => {
         if (img.kind === 'new') URL.revokeObjectURL(img.previewUrl);
       });
@@ -81,25 +87,51 @@ export default function NewsEditor(props: NewsEditorProps) {
     };
   }, []);
 
-  function handleFilesSelected(files: FileList | null) {
+  async function handleFilesSelected(files: FileList | null) {
     if (!files || files.length === 0) return;
     setError(null);
 
     const available = MAX_IMAGES_HARD - images.length;
     const incoming = Array.from(files).slice(0, available);
+    const messages: string[] = [];
     if (files.length > available) {
-      setError(`Maximum ${MAX_IMAGES_HARD} images per post; extras ignored.`);
+      messages.push(`Maximum ${MAX_IMAGES_HARD} images per post; ${files.length - available} extra ignored.`);
+    }
+    if (incoming.length === 0) {
+      if (messages.length > 0) setError(messages.join('\n'));
+      return;
     }
 
-    const drafts: ImageDraft[] = incoming.map((file) => ({
-      kind: 'new',
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      name: file.name,
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
-
-    setImages((cur) => [...cur, ...drafts]);
+    setTranscoding(true);
+    try {
+      const results = await Promise.allSettled(incoming.map((file) => transcodeToWebp(file)));
+      const drafts: ImageDraft[] = [];
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') {
+          const previewUrl = URL.createObjectURL(r.value);
+          // 组件已卸载就当场 revoke，否则会成为孤儿 URL —— imagesRef cleanup 已经跑过且不会再更新
+          if (!mountedRef.current) {
+            URL.revokeObjectURL(previewUrl);
+            return;
+          }
+          drafts.push({
+            kind: 'new',
+            id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`,
+            name: r.value.name,
+            file: r.value,
+            previewUrl,
+          });
+        } else {
+          const reason = r.reason instanceof Error ? r.reason.message : 'transcode failed';
+          messages.push(`${incoming[i].name}: ${reason}`);
+        }
+      });
+      if (!mountedRef.current) return;
+      if (drafts.length > 0) setImages((cur) => [...cur, ...drafts]);
+      if (messages.length > 0) setError(messages.join('\n'));
+    } finally {
+      if (mountedRef.current) setTranscoding(false);
+    }
   }
 
   function removeImage(id: string) {
@@ -285,7 +317,8 @@ export default function NewsEditor(props: NewsEditorProps) {
           images={images}
           onFilesSelected={handleFilesSelected}
           onRemove={removeImage}
-          disabled={busy}
+          disabled={busy || transcoding}
+          transcoding={transcoding}
         />
 
         {error && (
@@ -306,7 +339,7 @@ export default function NewsEditor(props: NewsEditorProps) {
           </button>
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || transcoding}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {submitLabel}
