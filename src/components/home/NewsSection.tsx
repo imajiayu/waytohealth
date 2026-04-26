@@ -22,7 +22,7 @@ export default async function NewsSection() {
   const items = all.slice(0, HOME_LIMIT);
 
   return (
-    <section id="news" className="relative scroll-mt-16 overflow-x-clip pt-6 sm:pt-8">
+    <section id="news" className="section-y relative scroll-mt-16 overflow-x-clip">
       {/* 背景装饰 — 冷色光源从左上,金色从右下,避开 Projects 的右上主光源 */}
       <div className="aura-teal-md pointer-events-none absolute -left-40 -top-24 h-[620px] w-[620px] rounded-full opacity-55 blur-3xl" />
       <div className="aura-gold-lg pointer-events-none absolute -right-32 bottom-0 h-[380px] w-[380px] rounded-full opacity-35 blur-3xl" />
@@ -36,15 +36,17 @@ export default async function NewsSection() {
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
             {tNews('sectionTitle')}
           </h2>
-          <div className="mt-3 accent-line" />
+          <div className="mt-2 accent-line" />
         </div>
       </div>
 
       {/* sm+：CTA 固定在滚动区右侧,卡片从其下方滚过并在接近时渐隐
-          mobile：CTA 变成滚动区下方的全宽按钮(--cta-w 未定义时 mask-fade-right 与 spacer 自动失效) */}
-      <div className="container-page relative mt-2 sm:mt-3">
+          mobile：CTA 变成滚动区下方的全宽按钮(--cta-w 未定义时 mask-fade-right 与 spacer 自动失效)
+          sm:-mb-3 抵消 scroll container 的 pb-3 — pb-3 给 hover 阴影留呼吸,但视觉上是空白,
+          不抵消会让 News→About section 间距比 Projects→News 多出 12px */}
+      <div className="container-page relative sm:-mb-3">
         <div className="relative sm:[--cta-w:220px] lg:[--cta-w:260px]">
-          <div className="hide-scrollbar mask-fade-right snap-x snap-proximity overflow-x-auto scroll-smooth pb-3 pt-3">
+          <div className="hide-scrollbar mask-fade-right snap-x snap-proximity overflow-x-auto scroll-smooth pb-3 pt-2 sm:pt-3">
             <div className="flex items-stretch gap-5 sm:gap-6">
               {items.map((item) => (
                 <div

@@ -97,10 +97,13 @@ export default async function TermsPage() {
       </section>
 
       {/* ═══════════ 2. BODY: 目录 + 正文 ═══════════ */}
-      <section className="section-y relative overflow-hidden">
-        {/* 装饰光晕 */}
-        <div className="pointer-events-none absolute -left-40 top-40 h-96 w-96 rounded-full opacity-[0.04] glow-blue-soft" />
-        <div className="pointer-events-none absolute -right-40 bottom-40 h-96 w-96 rounded-full opacity-[0.04] glow-gold-soft" />
+      {/* section 自身不能 overflow-hidden，否则 TermsTOC 的 sticky 失效（最近滚动祖先变成 section） */}
+      <section className="section-y relative">
+        {/* 装饰光晕 — 独立裁剪层，吸收 overflow-hidden，不影响 sticky */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-40 top-40 h-96 w-96 rounded-full opacity-[0.04] glow-blue-soft" />
+          <div className="absolute -right-40 bottom-40 h-96 w-96 rounded-full opacity-[0.04] glow-gold-soft" />
+        </div>
 
         <div className="container-page relative">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">

@@ -16,10 +16,10 @@ export default function HeroSection() {
         <div className="relative flex flex-1 flex-col items-center justify-center px-4 sm:px-6">
           {/* 品牌名称 */}
           <div className="animate-hero-title flex flex-col items-center">
-            <span className="text-sm font-semibold tracking-[0.35em] text-white/70 uppercase sm:text-base md:text-lg">
+            <span className="font-[family-name:var(--font-data)] text-sm font-semibold tracking-[0.35em] text-white/70 uppercase sm:text-base md:text-lg">
               {t('foundationLabel')}
             </span>
-            <h1 className="mt-3 text-center text-[clamp(2.5rem,10vw,8rem)] leading-none font-bold tracking-tight text-white uppercase sm:mt-4">
+            <h1 className="mt-3 text-center font-[family-name:var(--font-display)] text-[clamp(2.5rem,10vw,8rem)] leading-none font-bold tracking-tight text-white uppercase sm:mt-4">
               {t('title')}
             </h1>
           </div>

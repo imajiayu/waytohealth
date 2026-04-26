@@ -73,7 +73,7 @@ export default async function AboutSection() {
               </svg>
             </Link>
           </div>
-          <div className="mt-3 accent-line" />
+          <div className="mt-2 accent-line" />
         </div>
 
         {/* 照片 + 数据卡片 + 使命/愿景 — 两列布局 */}

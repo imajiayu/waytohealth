@@ -46,11 +46,11 @@ export default async function ProjectsSection() {
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-ukraine-blue-900 sm:text-4xl">
             {t('title')}
           </h2>
-          <div className="mt-3 accent-line" />
+          <div className="mt-2 accent-line" />
         </div>
 
         {/* 移动端：缩略图导航 + 单张当前卡片（折叠纵向高度，不用滚很长） */}
-        <div className="mt-4 sm:hidden">
+        <div className="mt-2 sm:hidden">
           <MobileProjectSwitcher
             thumbs={mainProjects.map((p) => ({
               id: p.id,
@@ -72,7 +72,7 @@ export default async function ProjectsSection() {
         </div>
 
         {/* 桌面端：大卡片 3 列网格 */}
-        <div className="mt-3 hidden gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="hidden gap-6 sm:mt-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {mainProjects.map((project, i) => (
             <ProjectCard
               key={project.id}
@@ -91,7 +91,7 @@ export default async function ProjectsSection() {
               <h3 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-ukraine-blue-800 sm:text-2xl">
                 {t('otherProjectsTitle')}
               </h3>
-              <div className="mt-2 h-[2px] w-10 rounded-full bg-ukraine-gold-500" />
+              <div className="mt-2 accent-line" />
             </div>
 
             {/* 紧凑卡片 5 列 */}
