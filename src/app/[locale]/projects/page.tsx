@@ -4,7 +4,6 @@ import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 import { Check } from 'lucide-react';
-import Image from 'next/image';
 import DonationSidebar from '@/components/projects/DonationSidebar';
 // 移动端 donation sheet 只在 lg 以下显示；dynamic + 媒体查询在 MobileDonationSheetMount 里处理
 import MobileDonationSheetMount from '@/components/projects/MobileDonationSheetMount';
@@ -12,6 +11,7 @@ import DocumentViewer from '@/components/common/DocumentViewer';
 import { getTranslations } from 'next-intl/server';
 import PatientStories from '@/components/projects/PatientStories';
 import ProjectStrip from '@/components/projects/ProjectStrip';
+import ProjectGallery from '@/components/projects/ProjectGallery';
 import RecoveryJourney from '@/components/projects/RecoveryJourney';
 
 type Props = {
@@ -194,76 +194,13 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
               </section>
             )}
 
-            {/* ── 内容配图（统一比例，显示时按 object-cover 裁剪） ── */}
-            {(() => {
-              const images = [
-                ...(detail?.contentImages ?? []),
-                ...(detail?.gallery ?? []),
-              ];
-              if (images.length === 0) return null;
-              const splitAt = Math.ceil(images.length / 2);
-              // ≤3 张：竖向构图；4+ 张：横向构图
-              const aspectClass = images.length <= 3 ? 'aspect-[3/4]' : 'aspect-[4/3]';
-              return (
-                <section className="mt-10 sm:mt-12">
-                  {images.length <= 3 ? (
-                    /* ≤3 张图：mobile 2 列网格（1 张单列、3 张末图跨 2 列）；sm+ 等宽并排 */
-                    <div
-                      className={`${
-                        images.length === 1 ? 'grid grid-cols-1' : 'grid grid-cols-2'
-                      } gap-2.5 sm:flex sm:items-stretch sm:gap-3`}
-                    >
-                      {images.map((img, i) => (
-                        <div
-                          key={i}
-                          className={`relative overflow-hidden rounded-xl ${aspectClass} sm:flex-1${
-                            images.length === 3 && i === 2 ? ' col-span-2 sm:col-span-1' : ''
-                          }`}
-                        >
-                          <Image
-                            src={`/data/projects/${projectId}/${img}`}
-                            alt={`${title} ${i + 1}`}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 28vw, 220px"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    /* 双行：4+ 张图，等比横图 */
-                    <div className="flex flex-col gap-2.5 sm:gap-3">
-                      <div className="flex items-stretch gap-2.5 sm:gap-3">
-                        {images.slice(0, splitAt).map((img, i) => (
-                          <div key={i} className={`relative flex-1 overflow-hidden rounded-xl ${aspectClass}`}>
-                            <Image
-                              src={`/data/projects/${projectId}/${img}`}
-                              alt={`${title} ${i + 1}`}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="flex items-stretch gap-2.5 sm:gap-3">
-                        {images.slice(splitAt).map((img, i) => (
-                          <div key={i} className={`relative flex-1 overflow-hidden rounded-xl ${aspectClass}`}>
-                            <Image
-                              src={`/data/projects/${projectId}/${img}`}
-                              alt={`${title} ${splitAt + i + 1}`}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 640px) 33vw, (max-width: 1024px) 28vw, 220px"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </section>
-              );
-            })()}
+            {/* ── 内容配图（点击放大；统一比例，按 object-cover 裁剪） ── */}
+            <ProjectGallery
+              images={[...(detail?.contentImages ?? []), ...(detail?.gallery ?? [])]}
+              basePath={`/data/projects/${projectId}`}
+              alt={title}
+            />
+
 
             {/* ── 康复旅程阶段 ── */}
             {detail?.stages && detail.stages.length > 0 && (

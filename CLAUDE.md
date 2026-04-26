@@ -47,7 +47,7 @@ npm run start    # 启动生产服务器
 | Admin 安全 | node:crypto HMAC cookie | HttpOnly 签名 cookie 承载 admin 会话，不走第三方库（见 `src/lib/adminSession.ts`） |
 | 事务邮件 | Resend (`resend`) | Admin 后台 `/admin/email`：手输收件人 + 模板渲染发送，模板注册表在 `src/lib/emailTemplates.ts`（server-only） |
 | XSS 过滤 | isomorphic-dompurify | DocumentViewer 的 xlsx HTML 走 DOMPurify 过滤再 dangerouslySetInnerHTML |
-| Focus trap | focus-trap-react | MobileMenuPanel / NewsLightbox 打开时锁键盘焦点在面板内 |
+| Focus trap | focus-trap-react | MobileMenuPanel / Lightbox 打开时锁键盘焦点在面板内 |
 
 ### 计划集成（尚未安装）
 
@@ -311,12 +311,12 @@ src/
 │       └── partnership/         # 合作伙伴申请表单（+ /success 页）
 ├── components/
 │   ├── about/                   # 关于页组件（VideoStory, TeamCollage, DocumentAccordion）
-│   ├── common/                  # 通用 UI 组件（BottomSheet, DocumentViewer）
+│   ├── common/                  # 通用 UI 组件（BottomSheet, DocumentViewer, Lightbox）
 │   ├── home/                    # 首页组件（HeroSection, ProjectsSection, AboutSection, ValuesAccordion, AchievementsCarousel, NewsSection）
 │   ├── layout/                  # 布局组件（Navigation, Footer, LoadingBar, CopyIbanButton）
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
-│   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney）
-│   ├── news/                    # 新闻组件（NewsCard, NewsLightbox, HomeDispatchCard, HomeDispatchCtaCard）
+│   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, ProjectGallery, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney）
+│   ├── news/                    # 新闻组件（NewsCard, HomeDispatchCard, HomeDispatchCtaCard）
 │   ├── admin/                   # Admin 后台组件（news 编辑器、AssistanceRequestsPanel、PartnershipRequestsPanel 等）
 │   ├── forms/                   # 表单原子（fields.tsx / PartnershipForm / RequestAssistanceForm）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）

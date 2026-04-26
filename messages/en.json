@@ -487,7 +487,9 @@
     "comingSoon": "Coming soon",
     "monobankHint": "Opens monobank jar page. Enter amount there.",
     "monobankUnavailable": "Jar for this project is not connected yet.",
-    "stripeHint": "Card · Apple Pay · Google Pay"
+    "stripeHint": "Card · Apple Pay · Google Pay",
+    "viewImage": "View image {n}",
+    "viewPhoto": "View photo"
   },
   "forms": {
     "requestAssistance": {

@@ -7,7 +7,7 @@ import { type Locale } from '@/i18n/config';
 import { type NewsItem } from '@/data/news';
 
 // 按需加载 lightbox：只有用户点图打开时才下载这块 ~4KB+ 的 client JS
-const NewsLightbox = dynamic(() => import('./NewsLightbox'));
+const Lightbox = dynamic(() => import('@/components/common/Lightbox'));
 
 interface NewsCardProps {
   item: NewsItem;
@@ -255,8 +255,8 @@ export default function NewsCard({ item, locale, preview = false, compact = fals
       </article>
 
       {!preview && lightboxIndex !== null && allImages.length > 0 && (
-        <NewsLightbox
-          images={allImages}
+        <Lightbox
+          images={allImages.map(resolveImageUrl)}
           startIndex={lightboxIndex}
           alt={title || 'News image'}
           onClose={() => setLightboxIndex(null)}

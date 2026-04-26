@@ -6,7 +6,10 @@ import { type PatientStory, type LocaleString } from '@/data/projects';
 import { useTranslations } from 'next-intl';
 import { User } from 'lucide-react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+
+const Lightbox = dynamic(() => import('@/components/common/Lightbox'));
 
 interface Props {
   stories: PatientStory[];
@@ -23,9 +26,17 @@ export default function PatientStories({
 }: Props) {
   const t = useTranslations('projectDetail');
   const [activeIndex, setActiveIndex] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const story = stories[activeIndex];
   const photoBase = `/data/projects/${projectId}`;
   const hasComparison = story.photoBefore && story.photoAfter;
+
+  // 当前 story 可放大的图集（顺序固定：before, after；或仅 photo）
+  const lightboxImages = hasComparison
+    ? [`${photoBase}/${story.photoBefore}`, `${photoBase}/${story.photoAfter}`]
+    : story.photo
+      ? [`${photoBase}/${story.photo}`]
+      : [];
 
   return (
     <section className="mt-16 sm:mt-20">
@@ -101,12 +112,17 @@ export default function PatientStories({
         {hasComparison && (
           <div className="relative grid grid-cols-2">
             {/* Before */}
-            <div className="relative aspect-square overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(0)}
+              aria-label={`${story.name} — ${t('before')}`}
+              className="group relative aspect-square cursor-zoom-in overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ukraine-gold-500"
+            >
               <Image
                 src={`${photoBase}/${story.photoBefore}`}
                 alt={`${story.name} — ${t('before')}`}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 style={story.photoBeforePosition ? { objectPosition: story.photoBeforePosition } : undefined}
                 sizes="(max-width: 640px) 50vw, 35vw"
               />
@@ -114,16 +130,21 @@ export default function PatientStories({
               <span className="absolute bottom-1.5 left-2.5 font-[family-name:var(--font-data)] text-[9px] font-semibold uppercase tracking-widest text-white/90">
                 {t('before')}
               </span>
-            </div>
+            </button>
             {/* 中线 */}
-            <div className="absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-white/80" />
+            <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-white/80" />
             {/* After */}
-            <div className="relative aspect-square overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(1)}
+              aria-label={`${story.name} — ${t('after')}`}
+              className="group relative aspect-square cursor-zoom-in overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ukraine-gold-500"
+            >
               <Image
                 src={`${photoBase}/${story.photoAfter}`}
                 alt={`${story.name} — ${t('after')}`}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 style={story.photoAfterPosition ? { objectPosition: story.photoAfterPosition } : undefined}
                 sizes="(max-width: 640px) 50vw, 35vw"
               />
@@ -131,7 +152,7 @@ export default function PatientStories({
               <span className="absolute bottom-1.5 right-2.5 font-[family-name:var(--font-data)] text-[9px] font-semibold uppercase tracking-widest text-white/90">
                 {t('after')}
               </span>
-            </div>
+            </button>
           </div>
         )}
 
@@ -140,19 +161,26 @@ export default function PatientStories({
           <div className="flex items-start gap-3">
             {/* 无对比照时显示头像 */}
             {!hasComparison && (
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-ukraine-blue-50 to-ukraine-blue-100/60 sm:h-16 sm:w-16">
-                {story.photo ? (
+              story.photo ? (
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex(0)}
+                  aria-label={t('viewPhoto')}
+                  className="group relative flex h-14 w-14 shrink-0 cursor-zoom-in items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-ukraine-blue-50 to-ukraine-blue-100/60 outline-none focus-visible:ring-2 focus-visible:ring-ukraine-gold-500 sm:h-16 sm:w-16"
+                >
                   <Image
                     src={`${photoBase}/${story.photo}`}
                     alt={story.name}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                     sizes="64px"
                   />
-                ) : (
+                </button>
+              ) : (
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-ukraine-blue-50 to-ukraine-blue-100/60 sm:h-16 sm:w-16">
                   <User className="h-7 w-7 text-ukraine-blue-300" />
-                )}
-              </div>
+                </div>
+              )
             )}
             <div>
               <h3 className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-ukraine-blue-900 sm:text-xl">
@@ -254,6 +282,15 @@ export default function PatientStories({
           )}
         </div>
       </div>
+
+      {lightboxIndex !== null && lightboxImages.length > 0 && (
+        <Lightbox
+          images={lightboxImages}
+          startIndex={lightboxIndex}
+          alt={story.name}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
     </section>
   );
 }

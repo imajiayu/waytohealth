@@ -7,7 +7,8 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 
-interface NewsLightboxProps {
+export interface LightboxProps {
+  /** 完整 URL — 调用方负责把相对路径解析成 / 开头的绝对路径或 http(s):// / blob: URL */
   images: string[];
   startIndex: number;
   alt: string;
@@ -18,13 +19,7 @@ function pad2(n: number): string {
   return n.toString().padStart(2, '0');
 }
 
-// Blob URL 或旧相对文件名都能解析
-function resolveSrc(src: string): string {
-  if (/^https?:\/\//.test(src)) return src;
-  return `/data/news/images/${src}`;
-}
-
-export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsLightboxProps) {
+export default function Lightbox({ images, startIndex, alt, onClose }: LightboxProps) {
   const [index, setIndex] = useState(startIndex);
   const thumbRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(true);
@@ -133,7 +128,7 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
         >
           <Image
             key={images[index]}
-            src={resolveSrc(images[index])}
+            src={images[index]}
             alt={`${alt} — ${index + 1}/${images.length}`}
             fill
             sizes="(max-width: 640px) 92vw, 80vw"
@@ -143,35 +138,46 @@ export default function NewsLightbox({ images, startIndex, alt, onClose }: NewsL
         </div>
       </div>
 
-      {/* 缩略图条 */}
+      {/* 缩略图条 — 胶片取景器 */}
       {images.length > 1 && (
         <div
           ref={thumbRef}
-          className="hide-scrollbar absolute bottom-3 left-1/2 z-20 flex max-w-[92vw] -translate-x-1/2 gap-1.5 overflow-x-auto rounded-full border border-white/10 bg-black/30 p-1.5 backdrop-blur-md sm:bottom-5 sm:gap-2 sm:p-2"
+          className="hide-scrollbar absolute bottom-3 left-1/2 z-20 flex max-w-[92vw] -translate-x-1/2 items-center gap-2 overflow-x-auto rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.07] to-black/50 p-2 shadow-[0_18px_44px_-14px_rgba(0,0,0,0.6)] ring-1 ring-inset ring-white/[0.04] backdrop-blur-xl sm:bottom-5 sm:gap-2.5 sm:p-2.5"
           onClick={stop}
         >
-          {images.map((name, i) => (
-            <button
-              key={name}
-              type="button"
-              data-thumb={i}
-              onClick={() => setIndex(i)}
-              aria-label={`View image ${i + 1}`}
-              className={`relative h-9 w-9 shrink-0 overflow-hidden rounded-md transition sm:h-12 sm:w-12 ${
-                i === index
-                  ? 'opacity-100 ring-2 ring-ukraine-gold-500'
-                  : 'opacity-55 hover:opacity-90'
-              }`}
-            >
-              <Image
-                src={resolveSrc(name)}
-                alt=""
-                fill
-                sizes="(max-width: 640px) 36px, 48px"
-                className="object-cover"
-              />
-            </button>
-          ))}
+          {images.map((src, i) => {
+            const active = i === index;
+            return (
+              <button
+                key={src}
+                type="button"
+                data-thumb={i}
+                onClick={() => setIndex(i)}
+                aria-label={`View image ${i + 1}`}
+                aria-current={active ? 'true' : undefined}
+                className={`relative h-10 w-10 shrink-0 overflow-hidden rounded-lg transition-[transform,opacity,filter,box-shadow] duration-300 ease-out sm:h-14 sm:w-14 ${
+                  active
+                    ? 'scale-[1.08] opacity-100 brightness-[1.05] ring-2 ring-ukraine-gold-400 shadow-[0_8px_22px_-6px_rgba(245,184,0,0.55)]'
+                    : 'opacity-45 saturate-50 hover:-translate-y-0.5 hover:opacity-95 hover:saturate-100'
+                }`}
+              >
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 40px, 56px"
+                  className="object-cover"
+                />
+                {/* 选中态：底部金色光线（取景器底缘） */}
+                {active && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-1.5 bottom-1 h-[2px] rounded-full bg-ukraine-gold-300/95 shadow-[0_0_10px_1px_rgba(245,184,0,0.85)]"
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

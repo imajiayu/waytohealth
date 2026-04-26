@@ -487,7 +487,9 @@
     "comingSoon": "Незабаром",
     "monobankHint": "Відкриється сторінка банки. Введіть суму там.",
     "monobankUnavailable": "Банку для цього проєкту ще не підключено.",
-    "stripeHint": "Картка · Apple Pay · Google Pay"
+    "stripeHint": "Картка · Apple Pay · Google Pay",
+    "viewImage": "Переглянути зображення {n}",
+    "viewPhoto": "Переглянути фото"
   },
   "forms": {
     "requestAssistance": {
