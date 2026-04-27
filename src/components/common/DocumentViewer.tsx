@@ -234,12 +234,26 @@ export default function DocumentViewer({ documents, labels }: DocumentViewerProp
               : 'max-h-[500px] sm:max-h-[600px] overflow-auto'
           }`}>
             {currentType === 'pdf' ? (
-              <iframe
-                src={currentDoc.url}
-                className="h-full w-full border-0"
-                title={currentDoc.label}
-                sandbox="allow-same-origin allow-scripts allow-downloads allow-popups"
-              />
+              // 用 <object> 而非 <iframe sandbox>：Chrome 内置 PDF Viewer 在 sandboxed
+              // iframe 里会被拒绝加载（呈现为"此页面已被 Chrome 屏蔽"），object 走浏览器
+              // 原生 PDF 处理通道、不受 iframe sandbox 影响。这里的 PDF 是同源首方静态
+              // 资产，去掉 sandbox 不损失实际安全收益
+              <object
+                data={currentDoc.url}
+                type="application/pdf"
+                className="h-full w-full"
+                aria-label={currentDoc.label}
+              >
+                <div className="flex h-full items-center justify-center p-4 text-center text-sm text-ukraine-blue-400">
+                  <a
+                    href={currentDoc.url}
+                    download
+                    className="text-ukraine-blue-600 underline hover:text-ukraine-blue-700"
+                  >
+                    {labels.download}
+                  </a>
+                </div>
+              </object>
             ) : (
               <ExcelPreview url={currentDoc.url} errorMessage={labels.loadError} />
             )}

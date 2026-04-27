@@ -449,7 +449,7 @@ const t = useTranslations('namespace')
 
 - 所有对外 API 调用走 `fetchWithTimeout(url, init, timeoutMs)`，不要直接 `fetch` 外部地址（否则悬挂请求会阻塞 server action / ISR）
 - 任何 `dangerouslySetInnerHTML` 必须经 `isomorphic-dompurify` 的 `DOMPurify.sanitize()`
-- 任何 `<iframe src>` 加 `sandbox` 属性（最少 `allow-same-origin`，PDF 预览用 `allow-same-origin allow-scripts allow-downloads allow-popups`）
+- 任何 `<iframe src>` 加 `sandbox` 属性（最少 `allow-same-origin`）。**PDF 预览不要用 iframe** —— Chrome 内置 PDF Viewer 在 sandboxed iframe 里会被拒绝加载（呈现"此页面已被 Chrome 屏蔽"），改用 `<object data={url} type="application/pdf">` + 内嵌下载链接 fallback（见 `DocumentViewer.tsx`）
 - Admin server action / API route 不接受 `pw` 参数，一律 `await requireAdmin()` 从 cookie 取身份
 
 ### Button / a11y
