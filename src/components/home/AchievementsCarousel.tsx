@@ -1,192 +1,305 @@
-'use client';
-
-import { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import MobileAchievementsTabs, { type AchievementTab } from './MobileAchievementsTabs';
 
 const ITEM_COUNT = 4;
 
-/* 无图片时的占位渐变 + 图标 */
-const PLACEHOLDERS: { gradient: string; icon: React.ReactNode }[] = [
-  { gradient: '', icon: null },
+// 图片真实尺寸（来自 public/images/achievement-*.webp）
+const IMAGE_DIMENSIONS: Record<number, { width: number; height: number }> = {
+  0: { width: 2000, height: 3000 }, // rehabilitation 2:3
+  1: { width: 1280, height: 1438 }, // ambulance 近正方
+  2: { width: 1400, height: 1050 }, // humanitarian 4:3 横
+  3: { width: 1400, height: 1867 }, // international 3:4
+};
+
+// 桌面 2 列布局：左列承载 0/2，右列承载 1/3；列内用 flex-col + mt-auto 把第二张
+// 卡 push 到底部，配合 grid 同行等高自动让两列底端齐平
+const COLUMN_PAIRS: ReadonlyArray<readonly [number, number]> = [
+  [0, 2],
+  [1, 3],
+];
+
+type Stat = { value: string; label: string };
+
+type AchievementItem = {
+  title: string;
+  meta: string;
+  text: string;
+  image: string;
+  list?: string[];
+  stats?: Stat[];
+};
+
+// 每个 entry 的 accent token —— 与 Values 三色呼应，第 4 项用暖色补齐
+const ENTRY_ACCENT: { dot: string; eyebrow: string; line: string; soft: string }[] = [
   {
-    gradient: 'from-warm-500 to-ukraine-gold-400',
-    icon: (
-      <svg viewBox="0 0 64 64" className="h-16 w-16" fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="10" y="26" width="44" height="20" rx="5" />
-        <circle cx="20" cy="46" r="5" />
-        <circle cx="44" cy="46" r="5" />
-        <path d="M16 26l5-10h22l5 10" />
-      </svg>
-    ),
+    dot: 'var(--color-ukraine-blue-500)',
+    eyebrow: 'var(--color-ukraine-blue-600)',
+    line: 'linear-gradient(90deg, var(--color-ukraine-blue-500), var(--color-ukraine-blue-200))',
+    soft: 'color-mix(in srgb, var(--color-ukraine-blue-500) 8%, transparent)',
   },
   {
-    gradient: 'from-life-500 to-ukraine-blue-300',
-    icon: (
-      <svg viewBox="0 0 64 64" className="h-16 w-16" fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M32 6L8 18v28l24 12 24-12V18z" />
-        <path d="M8 18l24 12m0 0l24-12m-24 12v24" opacity="0.4" />
-      </svg>
-    ),
+    dot: 'var(--color-ukraine-gold-600)',
+    eyebrow: 'var(--color-ukraine-gold-700)',
+    line: 'linear-gradient(90deg, var(--color-ukraine-gold-500), var(--color-ukraine-gold-200))',
+    soft: 'color-mix(in srgb, var(--color-ukraine-gold-500) 12%, transparent)',
   },
   {
-    gradient: 'from-ukraine-gold-500 to-ukraine-blue-400',
-    icon: (
-      <svg viewBox="0 0 64 64" className="h-16 w-16" fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="22" cy="22" r="10" />
-        <circle cx="42" cy="22" r="10" />
-        <circle cx="32" cy="42" r="10" />
-      </svg>
-    ),
+    dot: 'var(--color-life-500)',
+    eyebrow: 'var(--color-life-500)',
+    line: 'linear-gradient(90deg, var(--color-life-500), var(--color-ukraine-blue-200))',
+    soft: 'color-mix(in srgb, var(--color-life-500) 10%, transparent)',
+  },
+  {
+    dot: 'var(--color-warm-500)',
+    eyebrow: 'var(--color-warm-500)',
+    line: 'linear-gradient(90deg, var(--color-warm-500), var(--color-ukraine-gold-300))',
+    soft: 'color-mix(in srgb, var(--color-warm-500) 10%, transparent)',
   },
 ];
 
-export default function AchievementsCarousel() {
-  const t = useTranslations('about.achievements');
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrollState, setScrollState] = useState({ left: false, right: true });
+function isStat(s: unknown): s is Stat {
+  if (typeof s !== 'object' || s === null) return false;
+  const o = s as Record<string, unknown>;
+  return typeof o.value === 'string' && typeof o.label === 'string';
+}
 
-  const checkScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const left = el.scrollLeft > 4;
-    const right = el.scrollLeft < el.scrollWidth - el.clientWidth - 4;
-    setScrollState(prev => (prev.left === left && prev.right === right) ? prev : { left, right });
-  }, []);
+// 渲染单条 achievement 的内部内容（不含外层 <li> / <article> 包装），
+// 这样既能给 sm+ 的 <ol> 用，又能给移动端 switcher panel 用
+function renderInner(
+  item: AchievementItem,
+  i: number,
+  accent: (typeof ENTRY_ACCENT)[number],
+  dim: { width: number; height: number } | undefined,
+) {
+  const paragraphs = item.text.split('\n\n').filter(Boolean);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    checkScroll();
-    el.addEventListener('scroll', checkScroll, { passive: true });
-    window.addEventListener('resize', checkScroll);
-    return () => {
-      el.removeEventListener('scroll', checkScroll);
-      window.removeEventListener('resize', checkScroll);
-    };
-  }, [checkScroll]);
+  return (
+    <>
+      {/* 图片 —— 真实比例展示 */}
+      <figure className="relative">
+        <div
+          aria-hidden
+          className="absolute -bottom-2 -right-2 -z-10 hidden h-full w-full rounded-2xl opacity-90 sm:-bottom-3 sm:-right-3 sm:block"
+          style={{ background: accent.line }}
+        />
+        {item.image && dim ? (
+          <div className="relative overflow-hidden rounded-2xl bg-white ring-1 ring-ukraine-blue-100/70">
+            <Image
+              src={item.image}
+              alt={item.title}
+              width={dim.width}
+              height={dim.height}
+              className="h-auto w-full"
+              sizes="(max-width: 1024px) 100vw, 46vw"
+            />
+          </div>
+        ) : (
+          <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-ukraine-blue-50 ring-1 ring-ukraine-blue-100/70" />
+        )}
+      </figure>
 
-  const scroll = (direction: 'left' | 'right') => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const cardWidth = el.querySelector<HTMLElement>(':scope > *')?.offsetWidth ?? 600;
-    el.scrollBy({ left: direction === 'left' ? -cardWidth - 32 : cardWidth + 32, behavior: 'smooth' });
-  };
+      {/* meta badge —— eyebrow（4 张卡片共享结构，仅文本不同：数字 / 地点 / 合作方） */}
+      {item.meta && (
+        <div className="mt-5 flex items-center gap-2.5 sm:mt-6">
+          <span
+            aria-hidden
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ background: accent.dot }}
+          />
+          <span
+            className="font-[family-name:var(--font-data)] text-[0.7rem] font-medium uppercase tracking-[0.22em]"
+            style={{ color: accent.eyebrow }}
+          >
+            {item.meta}
+          </span>
+        </div>
+      )}
 
-  const items = Array.from({ length: ITEM_COUNT }, (_, i) => {
-    const hasImage = t(`items.${i}.image`) !== '';
-    // 先用 t.has 检查 list 字段是否存在，避免触发 MISSING_MESSAGE 警告
-    let list: string[] = [];
+      {/* title */}
+      <h4 className="mt-3 font-[family-name:var(--font-display)] text-xl font-bold leading-[1.2] text-ukraine-blue-800 sm:text-2xl">
+        {item.title}
+      </h4>
+
+      {/* body —— 4 张卡片差异化样式 */}
+      {i === 0 && (
+        /* Card 0 · Recovery Support —— 数据 tag 型：
+           - mobile / sm / md：chip 风格 flex-wrap，紧凑
+           - lg+：切到竖排全宽 tinted 块（每行一项 + 大字号 + 大间距），
+             把左列与右列高差吃掉，避免 mt-auto 留出过大空白 */
+        <>
+          <p className="mt-3 text-[0.92rem] leading-[1.6] text-gray-600">{item.text}</p>
+          {item.list && (
+            <ul className="mt-4 flex flex-wrap gap-1.5 lg:mt-4 lg:flex-col lg:flex-nowrap lg:gap-1">
+              {item.list.map(li => (
+                <li
+                  key={li}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.78rem] font-medium leading-none lg:flex lg:w-full lg:gap-2.5 lg:rounded-md lg:px-3.5 lg:py-1.5 lg:text-[0.85rem] lg:leading-tight"
+                  style={{ background: accent.soft, color: accent.eyebrow }}
+                >
+                  <span
+                    aria-hidden
+                    className="h-1 w-1 shrink-0 rounded-full"
+                    style={{ background: accent.dot }}
+                  />
+                  {li}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+
+      {i === 1 &&
+        /* Card 1 · Ambulance —— 叙事 lead 型：首段 italic + 略大字号 + 较深字色，
+           后续段统一 body 字号；不混用衬线字体（PT Serif 仅做装饰性点缀） */
+        paragraphs.map((para, pi) => (
+          <p
+            key={pi}
+            className={
+              pi === 0
+                ? 'mt-3 text-[0.98rem] italic leading-[1.65] text-ukraine-blue-900 sm:mt-4 sm:text-[1.02rem]'
+                : 'mt-3 text-[0.92rem] leading-[1.65] text-gray-600'
+            }
+          >
+            {para}
+          </p>
+        ))}
+
+      {i === 2 && (
+        /* Card 2 · Humanitarian —— 行动分块型：双段独立 panel，左 accent bar + 软色背景 */
+        <div className="mt-4 space-y-2.5">
+          {paragraphs.map((para, pi) => (
+            <div
+              key={pi}
+              className="rounded-r-lg border-l-[3px] py-2.5 pl-4 pr-3"
+              style={{ borderColor: accent.dot, background: accent.soft }}
+            >
+              <p className="text-[0.9rem] leading-[1.55] text-gray-700">{para}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {i === 3 && (
+        /* Card 3 · International —— KPI 卡片型：italic lead + 2 个大数字 stat 块。
+           lead 用默认 body 字体的 italic（不切到 PT Serif） */
+        <>
+          <p className="mt-3 text-[0.96rem] italic leading-[1.6] text-ukraine-blue-900 sm:mt-4 sm:text-[1rem]">
+            {item.text}
+          </p>
+          {item.stats && (
+            <dl className="mt-5 grid grid-cols-2 gap-3">
+              {item.stats.map(s => (
+                <div
+                  key={s.value}
+                  className="rounded-lg p-3.5 ring-1 ring-ukraine-blue-100/70"
+                  style={{ background: accent.soft }}
+                >
+                  <dt
+                    className="font-[family-name:var(--font-data)] text-[1.75rem] font-bold leading-none sm:text-[2rem]"
+                    style={{ color: accent.eyebrow }}
+                  >
+                    {s.value}
+                  </dt>
+                  <dd className="mt-2 text-[0.78rem] leading-snug text-gray-600">
+                    {s.label}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+export default async function AchievementsCarousel() {
+  const t = await getTranslations('about.achievements');
+
+  const items: AchievementItem[] = Array.from({ length: ITEM_COUNT }, (_, i) => {
+    let list: string[] | undefined;
     if (t.has(`items.${i}.list`)) {
       const raw = t.raw(`items.${i}.list`);
-      if (Array.isArray(raw)) {
-        list = raw.filter((x): x is string => typeof x === 'string');
-      }
+      if (Array.isArray(raw)) list = raw.filter((x): x is string => typeof x === 'string');
+    }
+    let stats: Stat[] | undefined;
+    if (t.has(`items.${i}.stats`)) {
+      const raw = t.raw(`items.${i}.stats`);
+      if (Array.isArray(raw)) stats = raw.filter(isStat);
     }
     return {
       title: t(`items.${i}.title`),
+      meta: t.has(`items.${i}.meta`) ? t(`items.${i}.meta`) : '',
       text: t(`items.${i}.text`),
-      image: hasImage ? t(`items.${i}.image`) : '',
+      image: t.has(`items.${i}.image`) ? t(`items.${i}.image`) : '',
       list,
+      stats,
+    };
+  });
+
+  // 移动端 tab：编号 + 标题，4 等分固定宽度
+  const tabs: AchievementTab[] = items.map((item, i) => {
+    const accent = ENTRY_ACCENT[i] ?? ENTRY_ACCENT[0];
+    return {
+      key: i,
+      label: item.title,
+      accent: { dot: accent.dot, eyebrow: accent.eyebrow, soft: accent.soft },
     };
   });
 
   return (
     <div className="mt-10 sm:mt-12">
-      {/* 标题行 + 导航箭头 */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
-            {t('title')}
-          </h3>
-          <div className="mt-2 accent-line" />
-        </div>
+      <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-ukraine-blue-800 sm:text-2xl">
+        {t('title')}
+      </h3>
+      <div className="mt-2 accent-line" />
 
-        <div className="hidden gap-1.5 sm:flex sm:gap-2">
-          <button
-            type="button"
-            onClick={() => scroll('left')}
-            disabled={!scrollState.left}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
-            aria-label={t('scrollLeft')}
-          >
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 4l-4 4 4 4" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll('right')}
-            disabled={!scrollState.right}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-ukraine-blue-200 text-ukraine-blue-500 transition-all duration-200 hover:bg-ukraine-blue-50 disabled:opacity-30 disabled:hover:bg-transparent sm:h-10 sm:w-10"
-            aria-label={t('scrollRight')}
-          >
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 4l4 4-4 4" />
-            </svg>
-          </button>
-        </div>
+      {/* 移动端：4 等分编号 tab + 单张当前卡片 */}
+      <div className="mt-3 sm:hidden">
+        <MobileAchievementsTabs tabs={tabs} ariaLabel={t('title')}>
+          {items.map((item, i) => {
+            const accent = ENTRY_ACCENT[i] ?? ENTRY_ACCENT[0];
+            const dim = IMAGE_DIMENSIONS[i];
+            return (
+              <article key={i} className="pb-2">
+                {renderInner(item, i, accent, dim)}
+              </article>
+            );
+          })}
+        </MobileAchievementsTabs>
       </div>
 
-      {/* 横向滚动容器 — 默认 align-items: stretch 让所有卡片自动对齐到最高那张的高度 */}
-      <div
-        ref={scrollRef}
-        className="hide-scrollbar mt-2 flex gap-4 overflow-x-auto sm:mt-3 sm:gap-6 lg:gap-8 snap-x snap-mandatory"
-      >
+      {/* sm-lg：单列纵向堆叠 */}
+      <div className="mt-6 hidden space-y-12 sm:mt-8 sm:block lg:hidden">
         {items.map((item, i) => {
-          const placeholder = PLACEHOLDERS[i];
-          const hasImage = item.image !== '';
-
+          const accent = ENTRY_ACCENT[i] ?? ENTRY_ACCENT[0];
+          const dim = IMAGE_DIMENSIONS[i];
           return (
-            <div
-              key={i}
-              className="group flex w-[85vw] max-w-[820px] shrink-0 snap-start overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/30 sm:w-[72vw] sm:rounded-2xl"
-            >
-              {/* 左右两栏 — 移动端堆叠，sm 以上并排；外层 carousel stretch + 内层 h-full 链路让所有卡片同高 */}
-              <div className="flex h-full w-full flex-col sm:flex-row">
-                {/* 左侧：图片（sm:h-full 显式吃满内层高度，object-cover 填满分配区域无空隙） */}
-                {hasImage ? (
-                  <div className="relative h-64 w-full shrink-0 overflow-hidden bg-ukraine-blue-50/40 sm:h-full sm:w-2/5">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                      sizes="(max-width: 640px) 85vw, 30vw"
-                    />
-                  </div>
-                ) : (
-                  <div className={`relative flex h-56 w-full shrink-0 items-center justify-center bg-gradient-to-br sm:h-full sm:w-2/5 ${placeholder.gradient}`}>
-                    <div className="opacity-25">
-                      {placeholder.icon}
-                    </div>
-                  </div>
-                )}
+            <article key={i}>
+              {renderInner(item, i, accent, dim)}
+            </article>
+          );
+        })}
+      </div>
 
-                {/* 右侧：文字内容 — 自然流式排版，无内部滚动，所有信息一次性展示 */}
-                <div className="flex flex-1 flex-col px-5 py-5 sm:px-8 sm:py-7">
-                  <h4 className="font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800 sm:text-[1.4rem] sm:leading-snug">
-                    {item.title}
-                  </h4>
-
-                  {item.text.split('\n\n').map((paragraph, pi) => (
-                    <p key={pi} className="mt-2 text-[0.875rem] leading-relaxed text-gray-600 sm:mt-2.5 sm:text-[0.95rem] sm:leading-[1.65]">
-                      {paragraph}
-                    </p>
-                  ))}
-
-                  {item.list.length > 0 && (
-                    <ul className="mt-3 flex flex-col gap-1 sm:mt-3.5 sm:gap-1.5">
-                      {item.list.map((listItem, li_i) => (
-                        <li key={li_i} className="flex items-start gap-2 text-[0.875rem] leading-relaxed text-gray-600 sm:text-[0.95rem] sm:leading-[1.65]">
-                          <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-ukraine-blue-300 sm:mt-[11px]" />
-                          {listItem}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
+      {/* lg+：2 列 grid，每列内部 flex-col + 第二张卡 mt-auto 把底端推到对齐 */}
+      <div className="mt-8 hidden lg:grid lg:grid-cols-2 lg:gap-x-10 xl:gap-x-12">
+        {COLUMN_PAIRS.map(([top, bottom]) => {
+          const topItem = items[top];
+          const bottomItem = items[bottom];
+          if (!topItem || !bottomItem) return null;
+          const topAccent = ENTRY_ACCENT[top] ?? ENTRY_ACCENT[0];
+          const bottomAccent = ENTRY_ACCENT[bottom] ?? ENTRY_ACCENT[0];
+          const topDim = IMAGE_DIMENSIONS[top];
+          const bottomDim = IMAGE_DIMENSIONS[bottom];
+          return (
+            <div key={top} className="flex flex-col">
+              <article>{renderInner(topItem, top, topAccent, topDim)}</article>
+              <article className="mt-auto pt-12">
+                {renderInner(bottomItem, bottom, bottomAccent, bottomDim)}
+              </article>
             </div>
           );
         })}

@@ -1,36 +1,99 @@
 import { getTranslations } from 'next-intl/server';
+import MobileTabSwitcher, { type MobileTabItem } from './MobileTabSwitcher';
 
 const VALUE_KEYS = ['transparency', 'speed', 'result'] as const;
 
-const VALUE_ICONS: Record<string, React.ReactNode> = {
-  transparency: (
-    <svg viewBox="0 0 28 28" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="14" cy="14" r="5" />
-      <path d="M2 14s4.5-8 12-8 12 8 12 8-4.5 8-12 8-12-8-12-8z" />
-    </svg>
-  ),
-  speed: (
-    <svg viewBox="0 0 28 28" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 2L5 16h8l-2 10 10-14h-8z" />
-    </svg>
-  ),
-  result: (
-    <svg viewBox="0 0 28 28" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="14" cy="14" r="11" />
-      <circle cx="14" cy="14" r="7" />
-      <circle cx="14" cy="14" r="3" />
-    </svg>
-  ),
-};
+type ValueKey = (typeof VALUE_KEYS)[number];
 
-const VALUE_ACCENTS: Record<string, string> = {
-  transparency: 'from-ukraine-blue-400 to-ukraine-blue-200',
-  speed: 'from-ukraine-gold-500 to-ukraine-gold-300',
-  result: 'from-life-500 to-ukraine-blue-300',
+// 每个 value 的 accent token —— 用 inline CSS variable 驱动，避免 Tailwind 动态类名陷阱
+const VALUE_ACCENT: Record<ValueKey, { bar: string; dot: string; line: string }> = {
+  transparency: {
+    bar: 'linear-gradient(to bottom, var(--color-ukraine-blue-500), var(--color-ukraine-blue-200))',
+    dot: 'var(--color-ukraine-blue-500)',
+    line: 'linear-gradient(90deg, var(--color-ukraine-blue-500), var(--color-ukraine-blue-200))',
+  },
+  speed: {
+    bar: 'linear-gradient(to bottom, var(--color-ukraine-gold-500), var(--color-ukraine-gold-200))',
+    dot: 'var(--color-ukraine-gold-500)',
+    line: 'linear-gradient(90deg, var(--color-ukraine-gold-500), var(--color-ukraine-gold-200))',
+  },
+  result: {
+    bar: 'linear-gradient(to bottom, var(--color-life-500), var(--color-ukraine-blue-200))',
+    dot: 'var(--color-life-500)',
+    line: 'linear-gradient(90deg, var(--color-life-500), var(--color-ukraine-blue-200))',
+  },
 };
 
 export default async function ValuesAccordion() {
   const t = await getTranslations('about.values');
+
+  // sm+ 多列网格用的 article：含 h4 标题 + dot + body
+  const desktopArticles = VALUE_KEYS.map(key => {
+    const accent = VALUE_ACCENT[key];
+    return (
+      <article key={key} className="group relative pl-5">
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 h-full w-[3px] rounded-full"
+          style={{ background: accent.bar }}
+        />
+
+        <h4 className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800 sm:text-xl">
+          <span
+            aria-hidden
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ background: accent.dot }}
+          />
+          {t(`${key}.name`)}
+        </h4>
+
+        <p className="mt-3 text-[0.92rem] leading-[1.65] text-gray-600 sm:text-[0.95rem]">
+          {t(`${key}.text`)}
+        </p>
+      </article>
+    );
+  });
+
+  // 移动端 panel article：去掉 h4 标题（tab 已经标注），只留左 accent bar + body
+  const mobileArticles = VALUE_KEYS.map(key => {
+    const accent = VALUE_ACCENT[key];
+    return (
+      <article key={key} className="relative pl-5 pt-1">
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 h-full w-[3px] rounded-full"
+          style={{ background: accent.bar }}
+        />
+        <p className="text-[0.95rem] leading-[1.65] text-gray-600">
+          {t(`${key}.text`)}
+        </p>
+      </article>
+    );
+  });
+
+  // 移动端 tab card：纯文字矩形卡 —— 软色背景 + 居中粗体文字（值名）
+  const tabs: MobileTabItem[] = VALUE_KEYS.map(key => {
+    const accent = VALUE_ACCENT[key];
+    return {
+      key,
+      label: t(`${key}.name`),
+      activeAccent: accent.dot,
+      thumbnail: (
+        <div
+          className="flex h-[64px] w-full items-center justify-center px-3 text-center"
+          style={{
+            background: `color-mix(in srgb, ${accent.dot} 12%, transparent)`,
+          }}
+        >
+          {/* 字号统一放大；最长的 "Transparency" 在 ~390px 屏宽下仍与左右 px-3 留 padding，
+              更窄屏会优雅折行（h-[64px] 装得下两行 14px 文字） */}
+          <span className="text-[14px] font-semibold leading-[1.15] tracking-tight text-ukraine-blue-900">
+            {t(`${key}.name`)}
+          </span>
+        </div>
+      ),
+    };
+  });
 
   return (
     <div className="mt-10 sm:mt-12">
@@ -39,28 +102,20 @@ export default async function ValuesAccordion() {
       </h3>
       <div className="mt-2 accent-line" />
 
-      <div className="mt-2 grid gap-3 sm:mt-3 sm:gap-6 lg:grid-cols-3">
-        {VALUE_KEYS.map(key => (
-          <div
-            key={key}
-            className="group relative overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white p-5 transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-lg hover:shadow-ukraine-blue-100/40 sm:rounded-2xl sm:p-8"
-          >
-            {/* 顶部渐变条 */}
-            <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${VALUE_ACCENTS[key]} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
+      {/* 移动端：纯文字矩形卡 tab + 单段正文（折叠纵向高度） */}
+      <div className="mt-3 sm:hidden">
+        <MobileTabSwitcher
+          tabs={tabs}
+          ariaLabel={t('title')}
+          variant="card"
+        >
+          {mobileArticles}
+        </MobileTabSwitcher>
+      </div>
 
-            <div className="mb-4 text-ukraine-blue-300 transition-colors duration-300 group-hover:text-ukraine-blue-500">
-              {VALUE_ICONS[key]}
-            </div>
-
-            <h4 className="font-[family-name:var(--font-display)] text-lg font-bold text-ukraine-blue-800">
-              {t(`${key}.name`)}
-            </h4>
-
-            <p className="mt-3 text-sm leading-relaxed text-gray-600 sm:text-base">
-              {t(`${key}.text`)}
-            </p>
-          </div>
-        ))}
+      {/* sm+：原 1-col / lg 3-col 网格 —— 复用 AboutSection mission/vision 的左 accent bar 语汇 */}
+      <div className="mt-5 hidden gap-x-8 gap-y-7 sm:mt-6 sm:grid sm:grid-cols-1 sm:gap-x-10 lg:grid-cols-3">
+        {desktopArticles}
       </div>
     </div>
   );

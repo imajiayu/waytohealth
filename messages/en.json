@@ -111,22 +111,21 @@
         "text": "We take responsible care of every donation and partnership support. Funds received by the foundation have a clear purpose, are reflected in reporting, and are directed to specific areas of assistance and development of our programs."
       },
       "speed": {
-        "name": "Speed of Help",
+        "name": "Efficiency",
         "text": "In the field of rehabilitation, the charitable foundation operates as a single ecosystem with the Way to Health medical center. Thanks to this, patients can start rehabilitation immediately, while the foundation attracts donor support and covers treatment costs later."
       },
       "result": {
-        "name": "Results",
+        "name": "Impact",
         "text": "Our goal is to be a support for those who need it during the most difficult times for the country. So we work to ensure that as many people as possible can receive the necessary help, regain their footing, and live fully again."
       }
     },
     "achievements": {
       "title": "Our Achievements",
-      "scrollLeft": "Scroll left",
-      "scrollRight": "Scroll right",
       "items": [
         {
           "title": "Recovery Support",
-          "text": "Throughout its entire period of activity, the foundation has systematically directed financial assistance to the recovery of military personnel, veterans, and civilians affected by the war.\n\nOver more than three years of work, we have supported 500+ patients who sought help with various injuries and conditions, including:",
+          "meta": "3 years · 500+ patients",
+          "text": "We have financed rehabilitation for military personnel, veterans, and civilians wounded by the war. Cases we have supported include:",
           "list": [
             "mine-blast injuries",
             "gunshot and shrapnel wounds",
@@ -141,20 +140,23 @@
         },
         {
           "title": "Ambulance Procurement",
-          "text": "From the very first days of the full-scale invasion of Ukraine, our international friends have actively supported our work. Among them is Strategic Edge — a company with which we share a long and trusted partnership.\n\nTogether with them, Swiss combat paramedics travelled to Ukraine — people who don't merely voice their support, but who are ready to work personally in conditions close to those of the front lines.\n\nOne day they made a proposal that turned out to be extraordinarily important to us — to hand over an ambulance to our foundation. We accepted without hesitation.\n\nThe official handover took place at the Embassy of Switzerland in Ukraine, in Kyiv. It was not just a formality, but a symbol of trust, partnership, and international support for Ukraine. Our Swiss partners, the paramedics, and representatives of the foundation all took part in the event.",
+          "meta": "Embassy of Switzerland · Kyiv",
+          "text": "From the first days of the full-scale invasion, our partners at Strategic Edge stood beside us — and brought Swiss combat paramedics to Ukraine. One day, they offered to hand over an ambulance to the foundation.\n\nThe official handover took place at the Embassy of Switzerland in Kyiv — a symbol of trust, partnership, and international solidarity with Ukraine.",
           "image": "/images/achievement-ambulance.webp"
         },
         {
           "title": "Humanitarian Missions",
-          "text": "The first mission using the new ambulance took place in eastern Ukraine, in the city of Lyman.\n\nTogether with our friends from abroad, we carried out medical check-ups for the local population and provided free medicine and medical assistance. In regions affected by combat, access to healthcare is often limited or entirely absent — especially for the elderly, for children, and for those who have been unable to leave.\n\nIn addition, our international partners delivered paramedic training to Ukrainian soldiers — a brigade that stands directly in defence of our country. It was an extraordinarily valuable exchange of experience, both for our military and for the instructors themselves. In such conditions, knowledge can mean only one thing — a life saved.\n\nThis entire mission was organised by the «Way to Health» Charitable Foundation. It is just one example of the work we carry out in Ukraine every day.",
+          "meta": "Lyman, Eastern Ukraine",
+          "text": "The ambulance's first mission was in Lyman. We delivered medical check-ups, free medicines, and primary care to a region cut off from healthcare — especially for the elderly, the children, and those unable to leave.\n\nOur international partners also ran paramedic training for Ukrainian soldiers defending the country — knowledge that, on the front line, means a life saved.",
           "image": "/images/achievement-humanitarian.webp"
         },
         {
-          "title": "Implementing International Projects",
-          "text": "As part of the «Overcoming PTSD and Anxiety Disorders» project, we worked to restore the psychological well-being of people affected by the war. The main goal was to help them cope with PTSD and other traumatic conditions linked to their experiences.\n\nA separate strand of the project focused on training psychological ambassadors — specialists who could go on supporting those affected long after the project itself. This part was carried out with the support of Edessa Ramos.\n\nProject outcomes:",
-          "list": [
-            "1,100 individual and group consultations were held for people affected by the war — both offline and online, across Ukraine;",
-            "7 psychological ambassadors were trained, and they continue to provide support within their communities."
+          "title": "International Projects",
+          "meta": "Mental health · Online & offline",
+          "text": "Through the «Overcoming PTSD and Anxiety Disorders» project — carried out with the support of Edessa Ramos — we helped people affected by the war reclaim their psychological well-being, and trained the specialists who keep that work going.",
+          "stats": [
+            { "value": "1,100", "label": "individual & group consultations across Ukraine" },
+            { "value": "7", "label": "psychological ambassadors supporting their communities" }
           ],
           "image": "/images/achievement-international.webp"
         }
@@ -261,7 +263,7 @@
       "title": "Contact Information",
       "intro": "If you have any questions regarding these Terms, please reach out to us through any of the channels below.",
       "emailLabel": "Email",
-      "email": "waytohealthfoundation@gmail.com",
+      "email": "info@waytohealth.org.ua",
       "addressLabel": "Address",
       "address": "Slobozhanske village, street Heroiv Ukrainy 27C",
       "phoneLabel": "Phone",
@@ -329,7 +331,7 @@
       "title": "Contact Information",
       "intro": "If you have any questions regarding this Privacy Policy, please reach out to us through any of the channels below.",
       "emailLabel": "Email",
-      "email": "waytohealthfoundation@gmail.com",
+      "email": "info@waytohealth.org.ua",
       "addressLabel": "Address",
       "address": "Slobozhanske village, street Heroiv Ukrainy 27C",
       "phoneLabel": "Phone",
@@ -459,7 +461,7 @@
       "title": "Contact Information",
       "intro": "If you have any questions regarding this Public Offer, please contact the Foundation through any of the channels below.",
       "emailLabel": "Email",
-      "email": "waytohealthfoundation@gmail.com",
+      "email": "info@waytohealth.org.ua",
       "addressLabel": "Address",
       "address": "27C Teplychna St., Slobozhanske, Dnipro district, Dnipropetrovsk region, 52005, Ukraine",
       "phoneLabel": "Phone",

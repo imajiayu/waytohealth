@@ -40,7 +40,7 @@ export const SOCIAL_LINKS = [
 ];
 
 export const CONTACT = {
-  email: 'waytohealthfoundation@gmail.com',
+  email: 'info@waytohealth.org.ua',
   phoneDisplay: '+380 63 377 20 22',
   phoneTel: '+380633772022',
 } as const;
