@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { type NewsItem } from '@/data/news';
 import { deleteNewsAction, listNewsAction } from '@/app/actions/news';
+import AlertBanner from '../common/AlertBanner';
 
 interface NewsListProps {
   onEdit?: (item: NewsItem) => void;
@@ -48,9 +49,7 @@ export default function NewsList({ onEdit }: NewsListProps = {}) {
   return (
     <div>
       {error && (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
+        <AlertBanner variant="error" className="mb-4">{error}</AlertBanner>
       )}
 
       {items === null && <p className="text-sm text-gray-500">Loading…</p>}

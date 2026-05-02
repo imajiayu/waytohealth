@@ -3,8 +3,11 @@
 import { del } from '@vercel/blob';
 import { revalidateTag } from 'next/cache';
 import { sql } from '@/lib/db';
-import { type NewsItem, type Tag } from '@/data/news';
-import { requireAdmin } from '@/lib/adminSession';
+import { MAX_TAGS_PER_POST, MAX_TAG_LENGTH, type NewsItem, type Tag } from '@/data/news';
+import { ensureAdmin } from '@/lib/adminSession';
+import { randomSuffix } from '@/lib/ids';
+import { errorMessage } from '@/lib/errors';
+import { rowToItem, type NewsRow } from '@/lib/news';
 
 // 仅允许 Vercel Blob 主域：防止管理员接口被用来把外链写进前台 next/image
 const BLOB_URL_RE = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\//;
@@ -12,9 +15,6 @@ const BLOB_URL_RE = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\//;
 function isBlobUrl(u: string): boolean {
   return BLOB_URL_RE.test(u);
 }
-
-const MAX_TAGS_PER_POST = 6;
-const MAX_TAG_LENGTH = 30;
 
 // 规范化管理员提交的 tag：trim、截长、去重（按 en.toLowerCase）、上限
 // 前端 TagInput 也做一次相同逻辑；这里是服务端兜底，防止绕过 UI
@@ -34,10 +34,6 @@ function normalizeTags(raw: Tag[]): Tag[] {
   return out;
 }
 
-function randomSuffix(): string {
-  return Math.random().toString(36).slice(2, 6);
-}
-
 // 从 ISO 时间串生成 id；无效日期直接抛错，避免写入 "NaN-NaN-..." 这种脏 id
 function makeNewsId(publishedAt: string): string {
   const d = new Date(publishedAt);
@@ -48,26 +44,6 @@ function makeNewsId(publishedAt: string): string {
   const dateStr = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
   const timeStr = `${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}`;
   return `${dateStr}-${timeStr}-${randomSuffix()}`;
-}
-
-interface NewsRow {
-  id: string;
-  published_at: Date;
-  title: { ua: string; en: string };
-  body: { ua: string; en: string };
-  images: string[];
-  tags: Tag[];
-}
-
-function rowToItem(r: NewsRow): NewsItem {
-  return {
-    id: r.id,
-    published_at: r.published_at.toISOString(),
-    title: r.title,
-    body: r.body,
-    ...(r.images && r.images.length > 0 ? { images: r.images } : {}),
-    ...(r.tags && r.tags.length > 0 ? { tags: r.tags } : {}),
-  };
 }
 
 export interface PublishInput {
@@ -81,11 +57,8 @@ export interface PublishInput {
 export async function publishNewsAction(
   input: PublishInput
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
 
   if (!input.title.ua.trim() || !input.title.en.trim()) {
     return { ok: false, error: 'title required' };
@@ -101,7 +74,7 @@ export async function publishNewsAction(
   try {
     id = makeNewsId(input.published_at);
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'invalid date' };
+    return { ok: false, error: errorMessage(err, 'invalid date') };
   }
 
   const tags = normalizeTags(input.tags ?? []);
@@ -123,7 +96,7 @@ export async function publishNewsAction(
     revalidateTag('news', { expire: 0 });
     return { ok: true, id };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }
 
@@ -139,11 +112,8 @@ export interface UpdateInput {
 export async function updateNewsAction(
   input: UpdateInput
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
 
   if (!input.id) return { ok: false, error: 'id required' };
   if (!input.title.ua.trim() || !input.title.en.trim()) {
@@ -209,18 +179,15 @@ export async function updateNewsAction(
       id: input.id,
       error: err instanceof Error ? err.message : String(err),
     });
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }
 
 export async function deleteNewsAction(
   id: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
 
   try {
     // 先查出要删的 blob urls；DELETE RETURNING 一条 SQL 拿到要清理的图片
@@ -251,7 +218,7 @@ export async function deleteNewsAction(
 
     return { ok: true };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }
 
@@ -259,11 +226,8 @@ export async function deleteNewsAction(
 export async function cleanupBlobAction(
   urls: string[]
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
   if (urls.length === 0) return { ok: true };
   if (!urls.every(isBlobUrl)) {
     return { ok: false, error: 'invalid image url' };
@@ -272,18 +236,15 @@ export async function cleanupBlobAction(
     await del(urls);
     return { ok: true };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'cleanup failed' };
+    return { ok: false, error: errorMessage(err, 'cleanup failed') };
   }
 }
 
 export async function listNewsAction(): Promise<
   { ok: true; items: NewsItem[] } | { ok: false; error: string }
 > {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
 
   try {
     const rows = (await sql`
@@ -293,6 +254,6 @@ export async function listNewsAction(): Promise<
     `) as NewsRow[];
     return { ok: true, items: rows.map(rowToItem) };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }

@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { listAssistanceRequestsAction } from '@/app/actions/requests';
 import type { AssistanceRequestRecord } from '@/data/requests';
+import AlertBanner from './common/AlertBanner';
 
 // 后台全英文（不走 i18n），直接内联英文标签避免跨命名空间依赖
 const APPLICANT_LABEL = {
@@ -74,9 +75,7 @@ export default function AssistanceRequestsPanel() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
+        <AlertBanner variant="error" className="mb-4">{error}</AlertBanner>
       )}
 
       {items === null && !error && <p className="text-sm text-gray-500">Loading…</p>}

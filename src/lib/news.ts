@@ -4,7 +4,7 @@ import { sql } from '@/lib/db';
 import { type NewsItem, type Tag } from '@/data/news';
 
 // DB 行到前端类型的映射；空 images / tags 数组不序列化进对象（保持和旧 JSON 形状一致）
-interface NewsRow {
+export interface NewsRow {
   id: string;
   published_at: Date;
   title: { ua: string; en: string };
@@ -13,7 +13,7 @@ interface NewsRow {
   tags: Tag[];
 }
 
-function rowToItem(r: NewsRow): NewsItem {
+export function rowToItem(r: NewsRow): NewsItem {
   return {
     id: r.id,
     published_at: r.published_at.toISOString(),

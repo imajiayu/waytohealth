@@ -2,6 +2,7 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import { listEmailHistoryAction, type EmailHistoryItem } from '@/app/actions/email';
+import AlertBanner from './common/AlertBanner';
 
 type HistoryResult =
   | { kind: 'loading' }
@@ -91,9 +92,7 @@ export default function EmailHistory({ refreshKey }: { refreshKey: number }) {
       ) : null}
 
       {result.kind === 'error' ? (
-        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {result.error}
-        </div>
+        <AlertBanner variant="error" className="mt-3">{result.error}</AlertBanner>
       ) : null}
 
       {result.kind === 'success' && result.emails.length === 0 ? (

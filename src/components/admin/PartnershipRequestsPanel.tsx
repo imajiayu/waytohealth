@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { listPartnershipRequestsAction } from '@/app/actions/requests';
 import type { PartnershipRequestRecord } from '@/data/requests';
+import AlertBanner from './common/AlertBanner';
 
 const ORG_LABEL = {
   business: 'Business / company',
@@ -88,9 +89,7 @@ export default function PartnershipRequestsPanel() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
+        <AlertBanner variant="error" className="mb-4">{error}</AlertBanner>
       )}
 
       {items === null && !error && <p className="text-sm text-gray-500">Loading…</p>}

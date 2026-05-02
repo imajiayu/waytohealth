@@ -270,7 +270,7 @@ CREATE INDEX idx_partnership_submitted ON partnership_requests (submitted_at DES
 - 表单页 `generateMetadata` 设 `robots: { index: false, follow: true }`、成功页设 `{ index: false, follow: false }`；两张前台路径**不加入 `sitemap.ts`**，这两条是刻意决定
 - Admin 页面（`/admin/requests` · `/admin/partnerships`）不走 i18n，英文硬编码，和 `/admin/news` 同一模式
 
-**限流**：`src/lib/formRateLimit.ts` 每 IP 每 60 分钟 8 次提交。用 Upstash Redis `INCR` + 首次 `EXPIRE` 原子计数；Redis 不可用降级到进程内 Map（`STATE_CAP=2000` 做 LRU 兜底）。**IP 提取走 `x-real-ip` 优先**（Vercel 平台不可伪造），`x-forwarded-for` 仅非 Vercel 环境兜底 —— 和 `src/lib/adminAuth.ts` 同步，避免攻击者塞伪造 XFF 头绕过限流。
+**限流**：`src/lib/formRateLimit.ts` 每 IP 每 60 分钟 8 次提交。用 Upstash Redis `INCR` + 首次 `EXPIRE` 原子计数；Redis 不可用降级到进程内 Map（`STATE_CAP=2000` 做 LRU 兜底）。**IP 提取统一走 `src/lib/clientIp.ts` 的 `getClientIp()`**：`x-real-ip` 优先（Vercel 平台不可伪造），`x-forwarded-for` 仅非 Vercel 环境兜底 —— 避免攻击者塞伪造 XFF 头绕过限流。
 
 **迁移工具**：`scripts/migrate-requests.mjs` 读本地 `.env` 里的 `DATABASE_URL`，把 JSON 导出批量回填进表（dev/prod 环境迁移或从旧 Google Form 批导时使用）。
 
@@ -317,7 +317,7 @@ src/
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
 │   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, ProjectGallery, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney）
 │   ├── news/                    # 新闻组件（NewsCard, HomeDispatchCard, HomeDispatchCtaCard）
-│   ├── admin/                   # Admin 后台组件（news 编辑器、AssistanceRequestsPanel、PartnershipRequestsPanel 等）
+│   ├── admin/                   # Admin 后台组件（news 编辑器、AssistanceRequestsPanel、PartnershipRequestsPanel；common/AlertBanner 共用错误/成功提示条）
 │   ├── forms/                   # 表单原子（fields.tsx / PartnershipForm / RequestAssistanceForm）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
@@ -343,15 +343,20 @@ src/
 │   ├── utils.ts                 # cn() 工具函数
 │   ├── resend.ts                # Resend 客户端单例（server-only），re-export emailFrom 的工具
 │   ├── emailFrom.ts             # 发件人常量：display name / 域名 / 前缀白名单 / buildFromAddress（client-safe）
+│   ├── email.ts                 # 邮箱地址正则（EMAIL_RE 单地址 / EMAIL_RE_BATCH 批量场景）
 │   ├── emailTemplates.ts        # 邮件模板注册表（server-only，纯静态 HTML，无变量）
 │   ├── emailTemplates/          # 每个模板单独一个 .ts，导出 subject / html / text 三常量
 │   ├── donations.ts             # 已筹金额查询（带缓存）
-│   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache）
+│   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache，导出 NewsRow / rowToItem）
 │   ├── db.ts                    # Neon Postgres 单例（`@neondatabase/serverless`）
+│   ├── redis.ts                 # Upstash Redis 单例 + KV_ENABLED 探测（adminRateLimit / formRateLimit 共用）
 │   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（monobank 等对外调用）
 │   ├── seo.ts                   # SEO helper：canonical / hreflang / openGraph / twitter
+│   ├── clientIp.ts              # `x-real-ip` 优先、XFF 兜底的客户端 IP 提取（限流 / 审计共用）
+│   ├── ids.ts                   # randomSuffix() 4 位 base36 后缀（news / requests id 共用）
+│   ├── errors.ts                # errorMessage(err, fallback) 把异常压成 server action result
 │   ├── adminAuth.ts             # 管理员密码 hash 校验（server-only）
-│   ├── adminSession.ts          # HMAC-SHA256 签名 cookie 会话发放/验证/清除
+│   ├── adminSession.ts          # HMAC-SHA256 签名 cookie 会话；requireAdmin (API route) / ensureAdmin (server action)
 │   ├── adminRateLimit.ts        # 管理员登录 IP 速率限制（@upstash/redis，fallback 进程内 Map）
 │   ├── formRateLimit.ts         # 前台表单 IP 速率限制（每 IP 每小时 8 次）
 │   └── requests.ts              # Assistance/Partnership 表 INSERT / SELECT（Neon Postgres）
@@ -470,7 +475,7 @@ const t = useTranslations('namespace')
 - **SEO metadata**: 新页 `generateMetadata` 走 `src/lib/seo.ts` 的 `buildAlternates` / `buildOpenGraph` / `buildTwitter` helper，不要手写 canonical / hreflang / OG；新路径记得加到 `src/app/sitemap.ts`
 - **KV 连接**：生产用 Vercel Marketplace KV（Upstash），SDK 是 `@upstash/redis`（**不要**装 `@vercel/kv`，已 deprecated）。`Redis.fromEnv()` 自动读 `KV_REST_API_URL` / `KV_REST_API_TOKEN`
 - **OG 图**: `public/og-image.jpg`（1200×630，≤ 200KB），由 `lib/seo.ts` 默认引用。替换时保持尺寸与路径
-- **客户端 IP 提取**：限流 / 审计类场景读 IP 一律走 `x-real-ip`（Vercel 不可伪造）优先、`x-forwarded-for` 最左值兜底。**不要**把 XFF 当主源 —— 客户端可伪造 `X-Forwarded-For` 旋转 key 绕开计数。参考 `src/lib/adminAuth.ts` / `src/app/actions/requests.ts` 的 `getClientIp`
+- **客户端 IP 提取**：限流 / 审计类场景读 IP 统一 `import { getClientIp } from '@/lib/clientIp'`，禁止在 server action / API route 里现写 `headers().get('x-forwarded-for')`。`x-real-ip` 优先（Vercel 不可伪造），XFF 仅非 Vercel 环境兜底 —— 客户端可伪造 XFF 旋转 key 绕开计数。
 
 ---
 

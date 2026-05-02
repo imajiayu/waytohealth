@@ -1,5 +1,5 @@
 import 'server-only';
-import { Redis } from '@upstash/redis';
+import { KV_ENABLED, getRedis } from './redis';
 
 /**
  * 针对 admin 密码校验的 IP 滑动窗口速率限制。
@@ -9,22 +9,11 @@ import { Redis } from '@upstash/redis';
  *
  * 存储：优先 Upstash Redis / Vercel KV（跨实例共享，生产环境必需）；
  * KV 不可用（未配置 env / 本地开发）时自动降级到进程内 Map。
- *
- * 注：Vercel 2024 H2 把 KV 迁到 Upstash Marketplace，官方推荐 @upstash/redis。
- * Redis.fromEnv() 自动读 KV_REST_API_URL / KV_REST_API_TOKEN（也兼容 UPSTASH_* 前缀）。
  */
 
 const WINDOW_MS = 15 * 60_000; // 15 分钟滑动窗口
 const MAX_FAILURES = 10; // 窗口内最多 10 次失败
 const LOCKOUT_MS = 30 * 60_000; // 触发后锁定 30 分钟
-
-const KV_ENABLED = !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN;
-// 惰性单例：env 缺失时不要在 import 期就 throw，让 fallback 路径能走
-let _redis: Redis | null = null;
-function getRedis(): Redis {
-  if (!_redis) _redis = Redis.fromEnv();
-  return _redis;
-}
 
 function failKey(ip: string): string {
   return `admin:fail:${ip}`;

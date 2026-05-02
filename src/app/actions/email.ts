@@ -1,6 +1,6 @@
 'use server';
 
-import { requireAdmin } from '@/lib/adminSession';
+import { ensureAdmin } from '@/lib/adminSession';
 import {
   getResend,
   buildFromAddress,
@@ -14,8 +14,9 @@ import {
   type EmailTemplateMeta,
   type RenderedEmail,
 } from '@/lib/emailTemplates';
+import { EMAIL_RE_BATCH as EMAIL_RE } from '@/lib/email';
+import { errorMessage } from '@/lib/errors';
 
-const EMAIL_RE = /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/;
 const MAX_RECIPIENTS = 50; // Resend 单次最多 50
 
 function parseRecipients(raw: string): { ok: true; list: string[] } | { ok: false; error: string } {
@@ -49,22 +50,16 @@ function parseRecipients(raw: string): { ok: true; list: string[] } | { ok: fals
 export async function listTemplatesAction(): Promise<
   { ok: true; templates: EmailTemplateMeta[] } | { ok: false; error: string }
 > {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
   return { ok: true, templates: listTemplates() };
 }
 
 export async function previewEmailAction(
   templateId: string
 ): Promise<{ ok: true; rendered: RenderedEmail } | { ok: false; error: string }> {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
   return renderEmail(templateId);
 }
 
@@ -105,17 +100,14 @@ const EMAIL_HISTORY_LIMIT = 100;
 export async function listEmailHistoryAction(): Promise<
   { ok: true; emails: EmailHistoryItem[]; hasMore: boolean } | { ok: false; error: string }
 > {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
 
   let resend: ReturnType<typeof getResend>;
   try {
     resend = getResend();
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'resend misconfigured' };
+    return { ok: false, error: errorMessage(err, 'resend misconfigured') };
   }
 
   try {
@@ -141,7 +133,7 @@ export async function listEmailHistoryAction(): Promise<
       hasMore: data?.has_more ?? false,
     };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }
 
@@ -162,11 +154,8 @@ export async function sendEmailAction(
     }
   | { ok: false; error: string }
 > {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
 
   const parsed = parseRecipients(input.to);
   if (!parsed.ok) return parsed;
@@ -195,7 +184,7 @@ export async function sendEmailAction(
     resend = getResend();
     from = buildFromAddress(prefix);
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'resend misconfigured' };
+    return { ok: false, error: errorMessage(err, 'resend misconfigured') };
   }
 
   try {
@@ -232,6 +221,6 @@ export async function sendEmailAction(
       rendered: { subject: finalSubject, html: rendered.rendered.html, text: rendered.rendered.text },
     };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }

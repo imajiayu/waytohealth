@@ -1,24 +1,13 @@
 import 'server-only';
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { headers } from 'next/headers';
 import { rateLimit } from './adminRateLimit';
+import { getClientIp } from './clientIp';
 
 // 强制从 env 读；不做 fallback，避免未来某环境漏设时静默走上已进 git 的弱默认值
 const SALT = process.env.ADMIN_PASSWORD_SALT;
 
 function sha256Hex(text: string): string {
   return createHash('sha256').update(text).digest('hex');
-}
-
-async function getClientIp(): Promise<string> {
-  const h = await headers();
-  // x-real-ip 由 Vercel 边缘设为真实 peer IP，客户端无法伪造；
-  // x-forwarded-for 的最左值可能来自客户端自带的伪造头，仅在非 Vercel 环境兜底
-  const real = h.get('x-real-ip');
-  if (real) return real.trim();
-  const xff = h.get('x-forwarded-for');
-  if (xff) return xff.split(',')[0].trim();
-  return 'unknown';
 }
 
 /**

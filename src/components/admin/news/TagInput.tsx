@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, type KeyboardEvent } from 'react';
-import { type Tag } from '@/data/news';
-
-export const MAX_TAGS_PER_POST = 6;
-export const MAX_TAG_LENGTH = 30;
+import { MAX_TAGS_PER_POST, MAX_TAG_LENGTH, type Tag } from '@/data/news';
 
 interface TagInputProps {
   value: Tag[];

@@ -1,6 +1,5 @@
 'use server';
 
-import { headers } from 'next/headers';
 import {
   ASSISTANCE_APPLICANT_VALUES,
   ASSISTANCE_REFERRAL_VALUES,
@@ -30,12 +29,13 @@ import {
   listAssistanceRequests,
   listPartnershipRequests,
 } from '@/lib/requests';
-import { requireAdmin } from '@/lib/adminSession';
+import { ensureAdmin } from '@/lib/adminSession';
 import { checkFormRateLimit } from '@/lib/formRateLimit';
+import { getClientIp } from '@/lib/clientIp';
+import { EMAIL_RE } from '@/lib/email';
+import { errorMessage } from '@/lib/errors';
 
 /* ── 工具：字段校验 ──────────────────────────────────────────────────── */
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function text(v: FormDataEntryValue | null, max: number): string {
   if (typeof v !== 'string') return '';
@@ -62,17 +62,6 @@ function enumArray<T extends string>(values: FormDataEntryValue[], allowed: read
     out.push(v as T);
   }
   return out;
-}
-
-async function getClientIp(): Promise<string> {
-  const h = await headers();
-  // x-real-ip 由 Vercel 边缘设为真实 peer IP，客户端无法伪造；
-  // x-forwarded-for 的最左值可能来自客户端自带的伪造头，仅在非 Vercel 环境兜底
-  const real = h.get('x-real-ip');
-  if (real) return real.trim();
-  const xff = h.get('x-forwarded-for');
-  if (xff) return xff.split(',')[0].trim();
-  return 'unknown';
 }
 
 export type SubmitResult =
@@ -212,29 +201,23 @@ export async function submitPartnershipRequestAction(formData: FormData): Promis
 export async function listAssistanceRequestsAction(): Promise<
   { ok: true; items: AssistanceRequestRecord[] } | { ok: false; error: string }
 > {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
   try {
     return { ok: true, items: await listAssistanceRequests() };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }
 
 export async function listPartnershipRequestsAction(): Promise<
   { ok: true; items: PartnershipRequestRecord[] } | { ok: false; error: string }
 > {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false, error: 'unauthorized' };
-  }
+  const guard = await ensureAdmin();
+  if (guard) return guard;
   try {
     return { ok: true, items: await listPartnershipRequests() };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    return { ok: false, error: errorMessage(err) };
   }
 }

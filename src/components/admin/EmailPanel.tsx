@@ -8,6 +8,7 @@ import {
   type RecipientFailure,
 } from '@/app/actions/email';
 import type { EmailTemplateMeta, RenderedEmail } from '@/lib/emailTemplates';
+import AlertBanner from './common/AlertBanner';
 import {
   FROM_PREFIXES,
   DEFAULT_FROM_PREFIX,
@@ -122,11 +123,7 @@ export default function EmailPanel() {
   const labelCls = 'block text-sm font-medium text-gray-700';
 
   if (loadError) {
-    return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-        {loadError}
-      </div>
-    );
+    return <AlertBanner variant="error">{loadError}</AlertBanner>;
   }
 
   if (templates === null) {
@@ -258,9 +255,7 @@ export default function EmailPanel() {
           </div>
 
           {sendResult?.kind === 'error' && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {sendResult.error}
-            </div>
+            <AlertBanner variant="error">{sendResult.error}</AlertBanner>
           )}
           {sendResult?.kind === 'success' && (
             <div
@@ -310,9 +305,7 @@ export default function EmailPanel() {
           </div>
 
           {previewError && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {previewError}
-            </div>
+            <AlertBanner variant="error">{previewError}</AlertBanner>
           )}
 
           {!preview && !previewError && (

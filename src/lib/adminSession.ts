@@ -129,3 +129,19 @@ export async function requireAdmin(): Promise<SessionPayload> {
   }
   return session;
 }
+
+/**
+ * server action 专用的 guard：通过则返回 null，未鉴权返回标准 error result。
+ * 用法：`const guard = await ensureAdmin(); if (guard) return guard;`
+ *
+ * API route handlers 仍直接 `await requireAdmin()` —— 它们的失败语义是抛 401 Response，
+ * 不是 result object，不通用。
+ */
+export async function ensureAdmin(): Promise<{ ok: false; error: 'unauthorized' } | null> {
+  try {
+    await requireAdmin();
+    return null;
+  } catch {
+    return { ok: false, error: 'unauthorized' };
+  }
+}

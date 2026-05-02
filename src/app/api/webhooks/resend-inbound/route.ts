@@ -4,12 +4,12 @@ import sanitizeHtml from 'sanitize-html';
 import type { Attachment } from 'resend';
 import { getResend, buildFromAddress } from '@/lib/resend';
 import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
+import { EMAIL_RE } from '@/lib/email';
 
 export const runtime = 'nodejs';
 // 附件下载 + 上行 send 总耗时保守取 60s，避免大邮件时 Vercel 函数默认 timeout 中断
 export const maxDuration = 60;
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SELF_DOMAIN = 'waytohealth.org.ua';
 const FORWARDED_PREFIX = '[Forwarded]';
 // 出站 header 里打标 + 入站读原邮件 headers 时识别，防我们自己转发出去的邮件被对方反弹/自动回复又绕回到入站 webhook

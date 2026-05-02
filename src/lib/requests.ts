@@ -1,5 +1,6 @@
 import 'server-only';
 import { sql } from '@/lib/db';
+import { randomSuffix } from '@/lib/ids';
 import type {
   AssistanceRequestData,
   AssistanceRequestRecord,
@@ -28,10 +29,6 @@ import type {
  *   );
  *   CREATE INDEX idx_partnership_submitted ON partnership_requests (submitted_at DESC);
  */
-
-function randomSuffix(): string {
-  return Math.random().toString(36).slice(2, 6);
-}
 
 function makeRequestId(prefix: string): string {
   const d = new Date();

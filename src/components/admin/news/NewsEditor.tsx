@@ -16,6 +16,7 @@ import ImageUploader from './ImageUploader';
 import TagInput from './TagInput';
 import { type ImageDraft, MAX_IMAGES_HARD } from './types';
 import { transcodeToWebp } from './imageTransform';
+import AlertBanner from '../common/AlertBanner';
 
 function toLocalInputValue(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -321,12 +322,8 @@ export default function NewsEditor(props: NewsEditorProps) {
           transcoding={transcoding}
         />
 
-        {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
-        )}
-        {success && (
-          <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">{success}</div>
-        )}
+        {error && <AlertBanner variant="error">{error}</AlertBanner>}
+        {success && <AlertBanner variant="success">{success}</AlertBanner>}
 
         <div className="flex justify-end gap-3 pt-1">
           <button

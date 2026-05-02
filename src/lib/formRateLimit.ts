@@ -1,5 +1,5 @@
 import 'server-only';
-import { Redis } from '@upstash/redis';
+import { KV_ENABLED, getRedis } from './redis';
 
 /**
  * 公开表单提交的 IP 限流。
@@ -12,13 +12,6 @@ import { Redis } from '@upstash/redis';
 
 const WINDOW_SECONDS = 60 * 60;
 const MAX_PER_WINDOW = 8;
-
-const KV_ENABLED = !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN;
-let _redis: Redis | null = null;
-function getRedis(): Redis {
-  if (!_redis) _redis = Redis.fromEnv();
-  return _redis;
-}
 
 function key(kind: string, ip: string): string {
   return `form:${kind}:${ip}`;
