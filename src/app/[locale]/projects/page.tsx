@@ -12,6 +12,7 @@ import { getTranslations } from 'next-intl/server';
 import PatientStories from '@/components/projects/PatientStories';
 import ProjectStrip from '@/components/projects/ProjectStrip';
 import ProjectGallery from '@/components/projects/ProjectGallery';
+import ProjectHeroImage from '@/components/projects/ProjectHeroImage';
 import RecoveryJourney from '@/components/projects/RecoveryJourney';
 
 type Props = {
@@ -198,12 +199,35 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
               </section>
             )}
 
-            {/* ── 内容配图（点击放大；统一比例，按 object-cover 裁剪） ── */}
-            <ProjectGallery
-              images={[...(detail?.contentImages ?? []), ...(detail?.gallery ?? [])]}
-              basePath={`/data/projects/${projectId}`}
-              alt={title}
-            />
+            {/* ── 内容配图（点击放大；统一比例，按 object-cover 裁剪） ──
+                 完全无图的项目（contentImages + gallery + stories 照片都为空）
+                 降级为单图 hero —— 把项目卡的 cover 当唯一插图。 */}
+            {(() => {
+              const galleryImages = [
+                ...(detail?.contentImages ?? []),
+                ...(detail?.gallery ?? []),
+              ];
+              if (galleryImages.length > 0) {
+                return (
+                  <ProjectGallery
+                    images={galleryImages}
+                    basePath={`/data/projects/${projectId}`}
+                    alt={title}
+                  />
+                );
+              }
+              const hasStoryPhotos = (detail?.stories ?? []).some(
+                (s) => s.photo || s.photoBefore || s.photoAfter,
+              );
+              if (hasStoryPhotos) return null;
+              return (
+                <ProjectHeroImage
+                  src={`/data/projects/${projectId}/cover.webp`}
+                  alt={title}
+                  projectId={projectId}
+                />
+              );
+            })()}
 
 
             {/* ── 康复旅程阶段 ── */}
