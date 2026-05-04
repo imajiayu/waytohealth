@@ -24,9 +24,9 @@ export default function DonationSidebar({
   const t = useTranslations('projectDetail');
   const flow = useDonationFlow();
 
-  const progress = goalAmount
-    ? Math.min((raisedAmount / goalAmount) * 100, 100)
-    : 0;
+  // 真实百分比给文字用；进度条宽度另截到 100 防 overflow
+  const progress = goalAmount ? (raisedAmount / goalAmount) * 100 : 0;
+  const progressBarWidth = Math.min(progress, 100);
 
   return (
     <div
@@ -66,7 +66,7 @@ export default function DonationSidebar({
               <div
                 className="gradient-brand-progress relative h-full rounded-full transition-all duration-1000 ease-out"
                 style={{
-                  width: isVisible ? `${Math.max(progress, 2)}%` : '0%',
+                  width: isVisible ? `${Math.max(progressBarWidth, 2)}%` : '0%',
                   transitionDelay: '0.3s',
                 }}
               >

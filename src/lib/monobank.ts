@@ -1,4 +1,5 @@
 import { unstable_cache } from 'next/cache';
+import { fetchWithTimeout } from './fetchWithTimeout';
 
 // monobank /personal/client-info 返回的 jar 单项
 interface MonobankJar {
@@ -24,10 +25,14 @@ async function fetchJarBalances(): Promise<Map<string, number>> {
   if (!token) return new Map();
 
   try {
-    const res = await fetch('https://api.monobank.ua/personal/client-info', {
-      headers: { 'X-Token': token },
-      cache: 'no-store',
-    });
+    const res = await fetchWithTimeout(
+      'https://api.monobank.ua/personal/client-info',
+      {
+        headers: { 'X-Token': token },
+        cache: 'no-store',
+      },
+      8000
+    );
 
     if (!res.ok) return new Map();
 

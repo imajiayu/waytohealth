@@ -1,5 +1,5 @@
 import { getProject, getAllProjects } from '@/lib/data';
-import { getRaisedAmount } from '@/lib/donations';
+import { getAllJarBalances } from '@/lib/monobank';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { notFound } from 'next/navigation';
@@ -52,7 +52,10 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const { id } = await searchParams;
   const typedLocale = toLocale(locale);
 
-  const allProjects = await getAllProjects();
+  const [allProjects, jarBalances] = await Promise.all([
+    getAllProjects(),
+    getAllJarBalances().catch(() => new Map<string, number>()),
+  ]);
 
   // 无 id 参数时自动选择第一个项目
   const projectId = id ? Number(id) : allProjects[0]?.id;
@@ -70,7 +73,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       title: p.title,
       description: p.description,
       goal_amount: p.goal_amount,
-      raised_amount: p.raised_amount,
+      // 实时金额：从 jar map 按 sendId 查；缺 sendId 或 jar 不可用降级为 0
+      raised_amount: p.monobankJarSendId ? jarBalances.get(p.monobankJarSendId) ?? 0 : 0,
       currency: p.currency,
       tags: p.tags,
     },
@@ -80,8 +84,10 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const title = project.title[typedLocale];
   const detail = project.detail;
 
-  // 实时已筹金额（来自 monobank jar）
-  const raisedAmount = await getRaisedAmount(projectId);
+  // 当前项目的实时已筹金额（复用上面的 jar map，避免二次 fetch）
+  const raisedAmount = project.monobankJarSendId
+    ? jarBalances.get(project.monobankJarSendId) ?? 0
+    : 0;
 
   // 文档查看器通用标签
   const t = await getTranslations('projectDetail');

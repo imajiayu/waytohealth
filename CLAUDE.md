@@ -80,12 +80,12 @@ npm run start    # 启动生产服务器
 
 DonationSidebar 是 method ↔ stripe **双视图状态机**，顶部进度区（raised / goal / %）常驻不随视图切换；`direction: 'forward' | 'backward'` 驱动 `animate-panel-forward` / `animate-panel-backward` 过渡。
 
-- **method 视图** 放 monobank / stripe 两个按钮。monobank 按钮是纯 `<a href>` 跳 `send.monobank.ua/jar/{sendId}`（新 tab 里用户自己输金额）：优先用项目 `data.json` 的 `monobankJarSendId`，缺失退 `NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID`，都没就灰态 "Coming soon"。
+- **method 视图** 放 monobank / stripe 两个按钮。monobank 按钮是纯 `<a href>` 跳 `send.monobank.ua/jar/{sendId}`（新 tab 里用户自己输金额）：用项目 `data.json` 的 `monobankJarSendId`，缺失就灰态 "Coming soon"。
 - **stripe 视图** 嵌入 `<stripe-buy-button>` Web Component，`buy-button-id` + `publishable-key` 写死在 `src/components/projects/donation/utils.ts`；`https://js.stripe.com/v3/buy-button.js` 用 `afterInteractive` 加载。用户点按钮跳 Stripe 托管 checkout，本站**不收回调**。
 
 ### 已筹金额展示
 
-`src/lib/donations.ts` 的 `getRaisedAmount(projectId)` 只聚合 **monobank jar**：`src/lib/monobank.ts` 调 `/personal/client-info`（`X-Token: MONOBANK_TOKEN`）拉所有 jar，`unstable_cache` 60s 缓存（正好匹配官方"1 次/60s"限流），按 `sendId` 匹配 `project.monobankJarSendId` 取 `balance / 100`。
+`src/lib/monobank.ts` 的 `getAllJarBalances()` 只聚合 **monobank jar**：调 `/personal/client-info`（`X-Token: MONOBANK_TOKEN`，走 `fetchWithTimeout` 8s）拉所有 jar，过滤 `currencyCode === 980 (UAH)` 后按 `sendId → balance/100 (UAH)` 入 Map，`unstable_cache` 60s 缓存（正好匹配官方"1 次/60s"限流，全实例共享一份）。展示进度的页面（首页 `ProjectsSection`、详情页 `ProjectStrip` / `DonationSidebar`）一次拉整张 map，按每个项目的 `monobankJarSendId` 自己查；这条路径之外所有地方读到的 `raised_amount`（如 JSON 静态值）都已废弃。
 
 Stripe 付款不计入 `raised_amount`（无 webhook / 无 secret key，查不到），这是刻意权衡。任一环节失败降级为 0，不阻塞渲染。
 
@@ -112,11 +112,10 @@ Stripe 付款不计入 `raised_amount`（无 webhook / 无 secret key，查不�
 
 ```env
 MONOBANK_TOKEN=                          # 基金会账户的 monobank personal token（api.monobank.ua 自助生成）
-NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID= # 基金会主 jar 的 sendId；项目无 monobankJarSendId 时 fallback 到这个
 ```
 
-- `MONOBANK_TOKEN` 缺失时 `getRaisedAmount` 返回 0，不报错
-- `NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID` 让支付方式面板里的 monobank 按钮始终可点（项目自己的 sendId 缺失时跳 fallback jar）；两者都缺失时 monobank 按钮显示 "Coming soon" 灰态
+- `MONOBANK_TOKEN` 缺失或 monobank 调用失败时 `getAllJarBalances` 返回空 Map，所有项目 raised 降级为 0，不报错
+- 项目 `data.json` 没填 `monobankJarSendId` 时，捐赠面板的 monobank 按钮显示 "Coming soon" 灰态（不再做 fallback jar）
 
 ---
 
@@ -346,7 +345,6 @@ src/
 │   ├── email.ts                 # 邮箱地址正则（EMAIL_RE 单地址 / EMAIL_RE_BATCH 批量场景）
 │   ├── emailTemplates.ts        # 邮件模板注册表（server-only，纯静态 HTML，无变量）
 │   ├── emailTemplates/          # 每个模板单独一个 .ts，导出 subject / html / text 三常量
-│   ├── donations.ts             # 已筹金额查询（带缓存）
 │   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache，导出 NewsRow / rowToItem）
 │   ├── db.ts                    # Neon Postgres 单例（`@neondatabase/serverless`）
 │   ├── redis.ts                 # Upstash Redis 单例 + KV_ENABLED 探测（adminRateLimit / formRateLimit 共用）

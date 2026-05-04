@@ -19,11 +19,8 @@ export default function MethodStep({
 }: MethodStepProps) {
   const t = useTranslations('projectDetail');
 
-  // monobank sendId：优先项目自己的，其次 fallback 到基金会主 jar
-  const fallbackSendId = process.env.NEXT_PUBLIC_MONOBANK_FALLBACK_JAR_SEND_ID;
-  const effectiveSendId = monobankJarSendId || fallbackSendId;
-  const monobankUrl = effectiveSendId
-    ? `https://send.monobank.ua/jar/${effectiveSendId}`
+  const monobankUrl = monobankJarSendId
+    ? `https://send.monobank.ua/jar/${monobankJarSendId}`
     : null;
 
   return (

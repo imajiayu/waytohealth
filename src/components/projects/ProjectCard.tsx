@@ -38,9 +38,9 @@ export default async function ProjectCard({ id, data, cover, index, compact, ski
 
   const title = data.title[locale];
   const description = data.description[locale];
-  const progress = data.goal_amount
-    ? Math.min((data.raised_amount / data.goal_amount) * 100, 100)
-    : 0;
+  // 真实百分比给徽章文字用；进度条宽度另截到 100 防 overflow
+  const progress = data.goal_amount ? (data.raised_amount / data.goal_amount) * 100 : 0;
+  const progressBarWidth = Math.min(progress, 100);
 
   // 条件包裹：skipFadeIn 时直接返回内容，由外层控制入场动画
   const wrap = (node: React.ReactNode) =>
@@ -73,7 +73,7 @@ export default async function ProjectCard({ id, data, cover, index, compact, ski
             <div className="mt-2.5 h-[2px] w-full overflow-hidden rounded-full bg-white/25">
               <div
                 className="h-full rounded-full bg-white/90"
-                style={{ width: `${Math.max(progress, 3)}%` }}
+                style={{ width: `${Math.max(progressBarWidth, 3)}%` }}
               />
             </div>
           )}
@@ -129,7 +129,7 @@ export default async function ProjectCard({ id, data, cover, index, compact, ski
             <div className="mb-3 h-1 w-full overflow-hidden rounded-full bg-ukraine-blue-50">
               <div
                 className="gradient-brand-progress relative h-full rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${Math.max(progress, 2)}%` }}
+                style={{ width: `${Math.max(progressBarWidth, 2)}%` }}
               >
                 <div className="absolute -right-1 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-ukraine-blue-300 shadow-[0_0_8px_rgba(0,167,189,0.5)]" />
               </div>

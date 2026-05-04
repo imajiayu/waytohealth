@@ -162,11 +162,9 @@ export default function ProjectStrip({ projects, currentId }: ProjectStripProps)
         {projects.map((project) => {
           const isCurrent = project.id === currentId;
           const title = project.data.title[locale];
-          const progress = project.data.goal_amount
-            ? Math.min(
-                (project.data.raised_amount / project.data.goal_amount) * 100,
-                100,
-              )
+          // 进度条宽度截到 100 防 overflow（这张卡不展示百分比文字）
+          const progressBarWidth = project.data.goal_amount
+            ? Math.min((project.data.raised_amount / project.data.goal_amount) * 100, 100)
             : 0;
 
           return (
@@ -214,7 +212,7 @@ export default function ProjectStrip({ projects, currentId }: ProjectStripProps)
                       <div className="h-1 w-full overflow-hidden rounded-full bg-ukraine-blue-50">
                         <div
                           className="gradient-brand-progress relative h-full rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${Math.max(progress, 2)}%` }}
+                          style={{ width: `${Math.max(progressBarWidth, 2)}%` }}
                         >
                           <div className="absolute -right-1 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-ukraine-blue-300 shadow-[0_0_6px_rgba(0,167,189,0.5)]" />
                         </div>
