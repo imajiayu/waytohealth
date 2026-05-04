@@ -72,9 +72,9 @@ npm run start    # 启动生产服务器
 
 ---
 
-## 支付方案（Stripe buy-button + monobank jar，无数据库、无 webhook）
+## 支付方案（Stripe buy-button + monobank jar，无 webhook）
 
-项目**不使用数据库**、**不接 webhook**、**不持有 Stripe secret key**。捐赠通过 Stripe buy-button 和 monobank jar 两条独立通道收款，只有 monobank 能读到金额（`/personal/client-info`），Stripe 侧我们不聚合。
+捐赠通过 Stripe buy-button 和 monobank jar 两条独立通道收款。本站**不持 Stripe secret key、不接任一通道的 webhook、不直接查任一通道余额**：已筹金额由 admin 手动维护（见下文「已筹金额展示」）。
 
 ### 核心流程
 
@@ -83,11 +83,16 @@ DonationSidebar 是 method ↔ stripe **双视图状态机**，顶部进度区�
 - **method 视图** 放 monobank / stripe 两个按钮。monobank 按钮是纯 `<a href>` 跳 `send.monobank.ua/jar/{sendId}`（新 tab 里用户自己输金额）：用项目 `data.json` 的 `monobankJarSendId`，缺失就灰态 "Coming soon"。
 - **stripe 视图** 嵌入 `<stripe-buy-button>` Web Component，`buy-button-id` + `publishable-key` 写死在 `src/components/projects/donation/utils.ts`；`https://js.stripe.com/v3/buy-button.js` 用 `afterInteractive` 加载。用户点按钮跳 Stripe 托管 checkout，本站**不收回调**。
 
-### 已筹金额展示
+### 已筹金额展示（admin 手动维护）
 
-`src/lib/monobank.ts` 的 `getAllJarBalances()` 只聚合 **monobank jar**：调 `/personal/client-info`（`X-Token: MONOBANK_TOKEN`，走 `fetchWithTimeout` 8s）拉所有 jar，过滤 `currencyCode === 980 (UAH)` 后按 `sendId → balance/100 (UAH)` 入 Map，`unstable_cache` 60s 缓存（正好匹配官方"1 次/60s"限流，全实例共享一份）。展示进度的页面（首页 `ProjectsSection`、详情页 `ProjectStrip` / `DonationSidebar`）一次拉整张 map，按每个项目的 `monobankJarSendId` 自己查；这条路径之外所有地方读到的 `raised_amount`（如 JSON 静态值）都已废弃。
+monobank 慈善基金会的 jar 走法人 API（providers，要 RSA 签名 + 客户端授权流），对一个"显示进度"的需求工作量过重；Stripe 也没接 webhook。**所以已筹金额不自动聚合**，由 admin 在 `/admin/amounts` 人工录入：
 
-Stripe 付款不计入 `raised_amount`（无 webhook / 无 secret key，查不到），这是刻意权衡。任一环节失败降级为 0，不阻塞渲染。
+- 单张 Neon 表 `project_amounts (project_id, raised_uah, updated_at)` 存每个项目的当前已筹（UAH 整数）
+- 流程：管理员看法人 mono business app 的 jar 余额 + Stripe dashboard，把合计数填进表单 → server action 批量 UPSERT + `revalidateTag('project-amounts')`，前台 60s 内刷新
+- 前台读：`src/lib/projectAmounts.ts` 的 `getAllProjectAmounts()` 一次拉整张 map（`unstable_cache(60s, tags:['project-amounts'])`），首页 `ProjectsSection` / 详情页 `projects/page.tsx` 用 `projectId → raised` 查，缺记录 / DB 不可用降级为 0，不阻塞渲染
+- 项目静态 JSON `public/data/projects/{id}/data.json` **不再含 `raised_amount`**（已废，类型 `ProjectData` 也不含）；展示组件用派生类型 `ProjectWithRaised = ProjectData & { raised_amount: number }`，由 SSR 阶段拼装
+
+更新频率：基金会每周 / 双周对账后登 admin 改一次即可。慈善网站的进度展示对实时性不敏感，这个粒度足够。
 
 ### 项目/商品数据
 
@@ -99,23 +104,25 @@ Stripe 付款不计入 `raised_amount`（无 webhook / 无 secret key，查不�
 
 ### 有意省略的能力
 
-下面这些能力**不提供**，如未来需要再引入数据库 / webhook：
+下面这些能力**不提供**，如未来需要再引入 webhook / 法人 API：
+- 实时聚合 monobank jar / Stripe 金额到 `raised_amount`（当前由 admin 人工录入）
 - 捐赠者留言 / 公开捐赠墙
 - Admin 后台（订单列表、状态机、发货跟踪）
 - 月捐（订阅）
 - 商品购买的收货地址、快递单号
 - 支付成功页（没有 webhook 就没有可靠成功信号）
-- Stripe 金额聚合到 raised_amount
-- 邮件通知（Resend 未接入）
 
-### 环境变量
+### Schema（需在 Neon console 一次性执行）
 
-```env
-MONOBANK_TOKEN=                          # 基金会账户的 monobank personal token（api.monobank.ua 自助生成）
+```sql
+CREATE TABLE project_amounts (
+  project_id  INT PRIMARY KEY,
+  raised_uah  BIGINT NOT NULL DEFAULT 0,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 ```
 
-- `MONOBANK_TOKEN` 缺失或 monobank 调用失败时 `getAllJarBalances` 返回空 Map，所有项目 raised 降级为 0，不报错
-- 项目 `data.json` 没填 `monobankJarSendId` 时，捐赠面板的 monobank 按钮显示 "Coming soon" 灰态（不再做 fallback jar）
+注：项目 `data.json` 没填 `monobankJarSendId` 时，捐赠面板的 monobank 按钮显示 "Coming soon" 灰态。
 
 ---
 
@@ -287,6 +294,7 @@ src/
 │   │   ├── layout.tsx           # admin 自己的 <html><body>（英文）
 │   │   ├── news/page.tsx        # News 管理后台
 │   │   ├── email/page.tsx       # Email 发送后台（Resend）
+│   │   ├── amounts/page.tsx     # 各项目已筹金额手动维护
 │   │   ├── requests/page.tsx    # Assistance 申请列表（只读）
 │   │   └── partnerships/page.tsx # Partnership 申请列表（只读）
 │   ├── api/
@@ -316,7 +324,7 @@ src/
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
 │   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, ProjectGallery, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney）
 │   ├── news/                    # 新闻组件（NewsCard, HomeDispatchCard, HomeDispatchCtaCard）
-│   ├── admin/                   # Admin 后台组件（news 编辑器、AssistanceRequestsPanel、PartnershipRequestsPanel；common/AlertBanner 共用错误/成功提示条）
+│   ├── admin/                   # Admin 后台组件（news 编辑器、EmailPanel、AmountsPanel、AssistanceRequestsPanel、PartnershipRequestsPanel；common/AlertBanner 共用错误/成功提示条）
 │   ├── forms/                   # 表单原子（fields.tsx / PartnershipForm / RequestAssistanceForm）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
@@ -337,6 +345,7 @@ src/
 ├── app/actions/
 │   ├── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
 │   ├── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送 + 历史拉取）
+│   ├── projectAmounts.ts        # 项目已筹金额批量 UPSERT（admin only）
 │   └── requests.ts              # Request/Partnership 提交（公开）+ admin 读取（需 cookie）
 ├── lib/
 │   ├── utils.ts                 # cn() 工具函数
@@ -346,9 +355,10 @@ src/
 │   ├── emailTemplates.ts        # 邮件模板注册表（server-only，纯静态 HTML，无变量）
 │   ├── emailTemplates/          # 每个模板单独一个 .ts，导出 subject / html / text 三常量
 │   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache，导出 NewsRow / rowToItem）
+│   ├── projectAmounts.ts        # 项目已筹金额读取（Neon SELECT，unstable_cache 60s）
 │   ├── db.ts                    # Neon Postgres 单例（`@neondatabase/serverless`）
 │   ├── redis.ts                 # Upstash Redis 单例 + KV_ENABLED 探测（adminRateLimit / formRateLimit 共用）
-│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（monobank 等对外调用）
+│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（resend-inbound webhook 拉附件用）
 │   ├── seo.ts                   # SEO helper：canonical / hreflang / openGraph / twitter
 │   ├── clientIp.ts              # `x-real-ip` 优先、XFF 兜底的客户端 IP 提取（限流 / 审计共用）
 │   ├── ids.ts                   # randomSuffix() 4 位 base36 后缀（news / requests id 共用）

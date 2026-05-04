@@ -8,7 +8,6 @@
     "en": "We fund ambulances to bring emergency care to those in need."
   },
   "goal_amount": 1200000,
-  "raised_amount": 0,
   "currency": "UAH",
   "tags": ["ambulance", "emergency"],
   "monobankJarSendId": "AeAimcRLhk",

@@ -1,24 +1,24 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { getAllProjects } from '@/lib/data';
-import { getAllJarBalances } from '@/lib/monobank';
+import { getAllProjectAmounts } from '@/lib/projectAmounts';
 import { toLocale } from '@/i18n/config';
 import ProjectCard from '@/components/projects/ProjectCard';
 import MobileProjectSwitcher from '@/components/home/MobileProjectSwitcher';
 
 export default async function ProjectsSection() {
-  const [t, tNav, rawProjects, rawLocale, jarBalances] = await Promise.all([
+  const [t, tNav, rawProjects, rawLocale, amounts] = await Promise.all([
     getTranslations('projects'),
     getTranslations('navigation'),
     getAllProjects(),
     getLocale(),
-    getAllJarBalances().catch(() => new Map<string, number>()),
+    getAllProjectAmounts(),
   ]);
   const locale = toLocale(rawLocale);
 
-  // 一次拉所有 jar，按 sendId 查每个项目的实时已筹金额；缺 sendId / jar 不可用降级为 0
+  // 已筹金额从 Neon 表 project_amounts 读（admin 在 /admin/amounts 手动维护，60s 缓存）；缺记录降级为 0
   const projects = rawProjects.map((p) => ({
     ...p,
-    raised_amount: p.monobankJarSendId ? jarBalances.get(p.monobankJarSendId) ?? 0 : 0,
+    raised_amount: amounts.get(p.id) ?? 0,
   }));
 
   const mainProjects = projects.slice(0, 6);

@@ -2,13 +2,13 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { type Locale } from '@/i18n/config';
-import { type ProjectData } from '@/data/projects';
+import { type ProjectWithRaised } from '@/data/projects';
 import { ArrowUpRight } from 'lucide-react';
 import FadeInOnView from '@/components/common/FadeInOnView';
 
 interface ProjectCardProps {
   id: number;
-  data: ProjectData;
+  data: ProjectWithRaised;
   cover: string;
   index: number; // 用于交错动画
   compact?: boolean; // 紧凑模式：图片全覆盖 + 叠加文字

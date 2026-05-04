@@ -1,5 +1,5 @@
 import { getProject, getAllProjects } from '@/lib/data';
-import { getAllJarBalances } from '@/lib/monobank';
+import { getAllProjectAmounts } from '@/lib/projectAmounts';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import { notFound } from 'next/navigation';
@@ -52,9 +52,9 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const { id } = await searchParams;
   const typedLocale = toLocale(locale);
 
-  const [allProjects, jarBalances] = await Promise.all([
+  const [allProjects, amounts] = await Promise.all([
     getAllProjects(),
-    getAllJarBalances().catch(() => new Map<string, number>()),
+    getAllProjectAmounts(),
   ]);
 
   // 无 id 参数时自动选择第一个项目
@@ -73,8 +73,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
       title: p.title,
       description: p.description,
       goal_amount: p.goal_amount,
-      // 实时金额：从 jar map 按 sendId 查；缺 sendId 或 jar 不可用降级为 0
-      raised_amount: p.monobankJarSendId ? jarBalances.get(p.monobankJarSendId) ?? 0 : 0,
+      // 已筹金额从 Neon 表 project_amounts 读（admin 维护）；缺记录降级为 0
+      raised_amount: amounts.get(p.id) ?? 0,
       currency: p.currency,
       tags: p.tags,
     },
@@ -84,10 +84,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   const title = project.title[typedLocale];
   const detail = project.detail;
 
-  // 当前项目的实时已筹金额（复用上面的 jar map，避免二次 fetch）
-  const raisedAmount = project.monobankJarSendId
-    ? jarBalances.get(project.monobankJarSendId) ?? 0
-    : 0;
+  // 当前项目的实时已筹金额（复用上面的 amounts map，避免二次查询）
+  const raisedAmount = amounts.get(projectId) ?? 0;
 
   // 文档查看器通用标签
   const t = await getTranslations('projectDetail');

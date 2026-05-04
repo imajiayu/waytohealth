@@ -5,19 +5,20 @@ export type ProjectId = (typeof PROJECTS)[number];
 // 双语文本
 export type LocaleString = { ua: string; en: string };
 
-// 项目静态数据类型
+// 项目静态数据类型 —— 不含已筹金额（已筹由 admin 在 /admin/amounts 维护，存 Neon 表 project_amounts）
 export interface ProjectData {
   title: LocaleString;
   description: LocaleString;
   goal_amount: number | null; // null 表示无上限
-  raised_amount: number;
   currency: string;
   tags: string[];
-  // monobank 募捐罐 sendId — send.monobank.ua/{sendId} 末尾那段
-  // 用来拼跳转链接 + 匹配 /personal/client-info 返回的 jar
+  // monobank 募捐罐 sendId —— send.monobank.ua/jar/{sendId} 末尾那段，用于拼捐赠跳转链接
   monobankJarSendId?: string;
   detail?: ProjectDetail;
 }
+
+// 给展示组件用的派生类型：在静态数据上叠 admin 维护的实时已筹金额
+export type ProjectWithRaised = ProjectData & { raised_amount: number };
 
 // 康复旅程阶段
 export interface ProjectStage {

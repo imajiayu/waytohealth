@@ -4,12 +4,12 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { toLocale } from '@/i18n/config';
-import { type ProjectData } from '@/data/projects';
+import { type ProjectWithRaised } from '@/data/projects';
 import { useRef, useEffect, useState, useCallback } from 'react';
 
 interface ProjectStripItem {
   id: number;
-  data: ProjectData;
+  data: ProjectWithRaised;
   cover: string;
 }
 

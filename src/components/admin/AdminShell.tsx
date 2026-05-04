@@ -10,6 +10,7 @@ import { AdminAuthContext } from './AdminAuthContext';
 const TABS = [
   { href: '/admin/news', label: 'News' },
   { href: '/admin/email', label: 'Email' },
+  { href: '/admin/amounts', label: 'Projects' },
   { href: '/admin/requests', label: 'Requests' },
   { href: '/admin/partnerships', label: 'Partnerships' },
 ];
