@@ -10,6 +10,7 @@ import { buildAlternates, buildOpenGraph, buildTwitter, siteUrl } from '@/lib/se
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import LoadingBar from '@/components/layout/LoadingBar';
+import { SOCIAL_LINKS, CONTACT } from '@/data/social';
 import '../globals.css';
 
 type Props = {
@@ -38,24 +39,62 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 // Organization / NonprofitOrganization JSON-LD —— 慈善机构常规结构化数据
+// Google Knowledge Graph 实体识别的主要输入；字段越完整、与官方平台对得越上，
+// 越能把 "way to health" 这一通用关键词在 SERP 中绑定到本基金会
 function organizationJsonLd(locale: string) {
   const base = siteUrl();
   const name = locale === 'ua' ? 'Шлях до здоров\'я' : 'Way to Health';
   return {
     '@context': 'https://schema.org',
     '@type': 'NGO',
+    '@id': `${base}/#organization`,
     name,
-    alternateName: 'Way to Health Charitable Foundation',
+    alternateName: [
+      'Way to Health Ukraine',
+      'Way to Health Charitable Foundation',
+      'Шлях до здоров\'я',
+      'Благодійний фонд «Шлях до здоров\'я»',
+    ],
+    legalName: 'Благодійний фонд «Шлях до здоров\'я»',
     url: base,
     logo: `${base}/images/logo-${locale === 'ua' ? 'ua' : 'en'}.webp`,
+    image: `${base}/og-image.jpg`,
     description: locale === 'ua'
-      ? 'Реабілітаційний центр для постраждалих від війни в Україні'
-      : 'Rehabilitation center for war victims in Ukraine',
+      ? 'Благодійний фонд «Шлях до здоров\'я» — реабілітаційний центр для постраждалих від війни в Україні.'
+      : 'Way to Health is a Ukrainian charitable foundation running a rehabilitation center for those affected by the war.',
+    email: CONTACT.email,
+    telephone: CONTACT.phoneTel,
+    contactPoint: [{
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: CONTACT.email,
+      telephone: CONTACT.phoneTel,
+      availableLanguage: ['uk', 'en'],
+    }],
+    address: locale === 'ua' ? {
+      '@type': 'PostalAddress',
+      streetAddress: 'вул. Теплична, 27С',
+      addressLocality: 'смт Слобожанське',
+      addressRegion: 'Дніпропетровська область',
+      postalCode: '52005',
+      addressCountry: 'UA',
+    } : {
+      '@type': 'PostalAddress',
+      streetAddress: '27C Teplychna St.',
+      addressLocality: 'Slobozhanske',
+      addressRegion: 'Dnipropetrovsk Oblast',
+      postalCode: '52005',
+      addressCountry: 'UA',
+    },
     areaServed: { '@type': 'Country', name: 'Ukraine' },
-    sameAs: [
-      'https://www.instagram.com/waytohealth.ua',
-      'https://www.facebook.com/waytohealth.ua',
+    knowsLanguage: ['uk', 'en'],
+    foundingDate: '2022-09-24',
+    taxID: '44947699',  // EDRPOU
+    founder: [
+      { '@type': 'Person', name: 'Mykyta Zhalin' },
+      { '@type': 'Person', name: 'Oleksii Dubovyk' },
     ],
+    sameAs: SOCIAL_LINKS.map((s) => s.href),
   };
 }
 

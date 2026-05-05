@@ -355,7 +355,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await resend.emails.send({
-      from: buildFromAddress(),
+      from: buildFromAddress('noreply'),
       to: forwardTo,
       replyTo: safeReplyTo,
       subject: `${FORWARDED_PREFIX} ${subject}`,

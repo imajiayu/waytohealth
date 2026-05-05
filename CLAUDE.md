@@ -206,7 +206,7 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 
 **UI**（`src/components/admin/EmailPanel.tsx`）：左栏表单（收件人 textarea / 模板下拉 / From 前缀下拉 / Advanced subject override + reply-to）+ 右栏 iframe 预览（`sandbox="allow-same-origin"`）。底部 `EmailHistory` 拉 Resend `emails.list({ limit: 100 })`，发送成功后 `refreshKey` bump 自动刷新。
 
-**发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'support', 'news', 'noreply']`，admin UI 下拉选择（默认 `noreply`），`buildFromAddress(prefix)` 拼成完整 from 串。故意不开"任意前缀"：写死能发的地址集合 = 发件内容已在 code review 阶段审过，和静态 HTML 模板是同一套"不接受运行时输入"的护栏。所有可选前缀的本地邮箱（`info@` / `support@` / `news@` / `noreply@`）域名必须已经在 Resend 控制台验证通过，否则 send 会 403。Inbound webhook 转发默认走 `noreply`。
+**发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'head', 'support', 'news', 'noreply']`，admin UI 下拉选择（默认 `info`），`buildFromAddress(prefix)` 拼成完整 from 串。故意不开"任意前缀"：写死能发的地址集合 = 发件内容已在 code review 阶段审过，和静态 HTML 模板是同一套"不接受运行时输入"的护栏。所有可选前缀的本地邮箱（`info@` / `head@` / `support@` / `news@` / `noreply@`）域名必须已经在 Resend 控制台验证通过，否则 send 会 403。Inbound webhook 转发显式走 `noreply`（不复用 admin 默认）。
 
 ### Inbound 邮件转发（catch-all → Gmail）
 
@@ -218,7 +218,7 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 
 - **`runtime = 'nodejs'` + `maxDuration = 60`** — svix 校验依赖 Node crypto（Edge 起不来）；带附件大邮件走串行 Resend API 会超默认 timeout
 - **HTML 走 `sanitize-html`（不是 DOMPurify）** —— jsdom 在 Vercel serverless 起不来。白名单保留表格 / 内嵌 style / `<img src="cid:…">`，剥 `on*` / `script/iframe/form/meta/style/object/embed`，`<a>` 强制 `target=_blank rel=noopener noreferrer`
-- **发件人必须固定为自己域名**（`buildFromAddress()` 默认 `noreply`），原发件人放正文 meta 块里。用 `from: <原发件人>` 会 DMARC fail 被 Gmail 判伪造
+- **发件人必须固定为自己域名**（webhook 显式 `buildFromAddress('noreply')`），原发件人放正文 meta 块里。用 `from: <原发件人>` 会 DMARC fail 被 Gmail 判伪造
 - **subject 必须 `sanitizeHeader(subject, 200)`** —— 入站可能带 `\r\n`（header 注入）或极长字符串
 - **`replyTo` 要校验邮箱格式** —— Resend 原 `from` 可能带展示名或异常字符，非合法邮箱就不设，否则 Resend API 400
 - **附件单独再调 `receiving.attachments.get()`** 拿 `download_url`（attachments metadata 不够）→ 下载 base64 → 带 `contentId` 附给出站，让 `<img src="cid:xxx">` 在 Gmail 继续渲染。`Promise.all` 并行，单附件失败只丢自己；累计 >30MB（Resend 40MB 硬限保险线）丢尾部

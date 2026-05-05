@@ -5,9 +5,9 @@ export const FROM_DISPLAY_NAME = 'Way to Health';
 export const FROM_DOMAIN = 'waytohealth.org.ua';
 
 // 前缀白名单：admin 发信时从下拉选择，避免被当成开放转发器
-export const FROM_PREFIXES = ['info', 'support', 'news', 'noreply'] as const;
+export const FROM_PREFIXES = ['info', 'head', 'support', 'news', 'noreply'] as const;
 export type FromPrefix = (typeof FROM_PREFIXES)[number];
-export const DEFAULT_FROM_PREFIX: FromPrefix = 'noreply';
+export const DEFAULT_FROM_PREFIX: FromPrefix = 'info';
 
 export function isFromPrefix(value: unknown): value is FromPrefix {
   return typeof value === 'string' && (FROM_PREFIXES as readonly string[]).includes(value);
