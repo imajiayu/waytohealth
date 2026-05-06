@@ -18,6 +18,8 @@ import { EMAIL_RE_BATCH as EMAIL_RE } from '@/lib/email';
 import { errorMessage } from '@/lib/errors';
 
 const MAX_RECIPIENTS = 50; // Resend 单次最多 50
+const MAX_SUBJECT_LEN = 998; // RFC 5322 line length
+const MAX_TEXT_LEN = 50_000;
 
 function parseRecipients(raw: string): { ok: true; list: string[] } | { ok: false; error: string } {
   // 只按换行分隔，避免邮箱地址内特殊字符（+、.）被误分割
@@ -63,13 +65,18 @@ export async function previewEmailAction(
   return renderEmail(templateId);
 }
 
-export interface SendInput {
+interface SendCommon {
   to: string; // 原始字符串，服务端解析
-  templateId: string;
-  subject: string; // 必填，UI 以模板默认主题 pre-fill
+  subject: string; // 必填
   fromPrefix?: FromPrefix; // 发件人本地部分；未给 / 非法则回落到默认
   replyTo?: string;
 }
+
+// template 模式：选注册表里的静态模板，subject 以模板默认值 pre-fill 后可编辑，html/text 用模板常量
+// custom 模式：admin 完全自定义 subject + 纯文本正文（不含 HTML），跳过模板注册表。受 cookie session + 长度上限护栏
+export type SendInput =
+  | (SendCommon & { mode: 'template'; templateId: string })
+  | (SendCommon & { mode: 'custom'; text: string });
 
 export interface EmailHistoryItem {
   id: string;
@@ -168,9 +175,25 @@ export async function sendEmailAction(
   if (!finalSubject) {
     return { ok: false, error: 'Subject is required' };
   }
+  if (finalSubject.length > MAX_SUBJECT_LEN) {
+    return { ok: false, error: `Subject too long (max ${MAX_SUBJECT_LEN} chars)` };
+  }
 
-  const rendered = renderEmail(input.templateId);
-  if (!rendered.ok) return rendered;
+  let html: string | undefined;
+  let text: string;
+  if (input.mode === 'template') {
+    const rendered = renderEmail(input.templateId);
+    if (!rendered.ok) return rendered;
+    html = rendered.rendered.html;
+    text = rendered.rendered.text;
+  } else {
+    const customText = input.text?.trim();
+    if (!customText) return { ok: false, error: 'Text body is required' };
+    if (customText.length > MAX_TEXT_LEN) {
+      return { ok: false, error: `Text too long (max ${MAX_TEXT_LEN} chars)` };
+    }
+    text = customText;
+  }
 
   // 非白名单前缀直接拒绝；未传则回落到默认
   if (input.fromPrefix !== undefined && !isFromPrefix(input.fromPrefix)) {
@@ -196,8 +219,8 @@ export async function sendEmailAction(
       from,
       to: [addr],
       subject: finalSubject,
-      html: rendered.rendered.html,
-      text: rendered.rendered.text,
+      ...(html ? { html } : {}),
+      text,
       ...(input.replyTo ? { replyTo: input.replyTo } : {}),
     }));
 
@@ -218,7 +241,7 @@ export async function sendEmailAction(
       sent: successCount,
       failed: failures.length,
       failures,
-      rendered: { subject: finalSubject, html: rendered.rendered.html, text: rendered.rendered.text },
+      rendered: { subject: finalSubject, html: html ?? '', text },
     };
   } catch (err) {
     return { ok: false, error: errorMessage(err) };

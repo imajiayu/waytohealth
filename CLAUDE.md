@@ -184,14 +184,14 @@ KV_REST_API_TOKEN=                # Upstash REST token
 
 ---
 
-## 邮件系统（Resend + 静态 HTML 模板）
+## 邮件系统（Resend + 静态 HTML 模板 + Custom 自定义）
 
-Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + 发送，走 Resend API。
+Admin 后台 `/admin/email`：手动输入收件人 + 两种发送模式 + 预览 + 发送，走 Resend API。
 
-**架构刻意简单**：模板都是**静态 HTML 常量**，subject / html / text 三件套写死在 TS 文件里。**没有参数化、没有变量填充、没有运行时字符串拼接**。换一个内容 = 加一个新模板文件。这个决定是为了：
-1. 避免被当开放邮件发射器用（所有发件内容都已在代码 review 阶段审过）
-2. 完整保留设计师给的 HTML（乌克兰语排版 / `@import` 字体 / 内嵌 CSS / flexbox 布局）不被 escape 污染
-3. 零渲染逻辑 = 零注入面
+**两种模式**（前端 segmented control 切换，后端 `SendInput` 是 discriminated union `{ mode: 'template' | 'custom' }`）：
+
+- **Template 模式（默认）** — 选注册表里的静态模板，subject 以模板默认值 pre-fill 后可编辑，html/text 用模板常量。整封内容在 code review 阶段审过，批量冷启动外发首选这个模式。完整保留设计师给的 HTML（乌克兰语排版 / `@import` 字体 / 内嵌 CSS / flexbox 布局）不被 escape 污染
+- **Custom 模式** — admin 自定义 subject + 纯文本正文（**不含 HTML**），跳过模板注册表。一次性外发 / 临时通知场景用。**护栏**：cookie session 鉴权（`ensureAdmin`）+ subject ≤ 998 chars (RFC 5322) + text ≤ 50KB。刻意不开 HTML 输入：富文本走 template 模式（在 code review 阶段审过），custom 模式只放开"打字"场景，注入面回归零。发送时 `messages` 不带 `html` 字段，Resend 直接以 text-only 邮件投递
 
 **模板注册表**（`src/lib/emailTemplates.ts`，`server-only`）：`TEMPLATES` 数组，每项 `{ id, name, description, locales, rendered: { subject, html, text } }`。当前内置：
 
@@ -204,9 +204,9 @@ Admin 后台 `/admin/email`：手动输入收件人 + 选择模板 + 预览 + �
 
 **发送流程**（`src/app/actions/email.ts`）：`requireAdmin()` → `parseRecipients`（换行拆分 + RFC 正则 + 去重，单次上限 50）→ 取模板常量 → `resend.batch.send(messages, { batchValidation: 'permissive' })` 把收件人展开成 N 封独立邮件（每封 `to: [addr]`），单封被反垃圾拦截不影响其余。`permissive` 返回 `data.errors[].index`，按下标映射成 `failures: { address, message }[]` 回给前端。**不用 `to=from + bcc` 群发** —— `Mail-from = Rcpt-to` 是经典垃圾邮件特征，实测 Gmail/Outlook 整封 bounced；独立寄出天然等同 bcc 隐私维度。`previewEmailAction` 只返常量不调 Resend。
 
-**UI**（`src/components/admin/EmailPanel.tsx`）：左栏表单（收件人 textarea / 模板下拉 / From 前缀下拉 / Advanced subject override + reply-to）+ 右栏 iframe 预览（`sandbox="allow-same-origin"`）。底部 `EmailHistory` 拉 Resend `emails.list({ limit: 100 })`，发送成功后 `refreshKey` bump 自动刷新。
+**UI**（`src/components/admin/EmailPanel.tsx`）：左栏表单（收件人 textarea / Template ↔ Custom segmented control / 模板下拉 *或* 纯文本 body textarea / From 前缀下拉 / Subject + reply-to）+ 右栏预览：template 模式走 iframe srcDoc（`sandbox="allow-same-origin"`），custom 模式走 `<pre>` 实时回显纯文本（无 iframe，无 HTML 插值面）。切到 custom 模式时若 body textarea 还空，会把当前模板的 text 灌入作为编辑起点。底部 `EmailHistory` 拉 Resend `emails.list({ limit: 100 })`，发送成功后 `refreshKey` bump 自动刷新。
 
-**发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'head', 'support', 'news', 'noreply']`，admin UI 下拉选择（默认 `info`），`buildFromAddress(prefix)` 拼成完整 from 串。故意不开"任意前缀"：写死能发的地址集合 = 发件内容已在 code review 阶段审过，和静态 HTML 模板是同一套"不接受运行时输入"的护栏。所有可选前缀的本地邮箱（`info@` / `head@` / `support@` / `news@` / `noreply@`）域名必须已经在 Resend 控制台验证通过，否则 send 会 403。Inbound webhook 转发显式走 `noreply`（不复用 admin 默认）。
+**发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'head', 'support', 'news', 'noreply']`，admin UI 下拉选择（默认 `info`），`buildFromAddress(prefix)` 拼成完整 from 串。故意不开"任意前缀"：从域名维度看 from 集合是封闭的，custom 模式只放开内容，不放开身份。所有可选前缀的本地邮箱（`info@` / `head@` / `support@` / `news@` / `noreply@`）域名必须已经在 Resend 控制台验证通过，否则 send 会 403。Inbound webhook 转发显式走 `noreply`（不复用 admin 默认）。
 
 ### Inbound 邮件转发（catch-all → Gmail）
 

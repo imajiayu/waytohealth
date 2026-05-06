@@ -24,15 +24,23 @@ type SendResult =
   | { kind: 'error'; error: string }
   | null;
 
+type Mode = 'template' | 'custom';
+
+const MAX_TEXT_LEN = 50_000;
+
 export default function EmailPanel() {
   const [templates, setTemplates] = useState<EmailTemplateMeta[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  const [mode, setMode] = useState<Mode>('template');
   const [templateId, setTemplateId] = useState<string>('');
   const [to, setTo] = useState('');
   const [replyTo, setReplyTo] = useState('');
   const [subject, setSubject] = useState('');
   const [fromPrefix, setFromPrefix] = useState<FromPrefix>(DEFAULT_FROM_PREFIX);
+
+  // custom 模式：admin 直接编辑纯文本正文；切换到 custom 时灌入当前模板的 text 作为编辑起点
+  const [customText, setCustomText] = useState('');
 
   const [preview, setPreview] = useState<RenderedEmail | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -71,6 +79,21 @@ export default function EmailPanel() {
     setSubject(next?.subject ?? '');
   }
 
+  function switchMode(next: Mode) {
+    if (next === mode) return;
+    if (next === 'custom') {
+      // 灌入当前模板的纯文本作为编辑起点；空就保留已有自定义内容
+      if (preview && !customText) {
+        setCustomText(preview.text);
+      }
+    } else {
+      // 切回 template：subject 用模板默认值覆盖（保持和模板下拉同步）
+      const tpl = templates?.find((t) => t.id === templateId);
+      if (tpl) setSubject(tpl.subject);
+    }
+    setMode(next);
+  }
+
   // 模板切换自动拉预览；取消标志避免快速切换时旧请求污染新状态
   useEffect(() => {
     if (!templateId) return;
@@ -91,17 +114,19 @@ export default function EmailPanel() {
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!templateId) return;
     setSendBusy(true);
     setSendResult(null);
 
-    const res = await sendEmailAction({
+    const common = {
       to,
-      templateId,
       subject: subject.trim(),
       fromPrefix,
       ...(replyTo.trim() ? { replyTo: replyTo.trim() } : {}),
-    });
+    } as const;
+
+    const res = mode === 'template'
+      ? await sendEmailAction({ mode: 'template', templateId, ...common })
+      : await sendEmailAction({ mode: 'custom', text: customText, ...common });
 
     setSendBusy(false);
     if (!res.ok) {
@@ -135,7 +160,7 @@ export default function EmailPanel() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Email</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Pick a static HTML template, enter recipients, and send via Resend.
+          Pick a static HTML template — or write a one-off subject + body — and send via Resend.
         </p>
       </div>
 
@@ -163,31 +188,64 @@ export default function EmailPanel() {
           </div>
 
           <div>
-            <label htmlFor="email-template" className={labelCls}>
-              Template
-            </label>
-            <select
-              id="email-template"
-              value={templateId}
-              onChange={(e) => selectTemplate(e.target.value)}
-              className={inputCls}
+            <span className={labelCls}>Mode</span>
+            <div
+              role="tablist"
+              aria-label="Email mode"
+              className="mt-1 inline-flex rounded-md border border-gray-300 bg-gray-50 p-0.5 text-sm"
             >
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
+              {(['template', 'custom'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === m}
+                  onClick={() => switchMode(m)}
+                  className={`rounded px-3 py-1 transition-colors ${
+                    mode === m
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {m === 'template' ? 'Template' : 'Custom'}
+                </button>
               ))}
-            </select>
-            {currentTemplate && (
-              <p className="mt-1 text-xs text-gray-500">
-                {currentTemplate.description}
-                {' · '}
-                <span className="uppercase tracking-wider">
-                  {currentTemplate.locales.join(' / ')}
-                </span>
-              </p>
-            )}
+            </div>
+            <p className="mt-1 text-xs text-gray-400">
+              {mode === 'template'
+                ? 'Pick a vetted, code-reviewed HTML template.'
+                : 'Free-form subject + plain-text body. No HTML — recipient sees text as-is.'}
+            </p>
           </div>
+
+          {mode === 'template' && (
+            <div>
+              <label htmlFor="email-template" className={labelCls}>
+                Template
+              </label>
+              <select
+                id="email-template"
+                value={templateId}
+                onChange={(e) => selectTemplate(e.target.value)}
+                className={inputCls}
+              >
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              {currentTemplate && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {currentTemplate.description}
+                  {' · '}
+                  <span className="uppercase tracking-wider">
+                    {currentTemplate.locales.join(' / ')}
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
 
           <div>
             <label htmlFor="email-from-prefix" className={labelCls}>
@@ -231,9 +289,31 @@ export default function EmailPanel() {
               className={inputCls}
             />
             <p className="mt-1 text-xs text-gray-400">
-              Pre-filled from the template — edit freely before sending.
+              {mode === 'template'
+                ? 'Pre-filled from the template — edit freely before sending.'
+                : 'Free-form subject. Max 998 characters (RFC 5322).'}
             </p>
           </div>
+
+          {mode === 'custom' && (
+            <div>
+              <label htmlFor="email-text" className={labelCls}>
+                Body <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="email-text"
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                rows={14}
+                required
+                placeholder="Type your message here…"
+                className={inputCls}
+              />
+              <p className="mt-1 text-xs text-gray-400">
+                Plain text only. {customText.length.toLocaleString()} / {MAX_TEXT_LEN.toLocaleString()} chars.
+              </p>
+            </div>
+          )}
 
           <div>
             <label htmlFor="email-reply-to" className={labelCls}>
@@ -284,7 +364,14 @@ export default function EmailPanel() {
           <div className="flex justify-end pt-1">
             <button
               type="submit"
-              disabled={sendBusy || !templateId || !to.trim() || !subject.trim()}
+              disabled={
+                sendBusy ||
+                !to.trim() ||
+                !subject.trim() ||
+                (mode === 'template'
+                  ? !templateId
+                  : !customText.trim() || customText.length > MAX_TEXT_LEN)
+              }
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {sendBusy ? 'Sending…' : 'Send'}
@@ -304,17 +391,23 @@ export default function EmailPanel() {
             )}
           </div>
 
-          {previewError && (
+          {mode === 'template' && previewError && (
             <AlertBanner variant="error">{previewError}</AlertBanner>
           )}
 
-          {!preview && !previewError && (
+          {mode === 'template' && !preview && !previewError && (
             <div className="rounded-md border border-dashed border-gray-300 bg-white p-10 text-center text-sm text-gray-500">
               Loading preview…
             </div>
           )}
 
-          {preview && (
+          {mode === 'custom' && !customText.trim() && (
+            <div className="rounded-md border border-dashed border-gray-300 bg-white p-10 text-center text-sm text-gray-500">
+              Type a message in the body field to see a live preview.
+            </div>
+          )}
+
+          {mode === 'template' && preview && (
             <div className="overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm">
               <iframe
                 title="Email preview"
@@ -322,6 +415,14 @@ export default function EmailPanel() {
                 sandbox="allow-same-origin"
                 className="h-[640px] w-full border-0"
               />
+            </div>
+          )}
+
+          {mode === 'custom' && customText.trim() && (
+            <div className="overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm">
+              <pre className="h-[640px] w-full overflow-auto whitespace-pre-wrap break-words p-4 font-sans text-sm text-gray-800">
+                {customText}
+              </pre>
             </div>
           )}
         </aside>
