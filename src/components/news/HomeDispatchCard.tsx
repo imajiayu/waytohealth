@@ -17,8 +17,10 @@ function resolveImg(src: string): string {
   return `/data/news/images/${src}`;
 }
 
-function isRemote(src: string): boolean {
-  return /^(https?:|blob:)/.test(src);
+// 只对 admin 预览期的 ObjectURL 关闭优化；Vercel Blob 上的 https 图必须走 next/image
+// 缩放管线，否则会把 2400x1354 的原图整张拉下来（PageSpeed 实测一张就 318 KiB）
+function isBlobUrl(src: string): boolean {
+  return src.startsWith('blob:');
 }
 
 export default async function HomeDispatchCard({ item, locale }: HomeDispatchCardProps) {
@@ -49,8 +51,8 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
             src={resolveImg(cover)}
             alt=""
             fill
-            sizes="(max-width: 640px) 62vw, 340px"
-            unoptimized={isRemote(cover)}
+            sizes="(max-width: 640px) 62vw, 400px"
+            unoptimized={isBlobUrl(cover)}
             className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (

@@ -27,6 +27,7 @@ type SendResult =
 type Mode = 'template' | 'custom';
 
 const MAX_TEXT_LEN = 50_000;
+const MAX_SUBJECT_LEN = 998;
 
 export default function EmailPanel() {
   const [templates, setTemplates] = useState<EmailTemplateMeta[] | null>(null);
@@ -368,6 +369,7 @@ export default function EmailPanel() {
                 sendBusy ||
                 !to.trim() ||
                 !subject.trim() ||
+                subject.trim().length > MAX_SUBJECT_LEN ||
                 (mode === 'template'
                   ? !templateId
                   : !customText.trim() || customText.length > MAX_TEXT_LEN)

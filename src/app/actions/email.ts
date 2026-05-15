@@ -178,6 +178,10 @@ export async function sendEmailAction(
   if (finalSubject.length > MAX_SUBJECT_LEN) {
     return { ok: false, error: `Subject too long (max ${MAX_SUBJECT_LEN} chars)` };
   }
+  // subject 是邮件 header，过 CRLF 防御性拦截（Resend JSON API 已不会拼 SMTP 文本，纯加固）
+  if (/[\r\n]/.test(finalSubject)) {
+    return { ok: false, error: 'Subject must not contain line breaks' };
+  }
 
   let html: string | undefined;
   let text: string;

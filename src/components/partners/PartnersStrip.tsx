@@ -77,25 +77,32 @@ export default function PartnersStrip() {
             ref={scrollRef}
             className="flex h-full items-center gap-1 overflow-x-auto hide-scrollbar"
           >
-            {partners.map((partner) => {
+            {partners.map((partner, idx) => {
               const name = t(`list.${partner.id}.name`);
+              // 前 4 张 logo 在移动端 hero (100vh) 内属于 fold-visible，是 LCP 候选。
+              // 默认 next/image loading="lazy" 会让 LCP 元素延迟加载（PageSpeed 标
+              // "应该应用 fetchpriority=high"），用 priority 改为 eager + fetchpriority=high
+              const isAboveFold = idx < 4;
               const logoImg = (
                 <Image
                   src={partner.logo}
                   alt={name}
                   width={180}
                   height={72}
-                  className={cn(
-                    'w-auto object-contain',
-                    // vataga 是纵向 logo，单独放大避免在 max-h 约束下宽度过窄
-                    partner.id === 'vataga'
-                      ? 'max-h-20 sm:max-h-28 md:max-h-32'
-                      : 'max-h-14 sm:max-h-20 md:max-h-24',
-                  )}
+                  priority={isAboveFold}
+                  className="h-full w-auto object-contain"
                 />
               );
-              const itemClass =
-                'flex flex-shrink-0 items-center justify-center px-2.5 py-3 opacity-80 transition-opacity duration-300 hover:opacity-100 sm:px-4 sm:py-4 md:px-5';
+              // 固定容器高度（vataga 是纵向 logo，单独放大）—— 避免图片真实 aspect ratio
+              // 加载完后撑开行高度引起 CLS（PageSpeed 实测移动端 CLS 0.277 主要源于此）
+              const heightClass =
+                partner.id === 'vataga'
+                  ? 'h-20 sm:h-28 md:h-32'
+                  : 'h-14 sm:h-20 md:h-24';
+              const itemClass = cn(
+                'flex flex-shrink-0 items-center justify-center px-2.5 py-3 opacity-80 transition-opacity duration-300 hover:opacity-100 sm:px-4 sm:py-4 md:px-5',
+                heightClass,
+              );
               // 无 url 的合作伙伴渲染为非可点击元素，避免 target=_blank 打开重复 tab
               return partner.url ? (
                 <a
