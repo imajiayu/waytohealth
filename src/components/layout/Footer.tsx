@@ -206,7 +206,7 @@ export default async function Footer() {
                 <div className="flex items-center justify-between border-t border-white/[0.06] pt-3 sm:pt-4">
                   <p className="text-xs text-white/50 sm:text-sm">{t('recipientCode')}</p>
                   <p className="text-sm text-white font-medium tracking-wide font-[family-name:var(--font-data)] sm:text-base">
-                    44947699
+                    44719925
                   </p>
                 </div>
               </div>

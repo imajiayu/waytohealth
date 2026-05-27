@@ -89,7 +89,7 @@ function organizationJsonLd(locale: string) {
     areaServed: { '@type': 'Country', name: 'Ukraine' },
     knowsLanguage: ['uk', 'en'],
     foundingDate: '2022-09-24',
-    taxID: '44947699',  // EDRPOU
+    taxID: '44719925',  // EDRPOU
     founder: [
       { '@type': 'Person', name: 'Mykyta Zhalin' },
       { '@type': 'Person', name: 'Oleksii Dubovyk' },
