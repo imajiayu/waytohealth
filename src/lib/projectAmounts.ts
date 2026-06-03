@@ -16,27 +16,32 @@ interface DbRow {
   updated_at: Date;
 }
 
-// 60s 缓存；admin 写入会 revalidateTag('project-amounts') 立刻失效
-export const getProjectAmountsList = unstable_cache(
+// 60s 缓存；admin 写入会 revalidateTag('project-amounts') 立刻失效。
+// try/catch 放外层：DB 抛错时 unstable_cache 不缓存空结果，下次请求会重试。
+const _getProjectAmountsList = unstable_cache(
   async (): Promise<ProjectAmountRow[]> => {
-    try {
-      const rows = (await sql`
-        SELECT project_id, raised_uah, updated_at
-        FROM project_amounts
-      `) as DbRow[];
-      return rows.map((r) => ({
-        projectId: r.project_id,
-        raised: Number(r.raised_uah),
-        updatedAt: r.updated_at.toISOString(),
-      }));
-    } catch (err) {
-      console.error('[projectAmounts:list]', err);
-      return [];
-    }
+    const rows = (await sql`
+      SELECT project_id, raised_uah, updated_at
+      FROM project_amounts
+    `) as DbRow[];
+    return rows.map((r) => ({
+      projectId: r.project_id,
+      raised: Number(r.raised_uah),
+      updatedAt: r.updated_at.toISOString(),
+    }));
   },
   ['project-amounts-all'],
   { revalidate: 60, tags: ['project-amounts'] },
 );
+
+export async function getProjectAmountsList(): Promise<ProjectAmountRow[]> {
+  try {
+    return await _getProjectAmountsList();
+  } catch (err) {
+    console.error('[projectAmounts:list]', err);
+    return [];
+  }
+}
 
 // 给前台用：projectId → 已筹金额（UAH 整数）
 export async function getAllProjectAmounts(): Promise<Map<number, number>> {
