@@ -14,8 +14,6 @@ import {
   DEFAULT_FROM_PREFIX,
   FROM_DISPLAY_NAME,
   FROM_DOMAIN,
-  isFromPrefix,
-  type FromPrefix,
 } from '@/lib/emailFrom';
 import EmailHistory from './EmailHistory';
 
@@ -38,7 +36,9 @@ export default function EmailPanel() {
   const [to, setTo] = useState('');
   const [replyTo, setReplyTo] = useState('');
   const [subject, setSubject] = useState('');
-  const [fromPrefix, setFromPrefix] = useState<FromPrefix>(DEFAULT_FROM_PREFIX);
+  const [prefixOption, setPrefixOption] = useState<string>(DEFAULT_FROM_PREFIX);
+  const [customPrefix, setCustomPrefix] = useState('');
+  const effectiveFromPrefix = prefixOption === '__other__' ? customPrefix.trim() : prefixOption;
 
   // custom 模式：admin 直接编辑纯文本正文；切换到 custom 时灌入当前模板的 text 作为编辑起点
   const [customText, setCustomText] = useState('');
@@ -121,9 +121,9 @@ export default function EmailPanel() {
     const common = {
       to,
       subject: subject.trim(),
-      fromPrefix,
+      fromPrefix: effectiveFromPrefix,
       ...(replyTo.trim() ? { replyTo: replyTo.trim() } : {}),
-    } as const;
+    };
 
     const res = mode === 'template'
       ? await sendEmailAction({ mode: 'template', templateId, ...common })
@@ -256,11 +256,8 @@ export default function EmailPanel() {
               <span className="text-gray-500">{FROM_DISPLAY_NAME} &lt;</span>
               <select
                 id="email-from-prefix"
-                value={fromPrefix}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (isFromPrefix(v)) setFromPrefix(v);
-                }}
+                value={prefixOption}
+                onChange={(e) => setPrefixOption(e.target.value)}
                 className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               >
                 {FROM_PREFIXES.map((p) => (
@@ -268,7 +265,24 @@ export default function EmailPanel() {
                     {p}
                   </option>
                 ))}
+                <option value="__other__">Other…</option>
               </select>
+              {prefixOption === '__other__' && (
+                <input
+                  type="text"
+                  aria-label="Custom sender prefix"
+                  value={customPrefix}
+                  onChange={(e) => {
+                    const filtered = e.target.value
+                      .replace(/[^a-zA-Z0-9._+\-]/g, '')
+                      .replace(/^[._+\-]+/, '');
+                    setCustomPrefix(filtered);
+                  }}
+                  placeholder="e.g. hello"
+                  maxLength={64}
+                  className="w-24 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-gray-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              )}
               <span className="text-gray-500">@{FROM_DOMAIN}&gt;</span>
             </div>
             <p className="mt-1 text-xs text-gray-400">
@@ -331,7 +345,7 @@ export default function EmailPanel() {
             <p className="mt-1 text-xs text-gray-400">
               Where recipient replies will go. Leave blank to route to the From address
               {' '}
-              (<code>{fromPrefix}@</code>).
+              (<code>{effectiveFromPrefix || DEFAULT_FROM_PREFIX}@</code>).
             </p>
           </div>
 
@@ -370,6 +384,7 @@ export default function EmailPanel() {
                 !to.trim() ||
                 !subject.trim() ||
                 subject.trim().length > MAX_SUBJECT_LEN ||
+                (prefixOption === '__other__' && !customPrefix.trim()) ||
                 (mode === 'template'
                   ? !templateId
                   : !customText.trim() || customText.length > MAX_TEXT_LEN)

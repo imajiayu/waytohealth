@@ -5,8 +5,8 @@ import {
   getResend,
   buildFromAddress,
   isFromPrefix,
+  isValidPrefixFormat,
   DEFAULT_FROM_PREFIX,
-  type FromPrefix,
 } from '@/lib/resend';
 import {
   listTemplates,
@@ -68,7 +68,7 @@ export async function previewEmailAction(
 interface SendCommon {
   to: string; // 原始字符串，服务端解析
   subject: string; // 必填
-  fromPrefix?: FromPrefix; // 发件人本地部分；未给 / 非法则回落到默认
+  fromPrefix?: string; // 发件人本地部分；未给 / 格式非法则回落到默认
   replyTo?: string;
 }
 
@@ -199,11 +199,11 @@ export async function sendEmailAction(
     text = customText;
   }
 
-  // 非白名单前缀直接拒绝；未传则回落到默认
-  if (input.fromPrefix !== undefined && !isFromPrefix(input.fromPrefix)) {
+  // 白名单前缀直接通过；自定义前缀校验格式（Resend 会进一步校验域名是否已验证）
+  if (input.fromPrefix !== undefined && !isFromPrefix(input.fromPrefix) && !isValidPrefixFormat(input.fromPrefix)) {
     return { ok: false, error: `Invalid from prefix: ${String(input.fromPrefix)}` };
   }
-  const prefix: FromPrefix = input.fromPrefix ?? DEFAULT_FROM_PREFIX;
+  const prefix: string = input.fromPrefix ?? DEFAULT_FROM_PREFIX;
 
   let resend: ReturnType<typeof getResend>;
   let from: string;

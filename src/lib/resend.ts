@@ -6,7 +6,9 @@ export {
   FROM_DOMAIN,
   FROM_PREFIXES,
   DEFAULT_FROM_PREFIX,
+  PREFIX_RE,
   isFromPrefix,
+  isValidPrefixFormat,
   buildFromAddress,
   type FromPrefix,
 } from './emailFrom';

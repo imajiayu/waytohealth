@@ -206,7 +206,7 @@ Admin 后台 `/admin/email`：手动输入收件人 + 两种发送模式 + 预�
 
 **UI**（`src/components/admin/EmailPanel.tsx`）：左栏表单（收件人 textarea / Template ↔ Custom segmented control / 模板下拉 *或* 纯文本 body textarea / From 前缀下拉 / Subject + reply-to）+ 右栏预览：template 模式走 iframe srcDoc（`sandbox="allow-same-origin"`），custom 模式走 `<pre>` 实时回显纯文本（无 iframe，无 HTML 插值面）。切到 custom 模式时若 body textarea 还空，会把当前模板的 text 灌入作为编辑起点。底部 `EmailHistory` 拉 Resend `emails.list({ limit: 100 })`，发送成功后 `refreshKey` bump 自动刷新。
 
-**发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'head', 'support', 'news', 'noreply']`，admin UI 下拉选择（默认 `info`），`buildFromAddress(prefix)` 拼成完整 from 串。故意不开"任意前缀"：从域名维度看 from 集合是封闭的，custom 模式只放开内容，不放开身份。所有可选前缀的本地邮箱（`info@` / `head@` / `support@` / `news@` / `noreply@`）域名必须已经在 Resend 控制台验证通过，否则 send 会 403。Inbound webhook 转发显式走 `noreply`（不复用 admin 默认）。
+**发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'head', 'support', 'news', 'noreply', 'Ekaterina.Karpenko', 'Yaroslav.Tretiakov']`，admin UI 下拉选择（默认 `info`）。下拉末尾还有 **Other…** 选项，选中后出现文本输入框，admin 可输入任意合法前缀（RFC 5321：字母/数字开头，允许 `. _ + -`，最长 64 字符；输入框通过 `onChange` 实时过滤，不合法字符无法输入）。`buildFromAddress(prefix)` 拼成完整 from 串。Inbound webhook 转发显式走 `noreply`（不复用 admin 默认）。注意：白名单预设前缀和自定义前缀对应的邮箱地址都需已在 Resend 控制台完成域名验证，否则 send 会 403（Resend 按域名级验证，`waytohealth.org.ua` 验证后该域下任意前缀均可发送）。
 
 ### Inbound 邮件转发（catch-all → Gmail）
 
@@ -242,7 +242,7 @@ RESEND_WEBHOOK_SECRET=            # Inbound 邮件 webhook 签名密钥，见上
 FORWARD_TO_EMAIL=                 # Inbound 邮件转发目标 Gmail，见上文 Inbound 小节
 ```
 
-> 发件人地址不走 env —— display name / 域名 / 可用前缀都在 `src/lib/emailFrom.ts` 定义。admin 发信时从白名单下拉选前缀。
+> 发件人地址不走 env —— display name / 域名 / 可用前缀都在 `src/lib/emailFrom.ts` 定义。admin 发信时从下拉选前缀（预设白名单或 Other… 自定义输入）。
 
 ---
 
