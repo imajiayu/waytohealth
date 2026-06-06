@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
-import { getTranslations, getLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import TermsTOC from '@/components/terms/TermsTOC';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = toLocale(await getLocale());
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: 'metadata' });
   const title = t('publicAgreementsTitle');
   const description = t('publicAgreementsDescription');
@@ -151,7 +153,8 @@ const SECTION_INDEX_MARKERS = [
   '08', '09', '10', '11', '12', '13', '14',
 ] as const;
 
-export default async function PublicAgreementsPage() {
+export default async function PublicAgreementsPage({ params }: Props) {
+  setRequestLocale(toLocale((await params).locale));
   const t = await getTranslations('publicAgreementPage');
 
   /* 构造目录数据 — 13 节正文 + 联系信息节 */

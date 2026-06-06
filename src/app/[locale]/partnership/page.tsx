@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import PartnershipForm from '@/components/forms/PartnershipForm';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = toLocale(await getLocale());
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: 'forms.partnership.meta' });
   const title = t('title');
   const description = t('description');
@@ -19,8 +21,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function PartnershipPage() {
-  const locale = toLocale(await getLocale());
+export default async function PartnershipPage({ params }: Props) {
+  const locale = toLocale((await params).locale);
+  setRequestLocale(locale);
   const t = await getTranslations('forms.partnership');
 
   return (

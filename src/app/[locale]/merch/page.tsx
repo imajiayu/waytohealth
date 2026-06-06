@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = toLocale(await getLocale());
-  const t = await getTranslations('metadata');
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  const t = await getTranslations({ locale, namespace: 'metadata' });
   const title = t('merchTitle');
   const description = t('merchDescription');
   return {
@@ -18,7 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // TODO: 当前为 Coming Soon 占位页，后续接入周边商品列表 + Stripe Product
-export default async function MerchPage() {
+export default async function MerchPage({ params }: Props) {
+  setRequestLocale(toLocale((await params).locale));
   const t = await getTranslations('navigation');
   const tPages = await getTranslations('pages');
 

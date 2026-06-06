@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { toLocale } from '@/i18n/config';
@@ -8,7 +9,11 @@ import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import Image from 'next/image';
 import { triggerRouteChange } from './LoadingBar';
 import LocaleSwitcher from './LocaleSwitcher';
-import MobileMenuPanel from './MobileMenuPanel';
+
+// 移动菜单面板离屏常驻（靠 translate-x 切换），不进 SSR 内容也不影响首屏渲染。
+// 用 dynamic(ssr:false) 把它和它依赖的 focus-trap-react 移出初始 bundle，改为
+// hydration 后异步加载 —— 桌面端从不打开菜单，移动端首次点击前也无需这段 JS。
+const MobileMenuPanel = dynamic(() => import('./MobileMenuPanel'), { ssr: false });
 
 export default function Navigation() {
   const t = useTranslations('navigation');

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { fontVariables } from '@/app/fonts';
@@ -17,6 +17,14 @@ type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 };
+
+// 预生成两个 locale 段，配合各页 setRequestLocale 让前台走静态/ISR 渲染。
+// 缺了它整站被 next-intl 判定为 dynamic（响应头 no-store）—— 既禁用了浏览器
+// BFCache，HTML 也完全不进 Vercel CDN，且让 unstable_cache/revalidateTag 的
+// ISR 基建形同虚设。
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: rawLocale } = await params;
@@ -104,6 +112,9 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
     notFound();
   }
+
+  // 启用静态渲染：把 locale 写入请求级缓存，后续 getTranslations 无需读 headers
+  setRequestLocale(locale);
 
   const messages = (await import(`../../../messages/${locale}.json`)).default;
   const jsonLd = organizationJsonLd(locale);

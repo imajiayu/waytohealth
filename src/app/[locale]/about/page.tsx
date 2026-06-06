@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import fs from 'node:fs';
 import path from 'node:path';
 import { cache } from 'react';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import VideoStory from '@/components/about/VideoStory';
@@ -86,6 +86,7 @@ function toViewerLabels(v: unknown): ViewerLabels {
 
 export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations('aboutPage');
 
   // 视频托管在 Vercel Blob ── 所有环境（含 dev）统一从公开 CDN 拉取，

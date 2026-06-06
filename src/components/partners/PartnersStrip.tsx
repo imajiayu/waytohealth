@@ -79,10 +79,13 @@ export default function PartnersStrip() {
           >
             {partners.map((partner, idx) => {
               const name = t(`list.${partner.id}.name`);
-              // 前 4 张 logo 在移动端 hero (100vh) 内属于 fold-visible，是 LCP 候选。
+              // 首屏可见 logo 是 LCP 候选（hero 无大图，最大可见图就是这条 logo 带）。
               // 默认 next/image loading="lazy" 会让 LCP 元素延迟加载（PageSpeed 标
-              // "应该应用 fetchpriority=high"），用 priority 改为 eager + fetchpriority=high
-              const isAboveFold = idx < 4;
+              // "应该应用 fetchpriority=high"），用 priority 改为 eager + fetchpriority=high。
+              // 桌面宽屏首屏内可见约 6~7 个 logo（移动端仅 2~3 个），阈值取 8 覆盖桌面
+              // fold —— Lighthouse desktop 实测 LCP logo 落在第 4 个之后仍被 lazy。logo 体积
+              // 极小（数 KB），多 eager 几个对带宽无压力。
+              const isAboveFold = idx < 8;
               const logoImg = (
                 <Image
                   src={partner.logo}

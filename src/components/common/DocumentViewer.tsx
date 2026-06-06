@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DOMPurify from 'isomorphic-dompurify';
 import { FileSpreadsheet, FileText, X, Download, Maximize2 } from 'lucide-react';
 
 export interface ViewerDocument {
@@ -43,8 +42,13 @@ function ExcelPreview({ url, errorMessage }: { url: string; errorMessage: string
 
     async function loadExcel() {
       try {
-        // 并行：按需下载 xlsx 运行时（从主 bundle 分离）与获取文件
-        const [XLSX, res] = await Promise.all([import('xlsx'), fetch(url)]);
+        // 并行：按需下载 xlsx 运行时 + DOMPurify（都从 DocumentViewer chunk 分离，
+        // 仅在真正打开 xlsx 时才拉）与获取文件
+        const [XLSX, { default: DOMPurify }, res] = await Promise.all([
+          import('xlsx'),
+          import('isomorphic-dompurify'),
+          fetch(url),
+        ]);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const buf = await res.arrayBuffer();
         const wb = XLSX.read(buf, { type: 'array' });

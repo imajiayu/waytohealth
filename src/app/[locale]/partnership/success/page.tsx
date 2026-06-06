@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CheckCircle2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { toLocale } from '@/i18n/config';
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function PartnershipSuccessPage() {
+type Props = { params: Promise<{ locale: string }> };
+
+export default async function PartnershipSuccessPage({ params }: Props) {
+  setRequestLocale(toLocale((await params).locale));
   const t = await getTranslations('forms.partnership.success');
 
   return (

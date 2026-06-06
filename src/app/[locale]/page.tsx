@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import HeroSection from '@/components/home/HeroSection';
@@ -8,9 +8,11 @@ import ProjectsSection from '@/components/home/ProjectsSection';
 import NewsSection from '@/components/home/NewsSection';
 import AboutSection from '@/components/home/AboutSection';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = toLocale(await getLocale());
-  const t = await getTranslations('metadata');
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
+  const t = await getTranslations({ locale, namespace: 'metadata' });
   const title = t('homeTitle');
   const description = t('homeDescription');
   return {
@@ -22,7 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function HomePage() {
+export default async function HomePage({ params }: Props) {
+  setRequestLocale(toLocale((await params).locale));
   return (
     <>
       {/* Hero — 全屏沉浸式首图（含 Partners 滚动条） */}

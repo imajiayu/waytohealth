@@ -53,12 +53,13 @@ export default async function ProjectCard({ id, data, cover, index, compact, ski
         href={`/projects?id=${id}`}
         className="group relative block aspect-[4/5] overflow-hidden rounded-xl"
       >
+        {/* alt="" 装饰图：标题在图上叠加可见，给 alt 会与可见标题重复（Lighthouse redundant-alt） */}
         <Image
           src={cover}
-          alt={title}
+          alt=""
           fill
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          sizes="(max-width: 1024px) 33vw, 20vw"
         />
         {/* 底部渐变遮罩 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
@@ -94,9 +95,10 @@ export default async function ProjectCard({ id, data, cover, index, compact, ski
     >
       {/* 封面图 — 8:5 宽幅比例 */}
       <div className="relative aspect-[8/5] w-full overflow-hidden">
+        {/* alt="" 装饰图：标题在卡片内紧邻可见（下方 h3），给 alt 会重复（Lighthouse redundant-alt） */}
         <Image
           src={cover}
-          alt={title}
+          alt=""
           fill
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

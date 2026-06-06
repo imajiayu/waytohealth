@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
-import { getTranslations, getLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { toLocale } from '@/i18n/config';
 import { buildAlternates, buildOpenGraph, buildTwitter } from '@/lib/seo';
 import TermsTOC from '@/components/terms/TermsTOC';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = toLocale(await getLocale());
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = toLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: 'metadata' });
   const title = t('termsTitle');
   const description = t('termsDescription');
@@ -32,7 +34,8 @@ const SECTIONS = [
 /* 装饰性大数字索引（hero 右侧显示） */
 const SECTION_INDEX_MARKERS = ['01', '02', '03', '04', '05', '06', '07'] as const;
 
-export default async function TermsPage() {
+export default async function TermsPage({ params }: Props) {
+  setRequestLocale(toLocale((await params).locale));
   const t = await getTranslations('termsPage');
 
   /* 构造目录数据 — 包含正文 6 节 + 联系信息节 */

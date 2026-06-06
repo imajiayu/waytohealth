@@ -83,6 +83,8 @@ export default async function AboutSection() {
             {/* 装饰色块 — 照片后方向左下偏移，呼应左下金光的视觉重心 */}
             <div className="absolute -bottom-4 -left-4 h-full w-full rounded-2xl gradient-brand opacity-10" />
             <div className="relative overflow-hidden rounded-2xl">
+              {/* 不加 priority：AboutSection 是首页第 4 个区块，稳在折叠下方，默认 lazy 即可，
+                  避免 Lighthouse "defer offscreen images"（约 45 KiB） */}
               <Image
                 src="/images/about-team.webp"
                 alt={t('title')}
@@ -90,7 +92,6 @@ export default async function AboutSection() {
                 height={900}
                 className="h-auto w-full"
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
               />
               {/* 底部渐变遮罩 — 增加层次感 */}
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent" />

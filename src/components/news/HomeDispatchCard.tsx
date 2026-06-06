@@ -41,6 +41,9 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
   return (
     <Link
       href={`/news#news-${item.id}`}
+      // 整张卡是单一链接，accessible name 取标题（简洁）。卡内日期戳 / +N / 正文摘要 /
+      // Read on 都标 aria-hidden，让标题成为唯一对 AT 可见的文本 —— 否则可见文本多于
+      // aria-label，触发 Lighthouse label-content-name-mismatch (WCAG 2.5.3)。
       aria-label={title || 'Dispatch'}
       className="group relative flex h-full flex-col overflow-hidden rounded-[20px] border border-gray-200/60 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all duration-500 hover:-translate-y-0.5 hover:border-gray-300/70 hover:shadow-[0_10px_24px_-12px_rgba(0,108,178,0.25)]"
     >
@@ -67,7 +70,7 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
 
         {/* 右上:多图角标 */}
         {extras > 0 && (
-          <div className="absolute right-4 top-4 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-md">
+          <div aria-hidden className="absolute right-4 top-4 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-md">
             +{extras}
           </div>
         )}
@@ -77,7 +80,7 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
           {/* 细金线 */}
           <div aria-hidden className="mb-3 h-px w-full bg-gradient-to-r from-ukraine-gold-500/70 via-white/25 to-transparent" />
 
-          <div className="flex items-baseline justify-end gap-1.5 text-white">
+          <div aria-hidden className="flex items-baseline justify-end gap-1.5 text-white">
             <span className="font-[family-name:var(--font-accent)] text-[2.1rem] font-bold leading-[0.85] tracking-[-0.02em]">
               {day}
             </span>
@@ -96,13 +99,13 @@ export default async function HomeDispatchCard({ item, locale }: HomeDispatchCar
           </h3>
         )}
 
-        <p className="mt-2 text-[13.5px] leading-[1.55] text-gray-500 line-clamp-3">
+        <p aria-hidden className="mt-2 text-[13.5px] leading-[1.55] text-gray-500 line-clamp-3">
           {body}
         </p>
 
         {/* Read on 行 */}
         <div className="mt-auto flex items-center justify-between pt-5">
-          <span className="relative font-[family-name:var(--font-data)] text-[10.5px] font-semibold uppercase tracking-[0.26em] text-gray-400 transition-colors duration-300 group-hover:text-ukraine-blue-600">
+          <span aria-hidden className="relative font-[family-name:var(--font-data)] text-[10.5px] font-semibold uppercase tracking-[0.26em] text-gray-400 transition-colors duration-300 group-hover:text-ukraine-blue-600">
             {t('readOn')}
             <span aria-hidden className="absolute -bottom-1 left-0 h-[2px] w-0 rounded-full bg-ukraine-gold-500 transition-[width] duration-500 group-hover:w-full" />
           </span>
