@@ -415,7 +415,6 @@ const t = useTranslations('namespace')
   - `ambient-canvas` — main 容器的连续天光氛围（渐变主背景 + ::before noise 叠层）
   - `animate-hero-title` / `animate-hero-cta` — Hero 专属入场动画（错峰触发）
   - `animate-panel-forward` / `animate-panel-backward` — DonationSidebar 多视图状态机切换动画
-  - `animate-rate-pop` — EUR 换算徽章出现动效
   - `gradient-brand-deep` — 深色 CTA 卡片（白字高对比）
   - `gradient-brand-circle` — 品牌圆形渐变（RecoveryJourney 小圆球图标）
   - `text-stroke-gold` — 金色半透明描边文字（about 大字装饰）

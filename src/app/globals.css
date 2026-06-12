@@ -48,7 +48,7 @@ html {
    * 需要平滑滚动的场景（锚点跳转等）请在 JS 中用 behavior: 'smooth' 局部指定。
    */
   /* --font-display 别名到 --font-body: 标题和正文都用 Fixel Text,
-   * 由 font-weight 区分层级 (正文 400/500,标题 700/800)
+   * 由 font-weight 区分层级 (正文 400/500,标题 600/700; ExtraBold 已刻意移除)
    */
   --font-display: var(--font-body);
   /* 导航栏高度 (h-14 = 56px) + 外边距 (mt-[2px] + py-2px = 8px) + Hero 外 pt-2 (8px) */
@@ -301,25 +301,6 @@ body {
 
 .animate-panel-backward {
   animation: panel-backward-in 300ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
-}
-
-/* StripeView 中 EUR 换算标签的入场：稍晚于主 pill，轻微 overshoot 强调"换算结果" */
-@keyframes rate-pop {
-  0% {
-    opacity: 0;
-    transform: translateX(-6px) scale(0.88);
-  }
-  60% {
-    transform: translateX(0) scale(1.04);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-.animate-rate-pop {
-  animation: rate-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 140ms both;
 }
 
 /* Excel 预览表格样式 */

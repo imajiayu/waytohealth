@@ -27,10 +27,13 @@ interface PageProps {
 }
 
 export default async function NewsPage({ searchParams }: PageProps) {
-  const tNav = await getTranslations('navigation');
-  const tNews = await getTranslations('news');
-  const locale = toLocale(await getLocale());
-  const items = await getAllNews();
+  const [tNav, tNews, rawLocale, items] = await Promise.all([
+    getTranslations('navigation'),
+    getTranslations('news'),
+    getLocale(),
+    getAllNews(),
+  ]);
+  const locale = toLocale(rawLocale);
 
   const { tag: rawTag } = await searchParams;
   // ?tag=a&tag=b 时 Next.js 会给 string[]，取第一个即可

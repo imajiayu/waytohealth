@@ -64,6 +64,117 @@ function isStat(s: unknown): s is Stat {
   return typeof o.value === 'string' && typeof o.label === 'string';
 }
 
+type Accent = (typeof ENTRY_ACCENT)[number];
+
+/* ── 4 张卡片的差异化 body 渲染器（与卡片序号一一对应）────────────── */
+
+// Card 0 · Recovery Support —— 数据 tag 型：
+// - mobile / sm / md：chip 风格 flex-wrap，紧凑
+// - lg+：切到竖排全宽 tinted 块（每行一项 + 大字号 + 大间距），
+//   把左列与右列高差吃掉，避免 mt-auto 留出过大空白
+function renderChipsBody(item: AchievementItem, accent: Accent) {
+  return (
+    <>
+      <p className="mt-3 text-[0.92rem] leading-[1.6] text-gray-600">{item.text}</p>
+      {item.list && (
+        <ul className="mt-4 flex flex-wrap gap-1.5 lg:mt-4 lg:flex-col lg:flex-nowrap lg:gap-1">
+          {item.list.map(li => (
+            <li
+              key={li}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.78rem] font-medium leading-none lg:flex lg:w-full lg:gap-2.5 lg:rounded-md lg:px-3.5 lg:py-1.5 lg:text-[0.85rem] lg:leading-tight"
+              style={{ background: accent.soft, color: accent.eyebrow }}
+            >
+              <span
+                aria-hidden
+                className="h-1 w-1 shrink-0 rounded-full"
+                style={{ background: accent.dot }}
+              />
+              {li}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+// Card 1 · Ambulance —— 叙事 lead 型：首段 italic + 略大字号 + 较深字色，
+// 后续段统一 body 字号；不混用衬线字体（PT Serif 仅做装饰性点缀）
+function renderLeadBody(item: AchievementItem) {
+  const paragraphs = item.text.split('\n\n').filter(Boolean);
+  return paragraphs.map((para, pi) => (
+    <p
+      key={pi}
+      className={
+        pi === 0
+          ? 'mt-3 text-[0.98rem] italic leading-[1.65] text-ukraine-blue-900 sm:mt-4 sm:text-[1.02rem]'
+          : 'mt-3 text-[0.92rem] leading-[1.65] text-gray-600'
+      }
+    >
+      {para}
+    </p>
+  ));
+}
+
+// Card 2 · Humanitarian —— 行动分块型：双段独立 panel，左 accent bar + 软色背景
+function renderPanelsBody(item: AchievementItem, accent: Accent) {
+  const paragraphs = item.text.split('\n\n').filter(Boolean);
+  return (
+    <div className="mt-4 space-y-2.5">
+      {paragraphs.map((para, pi) => (
+        <div
+          key={pi}
+          className="rounded-r-lg border-l-[3px] py-2.5 pl-4 pr-3"
+          style={{ borderColor: accent.dot, background: accent.soft }}
+        >
+          <p className="text-[0.9rem] leading-[1.55] text-gray-700">{para}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Card 3 · International —— KPI 卡片型：italic lead + 2 个大数字 stat 块。
+// lead 用默认 body 字体的 italic（不切到 PT Serif）
+function renderStatsBody(item: AchievementItem, accent: Accent) {
+  return (
+    <>
+      <p className="mt-3 text-[0.96rem] italic leading-[1.6] text-ukraine-blue-900 sm:mt-4 sm:text-[1rem]">
+        {item.text}
+      </p>
+      {item.stats && (
+        <dl className="mt-5 grid grid-cols-2 gap-3">
+          {item.stats.map(s => (
+            <div
+              key={s.value}
+              className="rounded-lg p-3.5 ring-1 ring-ukraine-blue-100/70"
+              style={{ background: accent.soft }}
+            >
+              <dt
+                className="font-[family-name:var(--font-data)] text-[1.75rem] font-bold leading-none sm:text-[2rem]"
+                style={{ color: accent.eyebrow }}
+              >
+                {s.value}
+              </dt>
+              <dd className="mt-2 text-[0.78rem] leading-snug text-gray-600">
+                {s.label}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </>
+  );
+}
+
+// 序号 → body 渲染器查表；与 ENTRY_ACCENT / IMAGE_DIMENSIONS 同序
+const BODY_RENDERERS: Array<(item: AchievementItem, accent: Accent) => React.ReactNode> = [
+  renderChipsBody,
+  renderLeadBody,
+  renderPanelsBody,
+  renderStatsBody,
+];
+
 // 渲染单条 achievement 的内部内容（不含外层 <li> / <article> 包装），
 // 这样既能给 sm+ 的 <ol> 用，又能给移动端 switcher panel 用
 function renderInner(
@@ -72,8 +183,6 @@ function renderInner(
   accent: (typeof ENTRY_ACCENT)[number],
   dim: { width: number; height: number } | undefined,
 ) {
-  const paragraphs = item.text.split('\n\n').filter(Boolean);
-
   return (
     <>
       {/* 图片 —— 真实比例展示 */}
@@ -121,96 +230,8 @@ function renderInner(
         {item.title}
       </h4>
 
-      {/* body —— 4 张卡片差异化样式 */}
-      {i === 0 && (
-        /* Card 0 · Recovery Support —— 数据 tag 型：
-           - mobile / sm / md：chip 风格 flex-wrap，紧凑
-           - lg+：切到竖排全宽 tinted 块（每行一项 + 大字号 + 大间距），
-             把左列与右列高差吃掉，避免 mt-auto 留出过大空白 */
-        <>
-          <p className="mt-3 text-[0.92rem] leading-[1.6] text-gray-600">{item.text}</p>
-          {item.list && (
-            <ul className="mt-4 flex flex-wrap gap-1.5 lg:mt-4 lg:flex-col lg:flex-nowrap lg:gap-1">
-              {item.list.map(li => (
-                <li
-                  key={li}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.78rem] font-medium leading-none lg:flex lg:w-full lg:gap-2.5 lg:rounded-md lg:px-3.5 lg:py-1.5 lg:text-[0.85rem] lg:leading-tight"
-                  style={{ background: accent.soft, color: accent.eyebrow }}
-                >
-                  <span
-                    aria-hidden
-                    className="h-1 w-1 shrink-0 rounded-full"
-                    style={{ background: accent.dot }}
-                  />
-                  {li}
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
-      )}
-
-      {i === 1 &&
-        /* Card 1 · Ambulance —— 叙事 lead 型：首段 italic + 略大字号 + 较深字色，
-           后续段统一 body 字号；不混用衬线字体（PT Serif 仅做装饰性点缀） */
-        paragraphs.map((para, pi) => (
-          <p
-            key={pi}
-            className={
-              pi === 0
-                ? 'mt-3 text-[0.98rem] italic leading-[1.65] text-ukraine-blue-900 sm:mt-4 sm:text-[1.02rem]'
-                : 'mt-3 text-[0.92rem] leading-[1.65] text-gray-600'
-            }
-          >
-            {para}
-          </p>
-        ))}
-
-      {i === 2 && (
-        /* Card 2 · Humanitarian —— 行动分块型：双段独立 panel，左 accent bar + 软色背景 */
-        <div className="mt-4 space-y-2.5">
-          {paragraphs.map((para, pi) => (
-            <div
-              key={pi}
-              className="rounded-r-lg border-l-[3px] py-2.5 pl-4 pr-3"
-              style={{ borderColor: accent.dot, background: accent.soft }}
-            >
-              <p className="text-[0.9rem] leading-[1.55] text-gray-700">{para}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {i === 3 && (
-        /* Card 3 · International —— KPI 卡片型：italic lead + 2 个大数字 stat 块。
-           lead 用默认 body 字体的 italic（不切到 PT Serif） */
-        <>
-          <p className="mt-3 text-[0.96rem] italic leading-[1.6] text-ukraine-blue-900 sm:mt-4 sm:text-[1rem]">
-            {item.text}
-          </p>
-          {item.stats && (
-            <dl className="mt-5 grid grid-cols-2 gap-3">
-              {item.stats.map(s => (
-                <div
-                  key={s.value}
-                  className="rounded-lg p-3.5 ring-1 ring-ukraine-blue-100/70"
-                  style={{ background: accent.soft }}
-                >
-                  <dt
-                    className="font-[family-name:var(--font-data)] text-[1.75rem] font-bold leading-none sm:text-[2rem]"
-                    style={{ color: accent.eyebrow }}
-                  >
-                    {s.value}
-                  </dt>
-                  <dd className="mt-2 text-[0.78rem] leading-snug text-gray-600">
-                    {s.label}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </>
-      )}
+      {/* body —— 4 张卡片差异化样式，按序号查表 */}
+      {BODY_RENDERERS[i]?.(item, accent)}
     </>
   );
 }

@@ -99,11 +99,6 @@ export async function submitAssistanceRequestAction(formData: FormData): Promise
     return { ok: false, error: 'invalid', fields: invalid };
   }
 
-  const ip = await getClientIp();
-  if (!(await checkFormRateLimit('assist', ip))) {
-    return { ok: false, error: 'rate_limited' };
-  }
-
   const data: AssistanceRequestData = {
     fullName,
     phone,
@@ -117,10 +112,14 @@ export async function submitAssistanceRequestAction(formData: FormData): Promise
   };
 
   try {
+    const ip = await getClientIp();
+    if (!(await checkFormRateLimit('assist', ip))) {
+      return { ok: false, error: 'rate_limited' };
+    }
     const id = await insertAssistanceRequest({ locale, data });
     return { ok: true, id };
   } catch (err) {
-    console.error('[requests:assistance] insert failed', err);
+    console.error('[requests:assistance] submit failed', err);
     return { ok: false, error: 'server_error' };
   }
 }
@@ -165,11 +164,6 @@ export async function submitPartnershipRequestAction(formData: FormData): Promis
     return { ok: false, error: 'invalid', fields: invalid };
   }
 
-  const ip = await getClientIp();
-  if (!(await checkFormRateLimit('partner', ip))) {
-    return { ok: false, error: 'rate_limited' };
-  }
-
   const data: PartnershipRequestData = {
     orgName,
     contactName,
@@ -188,10 +182,14 @@ export async function submitPartnershipRequestAction(formData: FormData): Promis
   };
 
   try {
+    const ip = await getClientIp();
+    if (!(await checkFormRateLimit('partner', ip))) {
+      return { ok: false, error: 'rate_limited' };
+    }
     const id = await insertPartnershipRequest({ locale, data });
     return { ok: true, id };
   } catch (err) {
-    console.error('[requests:partnership] insert failed', err);
+    console.error('[requests:partnership] submit failed', err);
     return { ok: false, error: 'server_error' };
   }
 }

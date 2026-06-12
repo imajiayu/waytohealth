@@ -1,10 +1,11 @@
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { type Locale } from '@/i18n/config';
+import { toLocale } from '@/i18n/config';
 import { type ProjectWithRaised } from '@/data/projects';
 import { ArrowUpRight } from 'lucide-react';
 import FadeInOnView from '@/components/common/FadeInOnView';
+import { formatCompactAmount } from './donation/utils';
 
 interface ProjectCardProps {
   id: number;
@@ -15,26 +16,12 @@ interface ProjectCardProps {
   skipFadeIn?: boolean; // 跳过外层 FadeInOnView 包裹（在自带切换动画的容器中使用，避免动画叠加）
 }
 
-// 格式化金额：紧凑显示大数字
-function formatAmount(amount: number, currency: string) {
-  const symbol = currency === 'UAH' ? '₴' : currency;
-  if (amount >= 1_000_000) {
-    const m = amount / 1_000_000;
-    return `${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M ${symbol}`;
-  }
-  if (amount >= 1_000) {
-    const k = amount / 1_000;
-    return `${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K ${symbol}`;
-  }
-  return `${amount.toLocaleString('en-US')} ${symbol}`;
-}
-
 export default async function ProjectCard({ id, data, cover, index, compact, skipFadeIn }: ProjectCardProps) {
   const [t, rawLocale] = await Promise.all([
     getTranslations('projects'),
     getLocale(),
   ]);
-  const locale: Locale = rawLocale === 'en' ? 'en' : 'ua';
+  const locale = toLocale(rawLocale);
 
   const title = data.title[locale];
   const description = data.description[locale];
@@ -142,15 +129,15 @@ export default async function ProjectCard({ id, data, cover, index, compact, ski
             {data.goal_amount ? (
               <div className="flex items-baseline gap-1.5">
                 <span className="font-[family-name:var(--font-data)] text-sm font-semibold text-ukraine-blue-500">
-                  {formatAmount(data.raised_amount, data.currency)}
+                  {formatCompactAmount(data.raised_amount, data.currency)}
                 </span>
                 <span className="font-[family-name:var(--font-data)] text-xs text-gray-400">
-                  / {formatAmount(data.goal_amount, data.currency)}
+                  / {formatCompactAmount(data.goal_amount, data.currency)}
                 </span>
               </div>
             ) : (
               <span className="font-[family-name:var(--font-data)] text-sm font-semibold text-ukraine-blue-500">
-                {formatAmount(data.raised_amount, data.currency)} {t('raised')}
+                {formatCompactAmount(data.raised_amount, data.currency)} {t('raised')}
               </span>
             )}
 

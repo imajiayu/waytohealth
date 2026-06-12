@@ -1,7 +1,8 @@
 'use client';
 
-import { Children, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { Children, useId, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { useMobileTabs } from '@/hooks/useMobileTabs';
 
 export interface MobileTabItem {
   /** 唯一 key */
@@ -45,30 +46,8 @@ export default function MobileTabSwitcher({
   const cards = Children.toArray(children);
   const count = cards.length;
 
-  const [active, setActive] = useState(0);
-  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const didMountRef = useRef(false);
+  const { active, direction, go, tabRefs } = useMobileTabs(count);
   const baseId = useId();
-
-  const go = useCallback(
-    (next: number) => {
-      if (next === active || next < 0 || next >= count) return;
-      setDirection(next > active ? 'forward' : 'backward');
-      setActive(next);
-    },
-    [active, count],
-  );
-
-  // 激活项自动居中到视口
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    const el = tabRefs.current[active];
-    el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  }, [active]);
 
   return (
     <div>

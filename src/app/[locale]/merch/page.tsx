@@ -22,8 +22,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // TODO: 当前为 Coming Soon 占位页，后续接入周边商品列表 + Stripe Product
 export default async function MerchPage({ params }: Props) {
   setRequestLocale(toLocale((await params).locale));
-  const t = await getTranslations('navigation');
-  const tPages = await getTranslations('pages');
+  const [t, tPages] = await Promise.all([
+    getTranslations('navigation'),
+    getTranslations('pages'),
+  ]);
 
   return (
     <div className="container-page section-y">

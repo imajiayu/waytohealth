@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { toLocale } from '@/i18n/config';
 import { type ProjectWithRaised } from '@/data/projects';
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { formatCompactAmount } from './donation/utils';
 
 interface ProjectStripItem {
   id: number;
@@ -16,26 +17,6 @@ interface ProjectStripItem {
 interface ProjectStripProps {
   projects: ProjectStripItem[];
   currentId: number;
-}
-
-// 格式化金额：紧凑显示大数字
-function formatAmount(amount: number, currency: string) {
-  if (amount >= 1_000_000) {
-    const millions = amount / 1_000_000;
-    const formatted = millions % 1 === 0 ? millions.toFixed(0) : millions.toFixed(1);
-    return `${formatted}M ${currency === 'UAH' ? '₴' : currency}`;
-  }
-  if (amount >= 1_000) {
-    const thousands = amount / 1_000;
-    const formatted = thousands % 1 === 0 ? thousands.toFixed(0) : thousands.toFixed(1);
-    return `${formatted}K ${currency === 'UAH' ? '₴' : currency}`;
-  }
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 function formatGoal(amount: number, currency: string) {
@@ -219,7 +200,7 @@ export default function ProjectStrip({ projects, currentId }: ProjectStripProps)
                       </div>
                       <div className="mt-2 flex items-baseline justify-between">
                         <span className="font-[family-name:var(--font-data)] text-xs font-semibold text-ukraine-blue-500">
-                          {formatAmount(project.data.raised_amount, project.data.currency)}
+                          {formatCompactAmount(project.data.raised_amount, project.data.currency)}
                         </span>
                         <span className="font-[family-name:var(--font-data)] text-[10px] text-gray-400">
                           {t('goalOf')} {formatGoal(project.data.goal_amount, project.data.currency)}

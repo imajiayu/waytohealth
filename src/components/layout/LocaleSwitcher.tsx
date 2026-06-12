@@ -4,13 +4,13 @@ import { useTransition } from 'react';
 import { useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useRouter, usePathname } from '@/i18n/navigation';
-import { type Locale } from '@/i18n/config';
+import { toLocale, type Locale } from '@/i18n/config';
 import { triggerRouteChange } from './LoadingBar';
 
 // UA / EN 双向切换胶囊，保留当前 path + query。
 export default function LocaleSwitcher() {
   const rawLocale = useLocale();
-  const locale: Locale = rawLocale === 'en' ? 'en' : 'ua';
+  const locale = toLocale(rawLocale);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

@@ -36,16 +36,18 @@ export async function saveProjectAmountsAction(
   }
 
   try {
-    // Neon HTTP driver 无事务；每行独立 UPSERT，行间错误概率极低且互不影响
-    for (const u of updates) {
-      await sql`
-        INSERT INTO project_amounts (project_id, raised_uah, updated_at)
-        VALUES (${u.projectId}, ${Math.floor(u.raisedUah)}, NOW())
-        ON CONFLICT (project_id) DO UPDATE
-          SET raised_uah = EXCLUDED.raised_uah,
-              updated_at = NOW()
-      `;
-    }
+    // Neon HTTP driver 的非交互式批量事务：一次往返、原子提交，杜绝部分写入
+    await sql.transaction(
+      updates.map(
+        (u) => sql`
+          INSERT INTO project_amounts (project_id, raised_uah, updated_at)
+          VALUES (${u.projectId}, ${Math.floor(u.raisedUah)}, NOW())
+          ON CONFLICT (project_id) DO UPDATE
+            SET raised_uah = EXCLUDED.raised_uah,
+                updated_at = NOW()
+        `,
+      ),
+    );
     revalidateTag('project-amounts', { expire: 0 });
     return { ok: true, saved: updates.length };
   } catch (err) {

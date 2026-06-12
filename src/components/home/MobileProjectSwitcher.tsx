@@ -1,8 +1,9 @@
 'use client';
 
-import { Children, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Children, type ReactNode } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useMobileTabs } from '@/hooks/useMobileTabs';
 
 interface ThumbItem {
   id: number;
@@ -28,29 +29,7 @@ export default function MobileProjectSwitcher({
   const cards = Children.toArray(children);
   const count = cards.length;
 
-  const [active, setActive] = useState(0);
-  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
-  const thumbRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const didMountRef = useRef(false);
-
-  const go = useCallback(
-    (next: number) => {
-      if (next === active || next < 0 || next >= count) return;
-      setDirection(next > active ? 'forward' : 'backward');
-      setActive(next);
-    },
-    [active, count],
-  );
-
-  // 激活项自动居中到视口，方便连续点击
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    const el = thumbRefs.current[active];
-    el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  }, [active]);
+  const { active, direction, go, tabRefs } = useMobileTabs(count);
 
   return (
     <div>
@@ -70,7 +49,7 @@ export default function MobileProjectSwitcher({
               <button
                 key={t.id}
                 ref={(el) => {
-                  thumbRefs.current[i] = el;
+                  tabRefs.current[i] = el;
                 }}
                 type="button"
                 role="tab"
