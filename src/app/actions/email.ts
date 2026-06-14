@@ -15,6 +15,7 @@ import {
   type RenderedEmail,
 } from '@/lib/emailTemplates';
 import { EMAIL_RE_BATCH as EMAIL_RE } from '@/lib/email';
+import { sanitizeInboundHtml } from '@/lib/emailSanitize';
 import { errorMessage } from '@/lib/errors';
 
 const MAX_RECIPIENTS = 50; // Resend 单次最多 50
@@ -138,6 +139,154 @@ export async function listEmailHistoryAction(): Promise<
         scheduledAt: email.scheduled_at,
       })),
       hasMore: data?.has_more ?? false,
+    };
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) };
+  }
+}
+
+// —— 收件箱（Resend Inbound）——
+
+export interface ReceivedEmailItem {
+  id: string;
+  createdAt: string;
+  from: string;
+  to: string[];
+  cc: string[];
+  subject: string;
+  attachmentCount: number;
+}
+
+/** 收件记录列表：Resend Inbound 收到的最近 100 封（仅 metadata，正文按需懒拉）。 */
+export async function listReceivedHistoryAction(): Promise<
+  { ok: true; emails: ReceivedEmailItem[]; hasMore: boolean } | { ok: false; error: string }
+> {
+  const guard = await ensureAdmin();
+  if (guard) return guard;
+
+  let resend: ReturnType<typeof getResend>;
+  try {
+    resend = getResend();
+  } catch (err) {
+    return { ok: false, error: errorMessage(err, 'resend misconfigured') };
+  }
+
+  try {
+    const { data, error } = await resend.emails.receiving.list({ limit: EMAIL_HISTORY_LIMIT });
+    if (error) {
+      return { ok: false, error: error.message || 'Resend API error' };
+    }
+
+    return {
+      ok: true,
+      emails: (data?.data ?? []).map((email) => ({
+        id: email.id,
+        createdAt: email.created_at,
+        from: email.from,
+        to: email.to ?? [],
+        cc: email.cc ?? [],
+        subject: email.subject,
+        attachmentCount: Array.isArray(email.attachments) ? email.attachments.length : 0,
+      })),
+      hasMore: data?.has_more ?? false,
+    };
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) };
+  }
+}
+
+// —— 单封邮件正文（点击列表行时懒拉）——
+
+export interface EmailAttachmentMeta {
+  id: string;
+  filename: string;
+  size: number;
+  contentType: string;
+}
+
+export interface EmailBody {
+  id: string;
+  kind: 'sent' | 'received';
+  subject: string;
+  from: string;
+  to: string[];
+  cc: string[];
+  createdAt: string;
+  html: string | null;
+  text: string | null;
+  attachments: EmailAttachmentMeta[];
+}
+
+/**
+ * 拉单封邮件正文。
+ * - sent：`emails.get` 返回我们自己发的内容（受审过的模板 / 纯文本），html 原样返回。
+ * - received：`emails.receiving.get` 返回外部不可信 HTML，server 侧先过 sanitize 再回（纵深防御，
+ *   和入站转发同一套白名单）。附件仅返回 metadata，下载走 /api/admin/email/attachment 代理。
+ */
+export async function getEmailBodyAction(
+  input: { kind: 'sent' | 'received'; id: string }
+): Promise<{ ok: true; body: EmailBody } | { ok: false; error: string }> {
+  const guard = await ensureAdmin();
+  if (guard) return guard;
+
+  if (input.kind !== 'sent' && input.kind !== 'received') {
+    return { ok: false, error: 'Invalid kind' };
+  }
+  if (typeof input.id !== 'string' || !input.id) {
+    return { ok: false, error: 'Missing email id' };
+  }
+
+  let resend: ReturnType<typeof getResend>;
+  try {
+    resend = getResend();
+  } catch (err) {
+    return { ok: false, error: errorMessage(err, 'resend misconfigured') };
+  }
+
+  try {
+    if (input.kind === 'sent') {
+      const { data, error } = await resend.emails.get(input.id);
+      if (error) return { ok: false, error: error.message || 'Resend API error' };
+      if (!data) return { ok: false, error: 'Email not found' };
+      return {
+        ok: true,
+        body: {
+          id: data.id,
+          kind: 'sent',
+          subject: data.subject,
+          from: data.from,
+          to: data.to ?? [],
+          cc: data.cc ?? [],
+          createdAt: data.created_at,
+          html: data.html ?? null,
+          text: data.text ?? null,
+          attachments: [], // 我们的发送流程（模板 / custom）不带附件
+        },
+      };
+    }
+
+    const { data, error } = await resend.emails.receiving.get(input.id);
+    if (error) return { ok: false, error: error.message || 'Resend API error' };
+    if (!data) return { ok: false, error: 'Email not found' };
+    return {
+      ok: true,
+      body: {
+        id: data.id,
+        kind: 'received',
+        subject: data.subject,
+        from: data.from,
+        to: data.to ?? [],
+        cc: data.cc ?? [],
+        createdAt: data.created_at,
+        html: data.html ? sanitizeInboundHtml(data.html) : null,
+        text: data.text ?? null,
+        attachments: (data.attachments ?? []).map((a) => ({
+          id: a.id,
+          filename: a.filename || `attachment-${a.id}`,
+          size: a.size,
+          contentType: a.content_type,
+        })),
+      },
     };
   } catch (err) {
     return { ok: false, error: errorMessage(err) };

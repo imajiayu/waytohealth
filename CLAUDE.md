@@ -186,7 +186,7 @@ KV_REST_API_TOKEN=                # Upstash REST token
 
 ## 邮件系统（Resend + 静态 HTML 模板 + Custom 自定义）
 
-Admin 后台 `/admin/email`：手动输入收件人 + 两种发送模式 + 预览 + 发送，走 Resend API。
+Admin 后台 `/admin/email`：手动输入收件人 + 两种发送模式 + 预览 + 发送 + 发送/收件历史查看（点 subject 看正文、收件附件可下载），走 Resend API。
 
 **两种模式**（前端 segmented control 切换，后端 `SendInput` 是 discriminated union `{ mode: 'template' | 'custom' }`）：
 
@@ -204,7 +204,11 @@ Admin 后台 `/admin/email`：手动输入收件人 + 两种发送模式 + 预�
 
 **发送流程**（`src/app/actions/email.ts`）：`requireAdmin()` → `parseRecipients`（换行拆分 + RFC 正则 + 去重，单次上限 50）→ 取模板常量 → `resend.batch.send(messages, { batchValidation: 'permissive' })` 把收件人展开成 N 封独立邮件（每封 `to: [addr]`），单封被反垃圾拦截不影响其余。`permissive` 返回 `data.errors[].index`，按下标映射成 `failures: { address, message }[]` 回给前端。**不用 `to=from + bcc` 群发** —— `Mail-from = Rcpt-to` 是经典垃圾邮件特征，实测 Gmail/Outlook 整封 bounced；独立寄出天然等同 bcc 隐私维度。`previewEmailAction` 只返常量不调 Resend。
 
-**UI**（`src/components/admin/EmailPanel.tsx`）：左栏表单（收件人 textarea / Template ↔ Custom segmented control / 模板下拉 *或* 纯文本 body textarea / From 前缀下拉 / Subject + reply-to）+ 右栏预览：template 模式走 iframe srcDoc（`sandbox="allow-same-origin"`），custom 模式走 `<pre>` 实时回显纯文本（无 iframe，无 HTML 插值面）。切到 custom 模式时若 body textarea 还空，会把当前模板的 text 灌入作为编辑起点。底部 `EmailHistory` 拉 Resend `emails.list({ limit: 100 })`，发送成功后 `refreshKey` bump 自动刷新。
+**UI**（`src/components/admin/EmailPanel.tsx`）：左栏表单（收件人 textarea / Template ↔ Custom segmented control / 模板下拉 *或* 纯文本 body textarea / From 前缀下拉 / Subject + reply-to）+ 右栏预览：template 模式走 iframe srcDoc（`sandbox="allow-same-origin"`），custom 模式走 `<pre>` 实时回显纯文本（无 iframe，无 HTML 插值面）。切到 custom 模式时若 body textarea 还空，会把当前模板的 text 灌入作为编辑起点。底部挂 `EmailHistory`（见下文「发送 / 收件历史」）。
+
+**发送 / 收件历史**（`src/components/admin/EmailHistory.tsx`）：**Send ↔ Receive 双视图**，顶部 segmented control 切换。Send 视图拉 `emails.list({ limit: 100 })`，Receive 视图拉 `emails.receiving.list({ limit: 100 })`（懒加载，首次切过去才请求；发送成功后 `refreshKey` bump 只刷 Send 视图）。两视图列表只显示 metadata，点行内 subject 按钮打开 `EmailBodyModal` 看正文 —— 正文按 id 懒拉（`getEmailBodyAction`：Send 走 `emails.get`、Receive 走 `emails.receiving.get`），HTML 在无 `allow-scripts` 的 sandbox iframe 渲染。收件是外部不可信 HTML，server 侧先过 `sanitizeInboundHtml`（见 Inbound 小节）再回；已发邮件是我们自己受审过的模板/纯文本，原样渲染。modal 用 `FocusTrap` + `useEscapeKey` + `useBodyScrollLock`，正文回填带 kind+id race guard（关闭/切换后旧响应不污染当前 modal）。`EmailHistory` / `EmailBodyModal` 共用 `src/components/admin/emailFormat.ts` 的 `formatDate` / `formatBytes` / `joinAddresses`。
+
+**收件附件下载**（`src/app/api/admin/email/attachment/route.ts`，`runtime = 'nodejs'`）：收件邮件附件经此代理下载 —— admin cookie 鉴权（`getSession`）→ `emails.receiving.attachments.get` 拿短时签名 URL → `fetchWithTimeout` 后**流式回传**，带 `Content-Disposition: attachment` 强制下载、保留原始（含非 ASCII，RFC 5987 `filename*=UTF-8''…`）文件名。签名 URL 不暴露给前端。已发邮件不带附件（发送流程无附件），所以附件下载只在 Receive 视图出现。Receive 视图依赖 Resend 域名已开启 Inbound Receiving（见 Inbound 小节）；未开则列表直接显示 Resend 报错，已降级不崩。
 
 **发件人地址**（`src/lib/emailFrom.ts`）：display name `Way to Health` 和域名 `waytohealth.org.ua` 写死成项目常量；本地部分走白名单 `FROM_PREFIXES = ['info', 'head', 'support', 'news', 'noreply', 'Ekaterina.Karpenko', 'Yaroslav.Tretiakov']`，admin UI 下拉选择（默认 `info`）。下拉末尾还有 **Other…** 选项，选中后出现文本输入框，admin 可输入任意合法前缀（RFC 5321：字母/数字开头，允许 `. _ + -`，最长 64 字符；输入框通过 `onChange` 实时过滤，不合法字符无法输入）。`buildFromAddress(prefix)` 拼成完整 from 串。Inbound webhook 转发显式走 `noreply`（不复用 admin 默认）。注意：白名单预设前缀和自定义前缀对应的邮箱地址都需已在 Resend 控制台完成域名验证，否则 send 会 403（Resend 按域名级验证，`waytohealth.org.ua` 验证后该域下任意前缀均可发送）。
 
@@ -217,7 +221,7 @@ Admin 后台 `/admin/email`：手动输入收件人 + 两种发送模式 + 预�
 **关键约束（非自明部分）**：
 
 - **`runtime = 'nodejs'` + `maxDuration = 60`** — svix 校验依赖 Node crypto（Edge 起不来）；带附件大邮件走串行 Resend API 会超默认 timeout
-- **HTML 走 `sanitize-html`（不是 DOMPurify）** —— jsdom 在 Vercel serverless 起不来。白名单保留表格 / 内嵌 style / `<img src="cid:…">`，剥 `on*` / `script/iframe/form/meta/style/object/embed`，`<a>` 强制 `target=_blank rel=noopener noreferrer`
+- **HTML 走 `sanitize-html`（不是 DOMPurify）** —— jsdom 在 Vercel serverless 起不来。白名单保留表格 / 内嵌 style / `<img src="cid:…">`，剥 `on*` / `script/iframe/form/meta/style/object/embed`，`<a>` 强制 `target=_blank rel=noopener noreferrer`。清洗逻辑抽在 `src/lib/emailSanitize.ts` 的 `sanitizeInboundHtml()`，inbound 转发和 admin 收件正文预览（EmailHistory 的 Receive 视图）共用同一套白名单
 - **发件人必须固定为自己域名**（webhook 显式 `buildFromAddress('noreply')`），原发件人放正文 meta 块里。用 `from: <原发件人>` 会 DMARC fail 被 Gmail 判伪造
 - **subject 必须 `sanitizeHeader(subject, 200)`** —— 入站可能带 `\r\n`（header 注入）或极长字符串
 - **`replyTo` 要校验邮箱格式** —— Resend 原 `from` 可能带展示名或异常字符，非合法邮箱就不设，否则 Resend API 400
@@ -299,6 +303,7 @@ src/
 │   │   └── partnerships/page.tsx # Partnership 申请列表（只读）
 │   ├── api/
 │   │   ├── admin/{login,logout,me}/  # 签名 cookie 发放 / 清除 / 探活
+│   │   ├── admin/email/attachment/   # 收件邮件附件下载代理（admin 鉴权 + 签名 URL + 流式回传）
 │   │   ├── news/upload/              # Vercel Blob client upload handler
 │   │   └── webhooks/resend-inbound/  # Resend Inbound webhook：catch-all 邮件转发到 Gmail
 │   ├── sitemap.ts               # 11 项目 × 2 locale + 静态页
@@ -324,7 +329,7 @@ src/
 │   ├── partners/                # 合作伙伴组件（PartnersStrip）
 │   ├── projects/                # 项目组件（ProjectCard, ProjectStrip, ProjectGallery, DonationSidebar, MobileDonationSheet, PatientStories, RecoveryJourney）
 │   ├── news/                    # 新闻组件（NewsCard, HomeDispatchCard, HomeDispatchCtaCard）
-│   ├── admin/                   # Admin 后台组件（news 编辑器、EmailPanel、AmountsPanel、AssistanceRequestsPanel、PartnershipRequestsPanel；common/AlertBanner 共用错误/成功提示条）
+│   ├── admin/                   # Admin 后台组件（news 编辑器、EmailPanel、EmailHistory（send/receive 双视图）、EmailBodyModal、emailFormat（共享格式化）、AmountsPanel、AssistanceRequestsPanel、PartnershipRequestsPanel；common/AlertBanner 共用错误/成功提示条）
 │   ├── forms/                   # 表单原子（fields.tsx / PartnershipForm / RequestAssistanceForm）
 │   └── terms/                   # 法律页面组件（TermsTOC 目录导航）
 ├── hooks/
@@ -344,7 +349,7 @@ src/
 │   └── routing.ts               # next-intl 路由配置
 ├── app/actions/
 │   ├── news.ts                  # News admin（cookie session + SQL CRUD + Blob 图清理）
-│   ├── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送 + 历史拉取）
+│   ├── email.ts                 # Email admin（cookie session + 模板渲染 + Resend 发送 + 发送/收件历史列表 + 单封正文懒拉）
 │   ├── projectAmounts.ts        # 项目已筹金额批量 UPSERT（admin only）
 │   └── requests.ts              # Request/Partnership 提交（公开）+ admin 读取（需 cookie）
 ├── lib/
@@ -354,11 +359,12 @@ src/
 │   ├── email.ts                 # 邮箱地址正则（EMAIL_RE 单地址 / EMAIL_RE_BATCH 批量场景）
 │   ├── emailTemplates.ts        # 邮件模板注册表（server-only，纯静态 HTML，无变量）
 │   ├── emailTemplates/          # 每个模板单独一个 .ts，导出 subject / html / text 三常量
+│   ├── emailSanitize.ts         # sanitizeInboundHtml()：外部来源邮件 HTML 清洗白名单（inbound 转发 + 收件正文预览共用，server-only）
 │   ├── news.ts                  # 新闻读取（从 Neon SELECT，带 unstable_cache，导出 NewsRow / rowToItem）
 │   ├── projectAmounts.ts        # 项目已筹金额读取（Neon SELECT，unstable_cache 60s）
 │   ├── db.ts                    # Neon Postgres 单例（`@neondatabase/serverless`）
 │   ├── redis.ts                 # Upstash Redis 单例 + KV_ENABLED 探测（adminRateLimit / formRateLimit 共用）
-│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（resend-inbound webhook 拉附件用）
+│   ├── fetchWithTimeout.ts      # AbortSignal.timeout 封装（resend-inbound webhook + 收件附件下载代理拉附件用）
 │   ├── seo.ts                   # SEO helper：canonical / hreflang / openGraph / twitter
 │   ├── clientIp.ts              # `x-real-ip` 优先、XFF 兜底的客户端 IP 提取（限流 / 审计共用）
 │   ├── ids.ts                   # randomSuffix() 4 位 base36 后缀（news / requests id 共用）

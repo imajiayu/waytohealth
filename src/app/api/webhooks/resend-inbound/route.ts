@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
-import sanitizeHtml from 'sanitize-html';
 import type { Attachment } from 'resend';
 import { getResend, buildFromAddress } from '@/lib/resend';
 import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
+import { sanitizeInboundHtml } from '@/lib/emailSanitize';
 import { EMAIL_RE } from '@/lib/email';
 
 export const runtime = 'nodejs';
@@ -76,34 +76,6 @@ function isSvixPayload(v: unknown): v is SvixPayload {
   if (obj.data !== undefined && (typeof obj.data !== 'object' || obj.data === null)) return false;
   return true;
 }
-
-const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
-  allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-    'img',
-    'h1',
-    'h2',
-    'center',
-    'font',
-    'span',
-    'u',
-  ]),
-  allowedAttributes: {
-    ...sanitizeHtml.defaults.allowedAttributes,
-    '*': ['style', 'class', 'align', 'lang', 'dir', 'title', 'width', 'height'],
-    img: ['src', 'alt', 'width', 'height', 'style'],
-    a: ['href', 'name', 'target', 'rel', 'title', 'style'],
-    font: ['color', 'size', 'face'],
-    td: ['colspan', 'rowspan', 'align', 'valign', 'style', 'width', 'height'],
-    th: ['colspan', 'rowspan', 'align', 'valign', 'style', 'width', 'height'],
-    table: ['align', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'style', 'width'],
-  },
-  // cid: 让入站 HTML 里的 <img src="cid:xxx"> 引用得以保留；发件时对应附件带 contentId 即可渲染 inline 图片
-  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
-  allowedSchemesByTag: { img: ['http', 'https', 'data', 'cid'] },
-  transformTags: {
-    a: sanitizeHtml.simpleTransform('a', { target: '_blank', rel: 'noopener noreferrer' }),
-  },
-};
 
 type InboundAttachmentMeta = {
   id: string;
@@ -315,7 +287,7 @@ export async function POST(req: NextRequest) {
   const htmlBody = detail.html ?? '';
   const textBody = detail.text ?? '';
 
-  const safeHtml = htmlBody ? sanitizeHtml(htmlBody, SANITIZE_OPTIONS) : '';
+  const safeHtml = htmlBody ? sanitizeInboundHtml(htmlBody) : '';
   const safeReplyTo = EMAIL_RE.test(rawFrom)
     ? rawFrom
     : extractEmailAddress(rawFrom) ?? undefined;
