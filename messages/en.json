@@ -185,22 +185,17 @@
       "eyebrow": "A conversation with the co-founder",
       "title": "Why we do what we do",
       "meta": "With Oleksii Dubovyk · co-founder",
-      "runtime": "Documentary",
-      "rec": "REC · 2025",
-      "genre": "Documentary",
-      "quality": "1080p · stereo",
-      "pressPlay": "PRESS PLAY ▸"
+      "runtime": "Documentary"
     },
     "watchListenWitness": "Watch · Listen · Witness",
     "teamTitle": "Team",
     "teamSubtitle": "The people who turn support into action, every single day",
     "team": {
       "0": { "name": "Oleksandr Khorev", "role": "communications manager", "image": "/images/team/oleksandr-khorev.webp" },
-      "1": { "name": "Anastasiia Sydorkina", "role": "project lead", "image": "/images/team/anastasiia-sydorkina.webp" },
-      "2": { "name": "Oleksii Dubovyk", "role": "co-founder", "image": "/images/team/oleksii-dubovyk.webp" },
-      "3": { "name": "Oleksandr Fedoniuk", "role": "foundation director", "image": "/images/team/oleksandr-fedoniuk.webp" },
-      "4": { "name": "Yehor Vorobiov", "role": "fundraiser, grant writer", "image": "/images/team/yehor-vorobiov.webp" },
-      "5": { "name": "Sofiia Tarnavska", "role": "SMM manager", "image": "/images/team/sofiia-tarnavska.webp" }
+      "1": { "name": "Oleksii Dubovyk", "role": "co-founder", "image": "/images/team/oleksii-dubovyk.webp" },
+      "2": { "name": "Oleksandr Fedoniuk", "role": "foundation director", "image": "/images/team/oleksandr-fedoniuk.webp" },
+      "3": { "name": "Yehor Vorobiov", "role": "fundraiser, grant writer", "image": "/images/team/yehor-vorobiov.webp" },
+      "4": { "name": "Sofiia Tarnavska", "role": "SMM manager", "image": "/images/team/sofiia-tarnavska.webp" }
     },
     "documents": {
       "0": { "title": "Statute", "href": "/documents/about/statute.pdf" },

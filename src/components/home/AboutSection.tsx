@@ -8,25 +8,25 @@ const STAT_KEYS = ['years', 'patients', 'funds', 'partners'] as const;
 
 const STAT_ICONS: Record<string, React.ReactNode> = {
   years: (
-    <svg viewBox="0 0 32 32" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="16" cy="16" r="12" />
       <path d="M16 10v7l4.5 3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
   patients: (
-    <svg viewBox="0 0 32 32" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M16 4C9.4 4 4 9 4 15c0 4.1 2.3 7.7 5.7 9.6L16 28l6.3-3.4C25.7 22.7 28 19.1 28 15c0-6-5.4-11-12-11z" />
       <path d="M12 15h8M16 11v8" strokeLinecap="round" />
     </svg>
   ),
   funds: (
-    <svg viewBox="0 0 32 32" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M6 24V12l10-6 10 6v12l-10 6z" />
       <path d="M6 12l10 6m0 0l10-6m-10 6v12" opacity="0.4" />
     </svg>
   ),
   partners: (
-    <svg viewBox="0 0 32 32" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="11" cy="12" r="4" />
       <circle cx="21" cy="12" r="4" />
       <path d="M4 26c0-4 3.1-7 7-7 1.5 0 2.9.5 4 1.2a7.2 7.2 0 0 1 5-1.2c3.9 0 7 3 7 7" strokeLinecap="round" />
@@ -77,7 +77,7 @@ export default async function AboutSection() {
         </div>
 
         {/* 照片 + 数据卡片 + 使命/愿景 — 两列布局 */}
-        <div className="mt-2 grid items-stretch gap-8 sm:mt-3 sm:gap-12 lg:grid-cols-2">
+        <div className="mt-2 grid items-stretch gap-8 sm:mt-3 sm:gap-12 lg:grid-cols-[13fr_7fr]">
           {/* 左侧：照片（高度撑满右列） */}
           <div className="relative">
             {/* 装饰色块 — 照片后方向左下偏移，呼应左下金光的视觉重心 */}
@@ -89,39 +89,45 @@ export default async function AboutSection() {
                 src="/images/about-team.webp"
                 alt={t('title')}
                 width={1200}
-                height={900}
+                height={800}
                 className="h-auto w-full"
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes="(max-width: 1024px) 100vw, 65vw"
               />
               {/* 底部渐变遮罩 — 增加层次感 */}
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
           </div>
 
-          {/* 右侧：2x2 数据卡片 + 使命 + 愿景 */}
-          <div className="flex flex-col gap-5 sm:gap-6">
-            {/* 2x2 统计数据网格 */}
+          {/* 右侧：2x2 数据卡片 + 使命 + 愿景 — 桌面端整体与左图等高 */}
+          <div className="flex flex-col gap-5 sm:gap-6 lg:h-full lg:justify-between">
+            {/* 2x2 统计数据网格 — 横向徽章布局，压低单卡高度让右列贴合图片高度 */}
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               {STAT_KEYS.map((key, i) => (
                 <div
                   key={key}
-                  className="group relative rounded-xl border border-ukraine-blue-100/60 bg-white p-3 transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-lg hover:shadow-ukraine-blue-100/40 sm:rounded-2xl sm:p-4"
+                  className="group relative flex items-center gap-3.5 overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white p-3.5 transition-all duration-300 hover:border-ukraine-blue-200 hover:shadow-lg hover:shadow-ukraine-blue-100/40 sm:rounded-2xl"
                   style={{ animationDelay: `${i * 120}ms` }}
                 >
-                  <div className="mb-1.5 text-ukraine-blue-300 transition-colors duration-300 group-hover:text-ukraine-blue-500 sm:mb-2">
+                  {/* icon 徽章 */}
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ukraine-blue-50 text-ukraine-blue-400 transition-colors duration-300 group-hover:bg-ukraine-blue-100 group-hover:text-ukraine-blue-600">
                     {STAT_ICONS[key]}
                   </div>
-                  <div className="font-[family-name:var(--font-data)] text-2xl font-bold tracking-tight text-ukraine-blue-700 sm:text-3xl lg:text-[2rem]">
-                    {t(`stats.${key}.value`)}
+                  {/* 数字 + 标签 */}
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-x-1">
+                      <span className="whitespace-nowrap font-[family-name:var(--font-data)] text-[clamp(1.45rem,2.2vw,1.85rem)] font-bold tracking-tight text-ukraine-blue-700">
+                        {t(`stats.${key}.value`)}
+                      </span>
+                      {key === 'funds' && (
+                        <span className="font-[family-name:var(--font-data)] text-[0.7rem] font-medium text-ukraine-blue-400">
+                          {t('stats.funds.unit')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs leading-snug text-gray-500 sm:text-sm">
+                      {t(`stats.${key}.label`)}
+                    </p>
                   </div>
-                  {key === 'funds' && (
-                    <span className="mt-0.5 block font-[family-name:var(--font-data)] text-xs font-medium text-ukraine-blue-400">
-                      {t('stats.funds.unit')}
-                    </span>
-                  )}
-                  <p className="mt-1 text-sm leading-snug text-gray-500">
-                    {t(`stats.${key}.label`)}
-                  </p>
                   <div className="absolute bottom-0 left-4 right-4 h-[2px] origin-left scale-x-0 rounded-full transition-transform duration-500 group-hover:scale-x-100 gradient-brand-line" />
                 </div>
               ))}

@@ -96,7 +96,7 @@ export default async function AboutPage({ params }: Props) {
     : 'https://tuilgvi6ppemprps.public.blob.vercel-storage.com/about-us-videos/about-ua.mp4';
 
   // 从翻译中获取结构化数据（带 runtime 守卫，缺键自动过滤）
-  const team = Array.from({ length: 6 }, (_, i) => toTeamMember(t.raw(`team.${i}`)))
+  const team = Array.from({ length: 5 }, (_, i) => toTeamMember(t.raw(`team.${i}`)))
     .filter((m): m is TeamMember => m !== null);
   const rawDocs = Array.from({ length: 6 }, (_, i) => toDocumentItem(t.raw(`documents.${i}`)))
     .filter((d): d is DocumentItem => d !== null);
@@ -228,10 +228,6 @@ export default async function AboutPage({ params }: Props) {
                 title={t('video.title')}
                 meta={t('video.meta')}
                 runtime={t('video.runtime')}
-                rec={t('video.rec')}
-                genre={t('video.genre')}
-                quality={t('video.quality')}
-                pressPlay={t('video.pressPlay')}
               />
             </div>
           </div>
