@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { FileText, ChevronDown, Download, Maximize2, X } from 'lucide-react';
+import { FileText, ChevronDown, Download, Maximize2, Minimize2 } from 'lucide-react';
 
 export interface AccordionDocument {
   title: string;
@@ -49,52 +49,56 @@ function DocumentRow({
   const id = String(index + 1).padStart(2, '0');
 
   return (
-    <li className="border-b border-ukraine-blue-100/80 last:border-b-0">
+    <li
+      className={`overflow-hidden rounded-2xl border bg-white/70 backdrop-blur-sm transition-all duration-300 ${
+        isOpen
+          ? 'border-ukraine-blue-300 shadow-[0_8px_28px_rgba(0,108,178,0.12)]'
+          : 'border-ukraine-blue-100/80 hover:border-ukraine-blue-200 hover:shadow-[0_4px_16px_rgba(0,108,178,0.08)]'
+      }`}
+    >
       {/* 行标题 — 可点击 */}
       <button
         type="button"
         onClick={onToggle}
-        className={`group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 text-left transition-colors duration-200 sm:gap-4 md:px-6 md:py-5 ${
-          isOpen
-            ? 'bg-ukraine-blue-50/50'
-            : 'hover:bg-ukraine-gold-50/40'
-        }`}
+        className="group flex w-full cursor-pointer items-center gap-3.5 px-4 py-4 text-left sm:gap-4 sm:px-6 sm:py-5"
       >
-        {/* 编号 */}
-        <span className="font-[family-name:var(--font-data)] text-xs font-semibold tabular-nums text-ukraine-gold-600 sm:text-sm">
+        {/* 编号徽章 */}
+        <span
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-[family-name:var(--font-data)] text-sm font-semibold tabular-nums transition-colors duration-300 ${
+            isOpen
+              ? 'bg-ukraine-blue-500 text-white'
+              : 'bg-ukraine-blue-50 text-ukraine-gold-600 group-hover:bg-ukraine-blue-100'
+          }`}
+        >
           {id}
         </span>
 
-        {/* 标题 */}
+        {/* 标题 + 元信息（PDF · 大小 合并到一处） */}
         <span className="min-w-0 flex-1">
-          <span className={`block font-[family-name:var(--font-display)] text-[14px] font-semibold leading-snug tracking-tight transition-colors duration-200 sm:text-lg ${
-            isOpen ? 'text-ukraine-blue-700' : 'text-ukraine-blue-900 group-hover:text-ukraine-blue-700'
-          }`}>
+          <span
+            className={`block font-[family-name:var(--font-display)] text-[15px] font-semibold leading-snug tracking-tight transition-colors duration-200 sm:text-lg ${
+              isOpen ? 'text-ukraine-blue-700' : 'text-ukraine-blue-900 group-hover:text-ukraine-blue-700'
+            }`}
+          >
             {doc.title}
           </span>
-          {/* 移动端元信息 */}
-          <span className="mt-0.5 block font-[family-name:var(--font-data)] text-[9px] uppercase tracking-[0.2em] text-ukraine-blue-400 md:hidden">
-            PDF · {doc.size}
+          <span className="mt-1 flex items-center gap-1.5 font-[family-name:var(--font-data)] text-[10px] uppercase tracking-[0.18em] text-ukraine-blue-400">
+            <FileText className="h-3 w-3" />
+            PDF
+            <span className="text-ukraine-blue-200">·</span>
+            <span className="tabular-nums">{doc.size}</span>
           </span>
-        </span>
-
-        {/* PDF 标签 — 桌面 */}
-        <span className="hidden font-[family-name:var(--font-data)] text-[11px] font-medium uppercase tracking-[0.22em] text-ukraine-blue-500 md:block">
-          PDF
-        </span>
-
-        {/* 文件大小 — 桌面 */}
-        <span className="hidden w-20 text-right font-[family-name:var(--font-data)] text-sm font-medium tabular-nums text-ukraine-blue-700 md:block">
-          {doc.size}
         </span>
 
         {/* 展开箭头 */}
-        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300 sm:h-8 sm:w-8 ${
-          isOpen
-            ? 'border-ukraine-blue-300 bg-ukraine-blue-500 text-white'
-            : 'border-ukraine-blue-200 text-ukraine-blue-400 group-hover:border-ukraine-gold-500 group-hover:text-ukraine-gold-600'
-        }`}>
-          <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 sm:h-4 sm:w-4 ${isOpen ? 'rotate-180' : ''}`} />
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
+            isOpen
+              ? 'border-ukraine-blue-500 bg-ukraine-blue-500 text-white'
+              : 'border-ukraine-blue-200 text-ukraine-blue-400 group-hover:border-ukraine-gold-500 group-hover:text-ukraine-gold-600'
+          }`}
+        >
+          <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </span>
       </button>
 
@@ -104,57 +108,53 @@ function DocumentRow({
         style={{ maxHeight: isOpen ? `${contentHeight}px` : '0px' }}
       >
         <div ref={contentRef}>
-          <div className="px-4 pb-4 md:px-6 md:pb-6">
-            <div className="overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-white shadow-[0_2px_12px_rgba(0,108,178,0.06)]">
-              {/* 工具栏 */}
-              <div className="flex items-center justify-between border-b border-ukraine-blue-100/60 bg-ukraine-blue-50/30 px-4 py-2">
-                <span className="font-[family-name:var(--font-data)] text-xs font-medium text-ukraine-blue-500">
-                  {doc.title}
-                  <span className="ml-2 uppercase text-ukraine-blue-400">.pdf</span>
-                </span>
-                <div className="flex items-center gap-1">
-                  {/* 全屏 */}
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setFullscreen(!fullscreen); }}
-                    className="cursor-pointer rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
-                    title={fullscreen ? labels.collapse : labels.expand}
-                    aria-label={fullscreen ? labels.collapse : labels.expand}
-                  >
-                    {fullscreen ? <X className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                  </button>
-                  {/* 下载 */}
-                  <a
-                    href={doc.href}
-                    download
-                    onClick={(e) => e.stopPropagation()}
-                    className="rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
-                    title={labels.download}
-                    aria-label={labels.download}
-                  >
-                    <Download className="h-4 w-4" />
-                  </a>
-                  {/* 关闭 */}
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); onToggle(); setFullscreen(false); }}
-                    className="cursor-pointer rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
-                    title={labels.close}
-                    aria-label={labels.close}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
+          <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+            <div className="overflow-hidden rounded-xl border border-ukraine-blue-100/60 bg-ukraine-blue-50/20">
+              {/* 操作条 — 只放操作按钮，不再重复文件名/格式；收起靠行箭头 */}
+              <div className="flex items-center justify-end gap-1 border-b border-ukraine-blue-100/60 px-2 py-1.5">
+                {/* 全屏放大 / 还原 */}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setFullscreen(!fullscreen); }}
+                  className="cursor-pointer rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
+                  title={fullscreen ? labels.collapse : labels.expand}
+                  aria-label={fullscreen ? labels.collapse : labels.expand}
+                >
+                  {fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                </button>
+                {/* 下载 */}
+                <a
+                  href={doc.href}
+                  download
+                  onClick={(e) => e.stopPropagation()}
+                  className="rounded-md p-1.5 text-ukraine-blue-400 transition-colors hover:bg-ukraine-blue-100/60 hover:text-ukraine-blue-600"
+                  title={labels.download}
+                  aria-label={labels.download}
+                >
+                  <Download className="h-4 w-4" />
+                </a>
               </div>
 
-              {/* PDF 预览 */}
+              {/* PDF 预览 — 用 <object> 而非 <iframe sandbox>：Chrome 内置 PDF Viewer 在
+                  sandboxed iframe 里会被拒绝加载（呈现为"此页面已被 Chrome 屏蔽"），object 走
+                  浏览器原生 PDF 处理通道、不受 iframe sandbox 影响。同源首方静态资产，安全无损 */}
               <div className={`transition-all duration-300 ${fullscreen ? 'h-[85vh]' : 'h-[380px] sm:h-[600px]'}`}>
-                <iframe
-                  src={doc.href}
-                  className="h-full w-full border-0"
-                  title={doc.title}
-                  sandbox="allow-same-origin allow-scripts allow-downloads allow-popups"
-                />
+                <object
+                  data={doc.href}
+                  type="application/pdf"
+                  className="h-full w-full"
+                  aria-label={doc.title}
+                >
+                  <div className="flex h-full items-center justify-center p-4 text-center text-sm text-ukraine-blue-400">
+                    <a
+                      href={doc.href}
+                      download
+                      className="text-ukraine-blue-600 underline hover:text-ukraine-blue-700"
+                    >
+                      {labels.download}
+                    </a>
+                  </div>
+                </object>
               </div>
             </div>
           </div>
@@ -173,32 +173,18 @@ export default function DocumentAccordion({ documents, labels }: Props) {
         {labels.title}
       </h2>
 
-      <div className="mt-4 overflow-hidden rounded-[6px] border border-ukraine-blue-100 bg-white/60 backdrop-blur-sm sm:mt-6">
-        {/* 表头 — 桌面端 */}
-        <div className="hidden items-center gap-4 border-b border-ukraine-blue-100 bg-ukraine-blue-50/40 px-6 py-3 font-[family-name:var(--font-data)] text-[10px] font-semibold uppercase tracking-[0.22em] text-ukraine-blue-600 md:flex">
-          <span className="w-8">№</span>
-          <span className="flex-1">
-            <FileText className="inline h-3 w-3 mr-1.5 -mt-0.5" />
-            {labels.title}
-          </span>
-          <span>Format</span>
-          <span className="w-20 text-right">Size</span>
-          <span className="w-8" />
-        </div>
-
-        <ul>
-          {documents.map((doc, i) => (
-            <DocumentRow
-              key={doc.href}
-              doc={doc}
-              index={i}
-              isOpen={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
-              labels={labels}
-            />
-          ))}
-        </ul>
-      </div>
+      <ul className="mt-5 flex flex-col gap-3 sm:mt-6">
+        {documents.map((doc, i) => (
+          <DocumentRow
+            key={doc.href}
+            doc={doc}
+            index={i}
+            isOpen={openIndex === i}
+            onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+            labels={labels}
+          />
+        ))}
+      </ul>
     </section>
   );
 }
