@@ -1,5 +1,5 @@
-import EmailPanel from '@/components/admin/EmailPanel';
+import EmailWorkspace from '@/components/admin/email/EmailWorkspace';
 
 export default function AdminEmailPage() {
-  return <EmailPanel />;
+  return <EmailWorkspace />;
 }

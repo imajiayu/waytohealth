@@ -8,76 +8,18 @@ import {
   isValidPrefixFormat,
   DEFAULT_FROM_PREFIX,
 } from '@/lib/resend';
-import {
-  listTemplates,
-  renderEmail,
-  type EmailTemplateMeta,
-  type RenderedEmail,
-} from '@/lib/emailTemplates';
 import { EMAIL_RE_BATCH as EMAIL_RE } from '@/lib/email';
 import { sanitizeInboundHtml } from '@/lib/emailSanitize';
 import { errorMessage } from '@/lib/errors';
+import { isBlobUrl } from '@/lib/blobUrl';
+import {
+  type AttachmentInput,
+  EMAIL_ATTACH_ALLOWED_MIME,
+  EMAIL_ATTACH_MAX_FILE_BYTES,
+} from '@/lib/emailAttachments';
 
-const MAX_RECIPIENTS = 50; // Resend 单次最多 50
 const MAX_SUBJECT_LEN = 998; // RFC 5322 line length
 const MAX_TEXT_LEN = 50_000;
-
-function parseRecipients(raw: string): { ok: true; list: string[] } | { ok: false; error: string } {
-  // 只按换行分隔，避免邮箱地址内特殊字符（+、.）被误分割
-  const parts = raw
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  if (parts.length === 0) return { ok: false, error: 'No recipients' };
-  if (parts.length > MAX_RECIPIENTS) {
-    return { ok: false, error: `Too many recipients (max ${MAX_RECIPIENTS})` };
-  }
-
-  const invalid = parts.find((e) => !EMAIL_RE.test(e) || e.length > 254);
-  if (invalid) return { ok: false, error: `Invalid address: ${invalid}` };
-
-  const seen = new Set<string>();
-  const list: string[] = [];
-  for (const e of parts) {
-    const key = e.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      list.push(e);
-    }
-  }
-
-  return { ok: true, list };
-}
-
-export async function listTemplatesAction(): Promise<
-  { ok: true; templates: EmailTemplateMeta[] } | { ok: false; error: string }
-> {
-  const guard = await ensureAdmin();
-  if (guard) return guard;
-  return { ok: true, templates: listTemplates() };
-}
-
-export async function previewEmailAction(
-  templateId: string
-): Promise<{ ok: true; rendered: RenderedEmail } | { ok: false; error: string }> {
-  const guard = await ensureAdmin();
-  if (guard) return guard;
-  return renderEmail(templateId);
-}
-
-interface SendCommon {
-  to: string; // 原始字符串，服务端解析
-  subject: string; // 必填
-  fromPrefix?: string; // 发件人本地部分；未给 / 格式非法则回落到默认
-  replyTo?: string;
-}
-
-// template 模式：选注册表里的静态模板，subject 以模板默认值 pre-fill 后可编辑，html/text 用模板常量
-// custom 模式：admin 完全自定义 subject + 纯文本正文（不含 HTML），跳过模板注册表。受 cookie session + 长度上限护栏
-export type SendInput =
-  | (SendCommon & { mode: 'template'; templateId: string })
-  | (SendCommon & { mode: 'custom'; text: string });
 
 export interface EmailHistoryItem {
   id: string;
@@ -260,7 +202,7 @@ export async function getEmailBodyAction(
           createdAt: data.created_at,
           html: data.html ?? null,
           text: data.text ?? null,
-          attachments: [], // 我们的发送流程（模板 / custom）不带附件
+          attachments: [], // sent 历史不回填附件 metadata（附件本体留在 Blob email-attachments/，可追溯）
         },
       };
     }
@@ -293,63 +235,87 @@ export async function getEmailBodyAction(
   }
 }
 
-export interface RecipientFailure {
-  address: string;
-  message: string;
+interface SendOneCommon {
+  recipient: string; // 单个收件人地址
+  subject: string; // 必填
+  fromPrefix?: string; // 发件人本地部分；未给 / 格式非法则回落到默认
+  replyTo?: string;
+  attachments?: AttachmentInput[]; // 已上传到 Blob email-attachments/ 的附件
 }
 
-export async function sendEmailAction(
-  input: SendInput
-): Promise<
-  | {
-      ok: true;
-      sent: number;
-      failed: number;
-      failures: RecipientFailure[];
-      rendered: RenderedEmail;
-    }
-  | { ok: false; error: string }
-> {
+// template 模式：客户端先调 previewEmailAction 拿到 html/text，再把它们传进来（避免每封重读 Blob）
+// custom 模式：纯文本，无 html
+export type SendOneInput =
+  | (SendOneCommon & { html: string; text: string })
+  | (SendOneCommon & { text: string; html?: undefined });
+
+type SendOneResult = { ok: true; id: string } | { ok: false; error: string };
+
+/**
+ * 发送单封邮件（客户端逐封编排时每个收件人调一次，自控并发见 src/lib/emailSendQueue.ts）。
+ * 改用 resend.emails.send 而非 batch.send —— 只有单封 API 支持 attachments。
+ * 服务端对单地址 / subject / 附件做纵深校验（客户端校验只是 UX，不是信任边界）。
+ */
+export async function sendOneEmailAction(input: SendOneInput): Promise<SendOneResult> {
   const guard = await ensureAdmin();
   if (guard) return guard;
 
-  const parsed = parseRecipients(input.to);
-  if (!parsed.ok) return parsed;
+  const recipient = (input.recipient ?? '').trim();
+  if (!recipient || !EMAIL_RE.test(recipient) || recipient.length > 254) {
+    return { ok: false, error: `Invalid recipient: ${recipient || '(empty)'}` };
+  }
 
   if (input.replyTo && !EMAIL_RE.test(input.replyTo)) {
     return { ok: false, error: `Invalid reply-to: ${input.replyTo}` };
   }
 
   const finalSubject = input.subject?.trim();
-  if (!finalSubject) {
-    return { ok: false, error: 'Subject is required' };
-  }
+  if (!finalSubject) return { ok: false, error: 'Subject is required' };
   if (finalSubject.length > MAX_SUBJECT_LEN) {
     return { ok: false, error: `Subject too long (max ${MAX_SUBJECT_LEN} chars)` };
   }
-  // subject 是邮件 header，过 CRLF 防御性拦截（Resend JSON API 已不会拼 SMTP 文本，纯加固）
+  // subject 是邮件 header，过 CRLF 防御性拦截
   if (/[\r\n]/.test(finalSubject)) {
     return { ok: false, error: 'Subject must not contain line breaks' };
   }
 
-  let html: string | undefined;
+  // html 存在 → template 模式（text 为可选 fallback）；否则 custom 模式（text 必填）
+  const html = typeof input.html === 'string' && input.html.length > 0 ? input.html : undefined;
   let text: string;
-  if (input.mode === 'template') {
-    const rendered = renderEmail(input.templateId);
-    if (!rendered.ok) return rendered;
-    html = rendered.rendered.html;
-    text = rendered.rendered.text;
+  if (html) {
+    text = typeof input.text === 'string' ? input.text : '';
   } else {
-    const customText = input.text?.trim();
-    if (!customText) return { ok: false, error: 'Text body is required' };
-    if (customText.length > MAX_TEXT_LEN) {
+    const t = (input.text ?? '').trim();
+    if (!t) return { ok: false, error: 'Text body is required' };
+    if (t.length > MAX_TEXT_LEN) {
       return { ok: false, error: `Text too long (max ${MAX_TEXT_LEN} chars)` };
     }
-    text = customText;
+    text = t;
+  }
+
+  // 附件纵深校验：必须是本服务上传到 Blob email-attachments/ 的文件，拒绝任意外链（防 SSRF：path 会被 Resend 主动拉取）
+  const attachments = input.attachments ?? [];
+  for (const a of attachments) {
+    if (!a || typeof a.url !== 'string' || !isBlobUrl(a.url) || !a.url.includes('/email-attachments/')) {
+      return { ok: false, error: 'Invalid attachment url' };
+    }
+    if (typeof a.filename !== 'string' || !a.filename) {
+      return { ok: false, error: 'Attachment missing filename' };
+    }
+    if (!EMAIL_ATTACH_ALLOWED_MIME.includes(a.contentType)) {
+      return { ok: false, error: `Attachment type not allowed: ${a.contentType}` };
+    }
+    if (typeof a.size !== 'number' || a.size > EMAIL_ATTACH_MAX_FILE_BYTES) {
+      return { ok: false, error: `Attachment too large: ${a.filename}` };
+    }
   }
 
   // 白名单前缀直接通过；自定义前缀校验格式（Resend 会进一步校验域名是否已验证）
-  if (input.fromPrefix !== undefined && !isFromPrefix(input.fromPrefix) && !isValidPrefixFormat(input.fromPrefix)) {
+  if (
+    input.fromPrefix !== undefined &&
+    !isFromPrefix(input.fromPrefix) &&
+    !isValidPrefixFormat(input.fromPrefix)
+  ) {
     return { ok: false, error: `Invalid from prefix: ${String(input.fromPrefix)}` };
   }
   const prefix: string = input.fromPrefix ?? DEFAULT_FROM_PREFIX;
@@ -364,38 +330,27 @@ export async function sendEmailAction(
   }
 
   try {
-    // 每个收件人一封独立邮件（batch.send），to 是真实地址
-    // 旧的 to=from + bcc 群发会被 Gmail/Outlook 反垃圾启发命中（Mail-from = Rcpt-to），
-    // 实测整封 bounced。每封独立寄出，收件人本来就互不可见，隐私维度等价。
-    // permissive 模式下单封失败不阻塞其余成功投递，errors[].index 映射回 parsed.list 拿地址。
-    const messages = parsed.list.map((addr) => ({
+    const { data, error } = await resend.emails.send({
       from,
-      to: [addr],
+      to: [recipient],
       subject: finalSubject,
       ...(html ? { html } : {}),
       text,
       ...(input.replyTo ? { replyTo: input.replyTo } : {}),
-    }));
+      ...(attachments.length > 0
+        ? {
+            attachments: attachments.map((a) => ({
+              filename: a.filename,
+              path: a.url, // Resend 自己去拉远程 URL，server 不重复下载
+              contentType: a.contentType,
+            })),
+          }
+        : {}),
+    });
 
-    const { data, error } = await resend.batch.send(messages, { batchValidation: 'permissive' });
-
-    if (error) {
-      return { ok: false, error: error.message || 'Resend API error' };
-    }
-
-    const successCount = data?.data?.length ?? 0;
-    const failures: RecipientFailure[] = (data?.errors ?? []).map((e) => ({
-      address: parsed.list[e.index] ?? `index ${e.index}`,
-      message: e.message,
-    }));
-
-    return {
-      ok: true,
-      sent: successCount,
-      failed: failures.length,
-      failures,
-      rendered: { subject: finalSubject, html: html ?? '', text },
-    };
+    if (error) return { ok: false, error: error.message || 'Resend API error' };
+    if (!data) return { ok: false, error: 'Resend returned no id' };
+    return { ok: true, id: data.id };
   } catch (err) {
     return { ok: false, error: errorMessage(err) };
   }

@@ -8,13 +8,7 @@ import { ensureAdmin } from '@/lib/adminSession';
 import { randomSuffix } from '@/lib/ids';
 import { errorMessage } from '@/lib/errors';
 import { rowToItem, type NewsRow } from '@/lib/news';
-
-// 仅允许 Vercel Blob 主域：防止管理员接口被用来把外链写进前台 next/image
-const BLOB_URL_RE = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\//;
-
-function isBlobUrl(u: string): boolean {
-  return BLOB_URL_RE.test(u);
-}
+import { isBlobUrl } from '@/lib/blobUrl';
 
 // 规范化管理员提交的 tag：trim、截长、去重（按 en.toLowerCase）、上限
 // 前端 TagInput 也做一次相同逻辑；这里是服务端兜底，防止绕过 UI

@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { sendOneEmailAction } from '@/app/actions/email';
+import { listTemplatesAction, previewEmailAction } from '@/app/actions/emailTemplates';
+import type { EmailTemplateMeta, RenderedEmail } from '@/lib/emailTemplatesStore';
+import { parseRecipients } from '@/lib/emailRecipients';
+import { sendBatch, type RecipientProgress } from '@/lib/emailSendQueue';
 import {
-  listTemplatesAction,
-  previewEmailAction,
-  sendEmailAction,
-  type RecipientFailure,
-} from '@/app/actions/email';
-import type { EmailTemplateMeta, RenderedEmail } from '@/lib/emailTemplates';
+  type AttachmentInput,
+  EMAIL_ATTACH_MAX_TOTAL_BYTES,
+} from '@/lib/emailAttachments';
 import AlertBanner from './common/AlertBanner';
+import AttachmentPicker from './email/AttachmentPicker';
 import {
   FROM_PREFIXES,
   DEFAULT_FROM_PREFIX,
@@ -17,15 +20,12 @@ import {
 } from '@/lib/emailFrom';
 import EmailHistory from './EmailHistory';
 
-type SendResult =
-  | { kind: 'success'; sent: number; failed: number; failures: RecipientFailure[] }
-  | { kind: 'error'; error: string }
-  | null;
-
 type Mode = 'template' | 'custom';
 
 const MAX_TEXT_LEN = 50_000;
 const MAX_SUBJECT_LEN = 998;
+// 逐封发送并发度（贴合 Resend ~2 req/s；emailSendQueue 内部还有节流 + 429 退避）
+const SEND_CONCURRENCY = 2;
 
 export default function EmailPanel() {
   const [templates, setTemplates] = useState<EmailTemplateMeta[] | null>(null);
@@ -46,9 +46,16 @@ export default function EmailPanel() {
   const [preview, setPreview] = useState<RenderedEmail | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
-  const [sendBusy, setSendBusy] = useState(false);
-  const [sendResult, setSendResult] = useState<SendResult>(null);
+  const [attachments, setAttachments] = useState<AttachmentInput[]>([]);
+
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<RecipientProgress[] | null>(null);
+  const [summary, setSummary] = useState<{ sent: number; failed: number } | null>(null);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+
+  const attachTotal = attachments.reduce((sum, a) => sum + a.size, 0);
+  const attachOverLimit = attachTotal > EMAIL_ATTACH_MAX_TOTAL_BYTES;
 
   useEffect(() => {
     let cancelled = false;
@@ -66,7 +73,9 @@ export default function EmailPanel() {
         setSubject(first.subject);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const currentTemplate = useMemo(
@@ -83,12 +92,10 @@ export default function EmailPanel() {
   function switchMode(next: Mode) {
     if (next === mode) return;
     if (next === 'custom') {
-      // 灌入当前模板的纯文本作为编辑起点；空就保留已有自定义内容
       if (preview && !customText) {
         setCustomText(preview.text);
       }
     } else {
-      // 切回 template：subject 用模板默认值覆盖（保持和模板下拉同步）
       const tpl = templates?.find((t) => t.id === templateId);
       if (tpl) setSubject(tpl.subject);
     }
@@ -110,37 +117,59 @@ export default function EmailPanel() {
         setPreviewError(res.error);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [templateId]);
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    setSendBusy(true);
-    setSendResult(null);
+    setSendError(null);
+    setSummary(null);
 
-    const common = {
-      to,
-      subject: subject.trim(),
-      fromPrefix: effectiveFromPrefix,
-      ...(replyTo.trim() ? { replyTo: replyTo.trim() } : {}),
-    };
-
-    const res = mode === 'template'
-      ? await sendEmailAction({ mode: 'template', templateId, ...common })
-      : await sendEmailAction({ mode: 'custom', text: customText, ...common });
-
-    setSendBusy(false);
-    if (!res.ok) {
-      setSendResult({ kind: 'error', error: res.error });
+    const parsed = parseRecipients(to);
+    if (!parsed.ok) {
+      setSendError(parsed.error);
       return;
     }
-    setSendResult({
-      kind: 'success',
-      sent: res.sent,
-      failed: res.failed,
-      failures: res.failures,
+    if (attachOverLimit) {
+      setSendError('Attachments exceed the 40MB per-email limit');
+      return;
+    }
+
+    const finalSubject = subject.trim();
+    const common = {
+      subject: finalSubject,
+      fromPrefix: effectiveFromPrefix,
+      ...(replyTo.trim() ? { replyTo: replyTo.trim() } : {}),
+      ...(attachments.length > 0 ? { attachments } : {}),
+    };
+
+    // 每封 payload 只换 recipient；template 模式复用客户端已渲染的 html/text，custom 模式纯文本
+    let makeSend: (addr: string) => ReturnType<typeof sendOneEmailAction>;
+    if (mode === 'template') {
+      if (!preview) {
+        setSendError('Template preview not ready yet — try again in a moment');
+        return;
+      }
+      const html = preview.html;
+      const text = preview.text;
+      makeSend = (recipient: string) => sendOneEmailAction({ recipient, ...common, html, text });
+    } else {
+      const text = customText;
+      makeSend = (recipient: string) => sendOneEmailAction({ recipient, ...common, text });
+    }
+
+    setSending(true);
+    setProgress(parsed.list.map((address) => ({ address, status: 'queued', attempts: 0 })));
+
+    const result = await sendBatch(parsed.list, makeSend, {
+      concurrency: SEND_CONCURRENCY,
+      onUpdate: setProgress,
     });
-    setPreview(res.rendered);
+
+    setSending(false);
+    setSummary(result);
     setHistoryRefreshKey((value) => value + 1);
   }
 
@@ -156,12 +185,14 @@ export default function EmailPanel() {
     return <p className="text-sm text-gray-500">Loading templates…</p>;
   }
 
+  const noTemplates = templates.length === 0;
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Email</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Pick a static HTML template — or write a one-off subject + body — and send via Resend.
+          Pick a template — or write a one-off subject + body — add attachments, and send via Resend (one email per recipient).
         </p>
       </div>
 
@@ -214,7 +245,7 @@ export default function EmailPanel() {
             </div>
             <p className="mt-1 text-xs text-gray-400">
               {mode === 'template'
-                ? 'Pick a vetted, code-reviewed HTML template.'
+                ? 'Pick an HTML template managed in the Templates tab.'
                 : 'Free-form subject + plain-text body. No HTML — recipient sees text as-is.'}
             </p>
           </div>
@@ -224,25 +255,27 @@ export default function EmailPanel() {
               <label htmlFor="email-template" className={labelCls}>
                 Template
               </label>
-              <select
-                id="email-template"
-                value={templateId}
-                onChange={(e) => selectTemplate(e.target.value)}
-                className={inputCls}
-              >
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
+              {noTemplates ? (
+                <p className="mt-1 rounded-md border border-dashed border-gray-300 bg-gray-50 p-3 text-sm text-gray-500">
+                  No templates yet — create one in the Templates tab, or switch to Custom mode.
+                </p>
+              ) : (
+                <select
+                  id="email-template"
+                  value={templateId}
+                  onChange={(e) => selectTemplate(e.target.value)}
+                  className={inputCls}
+                >
+                  {templates.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              )}
               {currentTemplate && (
-                <p className="mt-1 text-xs text-gray-500">
-                  {currentTemplate.description}
-                  {' · '}
-                  <span className="uppercase tracking-wider">
-                    {currentTemplate.locales.join(' / ')}
-                  </span>
+                <p className="mt-1 text-xs uppercase tracking-wider text-gray-500">
+                  {currentTemplate.locales.join(' / ')}
                 </p>
               )}
             </div>
@@ -331,6 +364,10 @@ export default function EmailPanel() {
           )}
 
           <div>
+            <AttachmentPicker attachments={attachments} onChange={setAttachments} disabled={sending} />
+          </div>
+
+          <div>
             <label htmlFor="email-reply-to" className={labelCls}>
               Reply-To <span className="text-gray-400">(optional)</span>
             </label>
@@ -349,49 +386,27 @@ export default function EmailPanel() {
             </p>
           </div>
 
-          {sendResult?.kind === 'error' && (
-            <AlertBanner variant="error">{sendResult.error}</AlertBanner>
-          )}
-          {sendResult?.kind === 'success' && (
-            <div
-              className={`rounded-md border p-3 text-sm ${
-                sendResult.failed === 0
-                  ? 'border-green-200 bg-green-50 text-green-700'
-                  : 'border-amber-200 bg-amber-50 text-amber-800'
-              }`}
-            >
-              <div>
-                Sent to {sendResult.sent} recipient{sendResult.sent === 1 ? '' : 's'}
-                {sendResult.failed > 0 && ` · ${sendResult.failed} failed`}
-              </div>
-              {sendResult.failures.length > 0 && (
-                <ul className="mt-2 space-y-1 text-xs">
-                  {sendResult.failures.map((f) => (
-                    <li key={f.address} className="break-all">
-                      <span className="font-medium">{f.address}</span> — {f.message}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
+          {sendError && <AlertBanner variant="error">{sendError}</AlertBanner>}
+
+          {progress && <ProgressList progress={progress} summary={summary} />}
 
           <div className="flex justify-end pt-1">
             <button
               type="submit"
               disabled={
-                sendBusy ||
+                sending ||
                 !to.trim() ||
                 !subject.trim() ||
                 subject.trim().length > MAX_SUBJECT_LEN ||
+                attachOverLimit ||
                 (prefixOption === '__other__' && !customPrefix.trim()) ||
                 (mode === 'template'
-                  ? !templateId
+                  ? noTemplates || !templateId
                   : !customText.trim() || customText.length > MAX_TEXT_LEN)
               }
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {sendBusy ? 'Sending…' : 'Send'}
+              {sending ? 'Sending…' : 'Send'}
             </button>
           </div>
         </form>
@@ -414,7 +429,7 @@ export default function EmailPanel() {
 
           {mode === 'template' && !preview && !previewError && (
             <div className="rounded-md border border-dashed border-gray-300 bg-white p-10 text-center text-sm text-gray-500">
-              Loading preview…
+              {noTemplates ? 'No template to preview.' : 'Loading preview…'}
             </div>
           )}
 
@@ -446,6 +461,54 @@ export default function EmailPanel() {
       </div>
 
       <EmailHistory refreshKey={historyRefreshKey} />
+    </div>
+  );
+}
+
+// 逐封发送进度列表 + 最终汇总
+function ProgressList({
+  progress,
+  summary,
+}: {
+  progress: RecipientProgress[];
+  summary: { sent: number; failed: number } | null;
+}) {
+  const dotCls: Record<RecipientProgress['status'], string> = {
+    queued: 'bg-gray-300',
+    sending: 'bg-blue-500 animate-pulse',
+    sent: 'bg-green-500',
+    failed: 'bg-red-500',
+  };
+
+  return (
+    <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+      <ul className="max-h-56 space-y-1 overflow-auto text-xs">
+        {progress.map((p) => (
+          <li key={p.address} className="flex items-start gap-2">
+            <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${dotCls[p.status]}`} aria-hidden />
+            <span className="min-w-0 flex-1">
+              <span className="break-all font-medium text-gray-800">{p.address}</span>
+              {p.status === 'sending' && p.attempts > 1 && (
+                <span className="text-gray-400"> · retry {p.attempts}</span>
+              )}
+              {p.status === 'failed' && p.error && (
+                <span className="block break-words text-red-600">{p.error}</span>
+              )}
+            </span>
+            <span className="shrink-0 text-gray-400">{p.status}</span>
+          </li>
+        ))}
+      </ul>
+      {summary && (
+        <div
+          className={`mt-2 border-t pt-2 text-sm ${
+            summary.failed === 0 ? 'border-green-200 text-green-700' : 'border-amber-200 text-amber-800'
+          }`}
+        >
+          Sent to {summary.sent} recipient{summary.sent === 1 ? '' : 's'}
+          {summary.failed > 0 && ` · ${summary.failed} failed`}
+        </div>
+      )}
     </div>
   );
 }
