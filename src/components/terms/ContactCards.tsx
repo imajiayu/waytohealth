@@ -1,4 +1,5 @@
 import { Mail, MapPin, Phone } from 'lucide-react';
+import ContactLink from '@/components/analytics/ContactLink';
 
 interface ContactCardsProps {
   email: string;
@@ -21,8 +22,9 @@ export default function ContactCards({
   return (
     <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
       {/* Email */}
-      <a
+      <ContactLink
         href={`mailto:${email}`}
+        channel="email"
         className="group relative overflow-hidden rounded-2xl border border-ukraine-blue-100 bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/50"
       >
         <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-ukraine-blue-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -37,7 +39,7 @@ export default function ContactCards({
             {email}
           </p>
         </div>
-      </a>
+      </ContactLink>
 
       {/* Address */}
       <div className="group relative overflow-hidden rounded-2xl border border-ukraine-blue-100 bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/50">
@@ -56,8 +58,9 @@ export default function ContactCards({
       </div>
 
       {/* Phone */}
-      <a
+      <ContactLink
         href={`tel:${phone.replace(/\s/g, '')}`}
+        channel="phone"
         className="group relative overflow-hidden rounded-2xl border border-ukraine-blue-100 bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-ukraine-blue-200 hover:shadow-xl hover:shadow-ukraine-blue-100/50"
       >
         <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-ukraine-blue-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -72,7 +75,7 @@ export default function ContactCards({
             {phone}
           </p>
         </div>
-      </a>
+      </ContactLink>
     </div>
   );
 }

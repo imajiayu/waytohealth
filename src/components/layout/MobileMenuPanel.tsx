@@ -7,6 +7,7 @@ import FocusTrap from 'focus-trap-react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { triggerRouteChange } from './LoadingBar';
+import ContactLink from '@/components/analytics/ContactLink';
 import { SOCIAL_LINKS, CONTACT } from '@/data/social';
 
 interface MenuItem {
@@ -146,8 +147,9 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                          ${open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`}
               style={{ transitionDelay: open ? `${80 + MENU_ITEMS.length * 50 + 30}ms` : '0ms' }}
             >
-              <a
+              <ContactLink
                 href={`mailto:${CONTACT.email}`}
+                channel="email"
                 className="flex items-center gap-2.5 sm:gap-3 text-[12px] sm:text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
               >
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
@@ -155,9 +157,10 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                   <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-ukraine-blue-400" />
                 </span>
                 <span className="truncate">{CONTACT.email}</span>
-              </a>
-              <a
+              </ContactLink>
+              <ContactLink
                 href={`tel:${CONTACT.phoneTel}`}
+                channel="phone"
                 className="flex items-center gap-2.5 sm:gap-3 text-[12px] sm:text-[13px] text-ukraine-blue-700/70 hover:text-ukraine-blue-600 transition-colors group"
               >
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-ukraine-blue-100/60 flex-shrink-0 flex items-center justify-center
@@ -165,7 +168,7 @@ export default function MobileMenuPanel({ open, onClose }: MobileMenuPanelProps)
                   <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-ukraine-blue-400" />
                 </span>
                 <span className="font-[family-name:var(--font-data)] tracking-wide">{CONTACT.phoneDisplay}</span>
-              </a>
+              </ContactLink>
             </div>
 
             {/* 社交媒体 */}

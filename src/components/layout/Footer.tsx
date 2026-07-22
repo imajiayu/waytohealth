@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation';
 import { ArrowUpRight, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 import CopyIbanButton from './CopyIbanButton';
+import ContactLink from '@/components/analytics/ContactLink';
 import { SOCIAL_LINKS, CONTACT } from '@/data/social';
 
 /* ── Constants ───────────────────────────────────────────────── */
@@ -87,8 +88,9 @@ export default async function Footer() {
               {/* 联系方式卡片组 — 三块独立小卡，移动端用紧凑间距 + active 点击反馈 */}
               <div className="order-1 space-y-1.5 sm:space-y-3 lg:order-none">
                 {/* 邮箱卡片 */}
-                <a
+                <ContactLink
                   href={`mailto:${CONTACT.email}`}
+                  channel="email"
                   className="group flex items-center gap-3 rounded-lg bg-white/[0.04] border border-white/[0.06]
                              px-3 py-2.5 active:bg-white/[0.09] transition-all duration-200
                              sm:gap-5 sm:rounded-2xl sm:border-white/[0.08]
@@ -109,11 +111,12 @@ export default async function Footer() {
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0
                                            group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all duration-200" />
-                </a>
+                </ContactLink>
 
                 {/* 电话卡片 */}
-                <a
+                <ContactLink
                   href={`tel:${CONTACT.phoneTel}`}
+                  channel="phone"
                   className="group flex items-center gap-3 rounded-lg bg-white/[0.04] border border-white/[0.06]
                              px-3 py-2.5 active:bg-white/[0.09] transition-all duration-200
                              sm:gap-5 sm:rounded-2xl sm:border-white/[0.08]
@@ -132,7 +135,7 @@ export default async function Footer() {
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0
                                            group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all duration-200" />
-                </a>
+                </ContactLink>
 
                 {/* 地址卡片 — 点击跳转 Google Maps */}
                 <a

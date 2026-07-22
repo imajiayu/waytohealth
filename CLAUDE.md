@@ -48,6 +48,7 @@ npm run start    # 启动生产服务器
 | 事务邮件 | Resend (`resend`) | Admin 后台 `/admin/email`：手输收件人 + 逐封发送（`resend.emails.send`，客户端自控并发 + 进度）+ 附件（Blob + Resend path URL）。模板存 Blob 文件夹，同页 Send/Templates 子视图切换管理，读取层 `src/lib/emailTemplatesStore.ts`（server-only） |
 | XSS 过滤 | isomorphic-dompurify | DocumentViewer 的 xlsx HTML 走 DOMPurify 过滤再 dangerouslySetInnerHTML |
 | Focus trap | focus-trap-react | MobileMenuPanel / Lightbox 打开时锁键盘焦点在面板内 |
+| 分析/追踪 | Meta (Facebook) Pixel | 按基金会规格前台 `[locale]` layout **无条件加载**（无同意门控）+ `<noscript>` 兜底像素。Pixel ID 硬编码在 `src/lib/fbpixel.constants.ts`（公开值，同 Stripe key）。6 个事件：PageView（含 SPA 路由）/ ViewContent（进 `/projects`）/ InitiateCheckout（点 Stripe·monobank）/ Donate（Stripe 付款后回跳 `/donation-success` 触发，需在 Stripe 后台设 buy-button 确认页 URL）/ Lead（表单成功）/ Contact（点电话·邮箱，`ContactLink` 组件）。埋点 helper `src/lib/fbpixel.ts`，加载器 `src/components/analytics/FacebookPixel.tsx` |
 
 ### 计划集成（尚未安装）
 
@@ -110,7 +111,7 @@ monobank 慈善基金会的 jar 走法人 API（providers，要 RSA 签名 + 客
 - Admin 后台（订单列表、状态机、发货跟踪）
 - 月捐（订阅）
 - 商品购买的收货地址、快递单号
-- 支付成功页（没有 webhook 就没有可靠成功信号）
+- 可靠的支付成功信号（没有 webhook / CAPI，无法确认真实付款）—— 注：`/[locale]/donation-success` 成功页**已存在**，但仅作 Meta Pixel `Donate` 事件的触发点（Stripe buy-button 确认页回跳 → `DonateTracker` 按 `session_id` 去重打点）。该页公开可直接访问、无服务端支付校验，故 Donate 转化数**可被伪造、不等于真实付款**，仅供广告归因参考，绝不用于金额聚合 / 订单跟踪等依赖可靠信号的场景
 
 ### Schema（需在 Neon console 一次性执行）
 
@@ -181,6 +182,8 @@ KV_REST_API_URL=                  # Upstash REST endpoint
 KV_REST_API_TOKEN=                # Upstash REST token
 # 未配置时 adminRateLimit 自动 fallback 到进程内 Map（开发环境可不配）
 ```
+
+> Meta Pixel 不走环境变量 —— Pixel ID（公开值）硬编码在 `src/lib/fbpixel.constants.ts`，同 `utils.ts` 的 Stripe key 做法。
 
 ---
 
@@ -456,7 +459,7 @@ const t = useTranslations('namespace')
 
 ### 图片
 
-- **始终使用 `next/image` 的 `<Image>` 组件**，禁止使用 `<img>` 标签（即使加 eslint-disable 注释也不行）
+- **始终使用 `next/image` 的 `<Image>` 组件**，禁止使用 `<img>` 标签（即使加 eslint-disable 注释也不行）。**唯一例外**：`<noscript>` 里的追踪像素（如 Meta Pixel 的 1×1 兜底像素）—— `next/image` 依赖 JS/hydration，在无 JS 环境根本无法渲染，只能用原生 `<img>` + `eslint-disable-next-line @next/next/no-img-element`（见 `src/app/[locale]/layout.tsx`）。仅限此类无 JS 追踪像素，内容图一律不适用
 
 ### React 模式
 

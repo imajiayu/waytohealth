@@ -313,7 +313,7 @@
       "cookies": {
         "number": "06",
         "title": "Cookies",
-        "0": "Our website uses cookies to collect statistical information and enhance user experience. You can manage cookie settings in your browser."
+        "0": "Our website uses cookies and the Meta (Facebook) Pixel to collect statistical information and enhance user experience. You can manage or block cookies in your browser settings."
       },
       "changes": {
         "number": "07",
@@ -649,5 +649,10 @@
     "foundationPage": "Foundation page",
     "legalEntity": "CO \"Way to Health Charity Foundation\" (EDRPOU Code 44719925)",
     "copyright": "© {year} Way to Health Charity Foundation. All rights reserved."
+  },
+  "donationSuccess": {
+    "title": "Thank you for your donation!",
+    "body": "Your contribution helps us provide rehabilitation and support to those affected by the war. We are sincerely grateful for your kindness.",
+    "back": "Back to home"
   }
 }

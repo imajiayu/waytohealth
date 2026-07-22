@@ -10,6 +10,10 @@ import { buildAlternates, buildOpenGraph, buildTwitter, siteUrl } from '@/lib/se
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import LoadingBar from '@/components/layout/LoadingBar';
+import FacebookPixel from '@/components/analytics/FacebookPixel';
+// 从纯常量模块导入（非 `'use client'`）：Server Component 才能拿到真实字符串，
+// 否则跨 RSC 边界会退化成 client-reference 代理，noscript src 插值出乱码。
+import { FB_PIXEL_ID } from '@/lib/fbpixel.constants';
 import { SOCIAL_LINKS, CONTACT } from '@/data/social';
 import '../globals.css';
 
@@ -139,6 +143,19 @@ export default async function LocaleLayout({ children, params }: Props) {
           </Suspense>
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />
+          <FacebookPixel />
+          {/* Meta Pixel 无脚本兜底（规格要求）。noscript 内必须是原生 <img>，next/image 无法在
+              无 JS 环境工作 —— 这是 CLAUDE.md「禁用 <img>」规则的合理例外：1×1 追踪像素而非内容图。 */}
+          <noscript>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              height="1"
+              width="1"
+              style={{ display: 'none' }}
+              src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
         </NextIntlClientProvider>
       </body>
     </html>

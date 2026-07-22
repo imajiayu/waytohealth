@@ -7,6 +7,7 @@ import { Check } from 'lucide-react';
 import DonationSidebar from '@/components/projects/DonationSidebar';
 // 移动端 donation sheet 只在 lg 以下显示；dynamic + 媒体查询在 MobileDonationSheetMount 里处理
 import MobileDonationSheetMount from '@/components/projects/MobileDonationSheetMount';
+import ViewContentTracker from '@/components/analytics/ViewContentTracker';
 import DocumentViewer from '@/components/common/DocumentViewer';
 import { getTranslations } from 'next-intl/server';
 import PatientStories from '@/components/projects/PatientStories';
@@ -109,6 +110,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
 
   return (
     <article className="relative overflow-clip">
+      {/* Meta Pixel ViewContent（进入项目详情触发；软导航换项目时按 projectId 补发） */}
+      <ViewContentTracker projectId={projectId} />
       {/* ── 背景装饰光晕 ── */}
       <div className="pointer-events-none absolute -top-20 right-[-10%] h-[36rem] w-[36rem] rounded-full aura-cyan-xl opacity-40" />
       <div className="pointer-events-none absolute left-[-15%] top-[60%] h-[28rem] w-[28rem] rounded-full aura-gold-lg opacity-30" />

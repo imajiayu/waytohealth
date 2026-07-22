@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import { ArrowUpRight } from 'lucide-react';
+import { track } from '@/lib/fbpixel';
 import {
   INTEREST_AREA_VALUES,
   ORG_TYPE_VALUES,
@@ -76,6 +77,7 @@ export default function PartnershipForm({ locale }: { locale: Locale }) {
     startTransition(async () => {
       const res = await submitPartnershipRequestAction(fd);
       if (res.ok) {
+        track('Lead', { form: 'partnership' });
         router.push('/partnership/success');
         return;
       }

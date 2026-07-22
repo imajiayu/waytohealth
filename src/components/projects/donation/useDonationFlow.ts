@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { type DonationView, type DonationDirection } from './utils';
+import { track } from '@/lib/fbpixel';
 
 // 捐赠 panel 的视图状态机：method → stripe，支持 back
 export function useDonationFlow() {
@@ -9,6 +10,7 @@ export function useDonationFlow() {
   const [direction, setDirection] = useState<DonationDirection>('forward');
 
   function goToStripe() {
+    track('InitiateCheckout', { payment_method: 'stripe' });
     setDirection('forward');
     setView('stripe');
   }

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { type Locale } from '@/i18n/config';
 import { ArrowUpRight } from 'lucide-react';
+import { track } from '@/lib/fbpixel';
 import {
   ASSISTANCE_APPLICANT_VALUES,
   ASSISTANCE_REFERRAL_VALUES,
@@ -63,6 +64,7 @@ export default function RequestAssistanceForm({ locale }: { locale: Locale }) {
     startTransition(async () => {
       const res = await submitAssistanceRequestAction(fd);
       if (res.ok) {
+        track('Lead', { form: 'assistance' });
         router.push('/request-assistance/success');
         return;
       }

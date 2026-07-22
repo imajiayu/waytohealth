@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import { track } from '@/lib/fbpixel';
 
 interface MethodStepProps {
   animationClass: string;
@@ -43,6 +44,7 @@ export default function MethodStep({
             href={monobankUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => track('InitiateCheckout', { payment_method: 'monobank' })}
             className="group relative flex items-center gap-3.5 overflow-hidden rounded-xl border border-ukraine-blue-100 bg-white p-4 transition-all duration-200 hover:border-ukraine-blue-900/50 hover:bg-ukraine-blue-50/40 hover:shadow-[0_4px_16px_rgba(0,108,178,0.1)]"
           >
             <div className="min-w-0 flex-1">
